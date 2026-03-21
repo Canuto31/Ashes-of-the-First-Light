@@ -684,6 +684,9 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  coyoteTime: 0.15
+  jumpBufferTime: 0.15
+  maxExtraJumps: 1
 --- !u!114 &1890735314
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D _rb;
-    private PlayerInputHandler _playerInputHandler;
+    private PlayerInputHandler _input;
 
     [Header("Movement")]
     public float maxSpeed = 6f;
@@ -21,19 +21,37 @@ public class PlayerController : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
 
-    private bool _isGrounded;
+    [Header("Jump Assist")]
+    public float coyoteTime = 0.1f;
+    private float _coyoteTimeCounter;
 
-    private void Awake() {
+    [Header("Jump Buffer")]
+    public float jumpBufferTime = 0.1f;
+    private float _jumpBufferCounter;
+
+    [Header("Extra Jumps")]
+    public int maxExtraJumps = 1;
+    private int _extraJumpsRemaining;
+
+    private bool _isGrounded;
+    private bool _wasGrounded;
+    private bool _hasJumped;
+
+    private void Awake()
+    {
         _rb = GetComponent<Rigidbody2D>();
-        _playerInputHandler = GetComponent<PlayerInputHandler>();
+        _input = GetComponent<PlayerInputHandler>();
     }
 
-    private void Update() {
+    private void Update()
+    {
         CheckGround();
+        UpdateJumpBuffer();
         HandleJump();
     }
 
-    private void FixedUpdate() {
+    private void FixedUpdate()
+    {
         HandleMovement();
         ApplyBetterGravity();
     }
@@ -41,36 +59,80 @@ public class PlayerController : MonoBehaviour
     // --------------------
     // MOVEMENT
     // --------------------
-    private void HandleMovement() {
-        float targetSpeed = _playerInputHandler.MoveInput.x * maxSpeed;
+    private void HandleMovement()
+    {
+        float targetSpeed = _input.MoveInput.x * maxSpeed;
         float speedDiff = targetSpeed - _rb.linearVelocityX;
 
         float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
 
         float movement = speedDiff * accelRate;
 
-        _rb.linearVelocity = new Vector2(_rb.linearVelocityX + movement * Time.fixedDeltaTime, _rb.linearVelocityY);
+        _rb.linearVelocity = new Vector2(
+            _rb.linearVelocityX + movement * Time.fixedDeltaTime,
+            _rb.linearVelocityY
+        );
     }
 
     // --------------------
     // JUMP
     // --------------------
-    private void HandleJump() {
-        if (_playerInputHandler.JumpPressed && _isGrounded) {
-            _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
+    private void HandleJump()
+    {
+        // SALTO BASE (suelo + coyote)
+        if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f && !_hasJumped)
+        {
+            Jump();
+
+            _hasJumped = true;
+            _coyoteTimeCounter = 0f;
+        }
+        // DOUBLE JUMP (aire)
+        else if (_jumpBufferCounter > 0f && _extraJumpsRemaining > 0 && !_isGrounded)
+        {
+            Jump();
+
+            _extraJumpsRemaining--;
         }
 
-        // Corte de salto (Salto variable)
-        if (!_playerInputHandler.JumpHeld && _rb.linearVelocityY > 0) {
-            _rb.linearVelocity = new Vector2(_rb.linearVelocityX, _rb.linearVelocityY * 0.5f);
+        // CORTE DE SALTO (variable jump)
+        if (!_input.JumpHeld && _rb.linearVelocityY > 0)
+        {
+            _rb.linearVelocity = new Vector2(
+                _rb.linearVelocityX,
+                _rb.linearVelocityY * 0.5f
+            );
+        }
+    }
+
+    private void Jump()
+    {
+        _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
+        _jumpBufferCounter = 0f;
+    }
+
+    // --------------------
+    // JUMP BUFFER
+    // --------------------
+    private void UpdateJumpBuffer()
+    {
+        if (_input.JumpPressed)
+        {
+            _jumpBufferCounter = jumpBufferTime;
+        }
+        else
+        {
+            _jumpBufferCounter -= Time.deltaTime;
         }
     }
 
     // --------------------
     // GRAVITY
     // --------------------
-    private void ApplyBetterGravity() {
-        if (_rb.linearVelocityY < 0) {
+    private void ApplyBetterGravity()
+    {
+        if (_rb.linearVelocityY < 0)
+        {
             _rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (gravityMultiplier - 1) * Time.fixedDeltaTime;
         }
     }
@@ -78,15 +140,40 @@ public class PlayerController : MonoBehaviour
     // --------------------
     // GROUND CHECK
     // --------------------
-    private void CheckGround() {
-        _isGrounded = Physics2D.OverlapCircle(
+    private void CheckGround()
+    {
+        bool groundedNow = Physics2D.OverlapCircle(
             groundCheck.position,
             groundCheckRadius,
             groundLayer
         );
+
+        // Detectar aterrizaje (evento)
+        if (groundedNow && !_wasGrounded)
+        {
+            _extraJumpsRemaining = maxExtraJumps;
+            _hasJumped = false;
+        }
+
+        _isGrounded = groundedNow;
+
+        if (_isGrounded)
+        {
+            _coyoteTimeCounter = coyoteTime;
+        }
+        else
+        {
+            _coyoteTimeCounter -= Time.deltaTime;
+        }
+
+        _wasGrounded = _isGrounded;
     }
 
-    private void OnDrawGizmosSelected() {
+    // --------------------
+    // DEBUG
+    // --------------------
+    private void OnDrawGizmosSelected()
+    {
         if (groundCheck == null) return;
 
         Gizmos.color = Color.red;
