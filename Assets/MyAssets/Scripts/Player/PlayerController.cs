@@ -6,6 +6,7 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D _rb;
     private PlayerInputHandler _input;
+    private PlayerStateMachine _stateMachine;
 
     [Header("Movement")]
     public float maxSpeed = 6f;
@@ -40,7 +41,7 @@ public class PlayerController : MonoBehaviour
 
     private bool _isTouchingWall;
     private bool _wasTouchingWall;
-    private int _wallDir; // -1 izquierda, 1 derecha
+    private int _wallDir;
 
     [Header("Wall Slide")]
     public float wallSlideSpeed = 2f;
@@ -54,6 +55,15 @@ public class PlayerController : MonoBehaviour
     private bool _isWallJumping;
     private float _wallJumpLockCounter;
 
+    [Header("Dash")]
+    public float dashForce = 15f;
+    public float dashDuration = 0.2f;
+    public float dashCooldown = 1f;
+
+    private bool _isDashing;
+    private float _dashTimeCounter;
+    private float _dashCooldownCounter;
+
     private bool _isGrounded;
     private bool _wasGrounded;
     private bool _hasJumped;
@@ -62,15 +72,21 @@ public class PlayerController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _input = GetComponent<PlayerInputHandler>();
+        _stateMachine = new PlayerStateMachine();
     }
 
     private void Update()
     {
         CheckGround();
         CheckWall();
+        UpdateState();
+
         UpdateJumpBuffer();
         HandleWallJumpLock();
+        HandleDash();
         HandleJump();
+
+        TryDash();
     }
 
     private void FixedUpdate()
@@ -81,11 +97,34 @@ public class PlayerController : MonoBehaviour
     }
 
     // --------------------
+    // STATE MACHINE
+    // --------------------
+    private void UpdateState()
+    {
+        if (_isDashing)
+        {
+            _stateMachine.ChangeState(PlayerState.Dashing);
+        }
+        else if (_isWallSliding)
+        {
+            _stateMachine.ChangeState(PlayerState.WallSliding);
+        }
+        else if (!_isGrounded)
+        {
+            _stateMachine.ChangeState(PlayerState.Airborne);
+        }
+        else
+        {
+            _stateMachine.ChangeState(PlayerState.Grounded);
+        }
+    }
+
+    // --------------------
     // MOVEMENT
     // --------------------
     private void HandleMovement()
     {
-        if (_isWallJumping || _isWallSliding) return;
+        if (_isWallJumping || _isDashing) return;
 
         float targetSpeed = _input.MoveInput.x * maxSpeed;
         float speedDiff = targetSpeed - _rb.linearVelocityX;
@@ -101,11 +140,54 @@ public class PlayerController : MonoBehaviour
     }
 
     // --------------------
+    // DASH
+    // --------------------
+    private void TryDash()
+    {
+        if (_input.DashPressed && _dashCooldownCounter <= 0f)
+        {
+            StartDash();
+        }
+    }
+
+    private void StartDash()
+    {
+        _isDashing = true;
+        _dashTimeCounter = dashDuration;
+        _dashCooldownCounter = dashCooldown;
+
+        float direction = Mathf.Sign(_input.MoveInput.x);
+        if (direction == 0) direction = transform.localScale.x;
+
+        _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
+    }
+
+    private void HandleDash()
+    {
+        if (_isDashing)
+        {
+            _dashTimeCounter -= Time.deltaTime;
+
+            if (_dashTimeCounter <= 0f)
+            {
+                _isDashing = false;
+            }
+        }
+
+        if (_dashCooldownCounter > 0f)
+        {
+            _dashCooldownCounter -= Time.deltaTime;
+        }
+    }
+
+    // --------------------
     // JUMP
     // --------------------
     private void HandleJump()
     {
-        // WALL JUMP (PRIORIDAD)
+        if (_stateMachine.CurrentState == PlayerState.Dashing) return;
+
+        // WALL JUMP
         if (_jumpBufferCounter > 0f && _isWallSliding)
         {
             _rb.linearVelocity = new Vector2(
@@ -120,7 +202,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // SALTO BASE (coyote)
+        // SALTO BASE
         if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f && !_hasJumped)
         {
             Jump();
@@ -134,7 +216,7 @@ public class PlayerController : MonoBehaviour
             _extraJumpsRemaining--;
         }
 
-        // CORTE DE SALTO
+        // CORTE
         if (!_input.JumpHeld && _rb.linearVelocityY > 0)
         {
             _rb.linearVelocity = new Vector2(
@@ -175,7 +257,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // --------------------
-    // WALL JUMP LOCK
+    // WALL LOCK
     // --------------------
     private void HandleWallJumpLock()
     {
@@ -215,7 +297,6 @@ public class PlayerController : MonoBehaviour
         else if (hitLeft) _wallDir = -1;
         else _wallDir = 0;
 
-        // Evento: recargar saltos al tocar pared
         if (touchingWallNow && !_wasTouchingWall && !_isGrounded)
         {
             _extraJumpsRemaining = maxExtraJumps;
@@ -226,7 +307,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // --------------------
-    // JUMP BUFFER
+    // BUFFER
     // --------------------
     private void UpdateJumpBuffer()
     {
@@ -245,7 +326,7 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void ApplyBetterGravity()
     {
-        if (_rb.linearVelocityY < 0)
+        if (_rb.linearVelocityY < 0 && !_isDashing)
         {
             _rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
                                   (gravityMultiplier - 1) * Time.fixedDeltaTime;
@@ -253,7 +334,7 @@ public class PlayerController : MonoBehaviour
     }
 
     // --------------------
-    // GROUND CHECK
+    // GROUND
     // --------------------
     private void CheckGround()
     {
@@ -272,44 +353,10 @@ public class PlayerController : MonoBehaviour
         _isGrounded = groundedNow;
 
         if (_isGrounded)
-        {
             _coyoteTimeCounter = coyoteTime;
-        }
         else
-        {
             _coyoteTimeCounter -= Time.deltaTime;
-        }
 
         _wasGrounded = _isGrounded;
-    }
-
-    // --------------------
-    // DEBUG
-    // --------------------
-    private void OnDrawGizmosSelected()
-    {
-        if (groundCheck != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
-        }
-
-        if (wallCheckLeft != null)
-        {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(
-                wallCheckLeft.position,
-                wallCheckLeft.position + Vector3.left * wallCheckDistance
-            );
-        }
-
-        if (wallCheckRight != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawLine(
-                wallCheckRight.position,
-                wallCheckRight.position + Vector3.right * wallCheckDistance
-            );
-        }
     }
 }
