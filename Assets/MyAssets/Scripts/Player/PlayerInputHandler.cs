@@ -10,6 +10,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool AttackPressed { get; private set; }
     public bool JumpPressed { get; private set; }
     public bool JumpHeld { get; private set; }
+    public bool InteractPressed { get; private set; }
 
     private void Awake() {
         _playerInputActions = new InputSystem_Actions();
@@ -29,6 +30,8 @@ public class PlayerInputHandler : MonoBehaviour
 
         _playerInputActions.Player.Dash.performed += ctx => DashPressed = true;
         _playerInputActions.Player.Attack.performed += ctx => AttackPressed = true;
+
+        _playerInputActions.Player.Interact.performed += ctx => InteractPressed = true;
     }
     
     private void OnDisable() {
