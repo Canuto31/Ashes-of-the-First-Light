@@ -43,5 +43,6 @@ public class PlayerInputHandler : MonoBehaviour
         JumpPressed = false;
         DashPressed = false;
         AttackPressed = false;
+        InteractPressed = false;
     }
 }

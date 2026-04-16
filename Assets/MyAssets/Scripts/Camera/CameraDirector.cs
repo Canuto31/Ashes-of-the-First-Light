@@ -9,49 +9,53 @@ public class CameraDirector : MonoBehaviour
     [Header("Main Player Camera")]
     [SerializeField] private CinemachineVirtualCamera _playerCamera;
 
-    [Header("Settings ")]
+    [Header("Settings")]
     [SerializeField] private int _activePriority = 20;
     [SerializeField] private int _defaultPriority = 10;
 
     private bool _isPlayingCinematic = false;
+    private Coroutine _currentRoutine;
 
-    private void Awake() {
+    private void Awake()
+    {
         if (Instance == null)
             Instance = this;
         else
             Destroy(gameObject);
     }
 
-    /// <summary>
-    /// Focus on a target camera for a duration, then return to player camera
-    /// </summary>
     public void FocusOn(CinemachineVirtualCamera targetCamera, float duration)
     {
-        if (_isPlayingCinematic) return;
+        if (_currentRoutine != null)
+        {
+            StopCoroutine(_currentRoutine);
+        }
 
-        StartCoroutine(FocusRoutine(targetCamera, duration));
+        _currentRoutine = StartCoroutine(FocusRoutine(targetCamera, duration));
     }
 
     private IEnumerator FocusRoutine(CinemachineVirtualCamera targetCamera, float duration)
     {
         _isPlayingCinematic = true;
 
-        // Activate target camera
+        Debug.Log("Switching to target camera");
+
+        // Activar cámara objetivo
         targetCamera.Priority = _activePriority;
         _playerCamera.Priority = _defaultPriority;
 
         yield return new WaitForSeconds(duration);
 
-        // Return to player camera
+        Debug.Log("Returning to player camera");
+
+        // Volver al jugador
         targetCamera.Priority = _defaultPriority;
         _playerCamera.Priority = _activePriority;
 
         _isPlayingCinematic = false;
+        _currentRoutine = null;
     }
 
-    /// <summary>
-    /// Force change without duration
-    /// </summary>
     public void SetCamera(CinemachineVirtualCamera targetCamera)
     {
         if (_isPlayingCinematic) return;

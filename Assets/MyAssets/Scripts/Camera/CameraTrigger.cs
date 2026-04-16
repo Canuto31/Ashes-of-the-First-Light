@@ -15,8 +15,13 @@ public class CameraTrigger : MonoBehaviour
 
     private bool _hasTriggered = false;
     private bool _playerInside = false;
+    private IInteractable _interactable;
 
     private PlayerInputHandler _playerInput;
+
+    private void Awake() {
+        _interactable = GetComponentInParent<IInteractable>();
+    }
 
     private void OnTriggerEnter2D(Collider2D other) 
     {
@@ -26,10 +31,12 @@ public class CameraTrigger : MonoBehaviour
 
         _playerInput = other.GetComponent<PlayerInputHandler>();
 
-        if (!_requireInput)
+        UI_Interaction.Instance.ShowText(_interactable.GetInteractionText());
+
+        /*if (!_requireInput)
         {
             TryActivate();
-        }
+        }*/
     }
 
     private void OnTriggerExit2D(Collider2D other) 
@@ -38,6 +45,8 @@ public class CameraTrigger : MonoBehaviour
 
         _playerInside = false;
         _playerInput = null;
+
+        UI_Interaction.Instance.Hide();
     }
 
     private void Update() {
@@ -45,7 +54,7 @@ public class CameraTrigger : MonoBehaviour
         {
             if (_playerInput.InteractPressed)
             {
-                TryActivate();
+                _interactable.Interact();
             }
         }
     }
