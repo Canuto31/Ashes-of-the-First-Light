@@ -567,6 +567,9 @@ MonoBehaviour:
   _targetCamera: {fileID: 1021785843}
   _cameraDuration: 5
   _targetDoor: {fileID: 1765969701}
+  _requiresKey: 1
+  _missingRequirementMessage: It's loocked...
+  _isUnlocked: 0
 --- !u!65 &29401350
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7854,7 +7857,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2090528935
 RectTransform:
   m_ObjectHideFlags: 0
