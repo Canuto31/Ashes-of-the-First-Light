@@ -11,6 +11,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool JumpPressed { get; private set; }
     public bool JumpHeld { get; private set; }
     public bool InteractPressed { get; private set; }
+    public bool ToggleLanternPressed { get; private set; }
 
     private void Awake() {
         _playerInputActions = new InputSystem_Actions();
@@ -32,6 +33,8 @@ public class PlayerInputHandler : MonoBehaviour
         _playerInputActions.Player.Attack.performed += ctx => AttackPressed = true;
 
         _playerInputActions.Player.Interact.performed += ctx => InteractPressed = true;
+        
+        _playerInputActions.Player.ToggleLantern.performed += ctx => ToggleLanternPressed = true;
     }
     
     private void OnDisable() {
@@ -44,5 +47,6 @@ public class PlayerInputHandler : MonoBehaviour
         DashPressed = false;
         AttackPressed = false;
         InteractPressed = false;
+        ToggleLanternPressed = false;
     }
 }
