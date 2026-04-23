@@ -12,17 +12,28 @@ public class Lever : MonoBehaviour, IInteractable
     [SerializeField] private DoorController _targetDoor;
 
     [Header("Requirements")]
-    [SerializeField] private bool _requiresKey = true;
-    [SerializeField] private string _missingRequirementMessage = "It's loocked...";
+    [SerializeField] private InventoryItem _requiredItem;
+    [SerializeField] private string _missingMessage = "You need something";
 
-    [SerializeField] private bool _isUnlocked = false;
     private bool _hasBeenUsed = false;
+    
+    // ----------------------------
+
+    private bool HasRequirement()
+    {
+        if (_requiredItem == null)
+            return true;
+        
+        return PlayerInventory.Instance.HasItem(_requiredItem);
+    }
 
     public string GetInteractionText()
     {
-        if (_hasBeenUsed) return "";
+        if (_hasBeenUsed)
+            return "";
 
-        if (!_isUnlocked) return "Locked";
+        if (!HasRequirement())
+            return "Locked";
 
         return "Press E to interact";
     }
@@ -31,8 +42,8 @@ public class Lever : MonoBehaviour, IInteractable
     {
         if (_hasBeenUsed) return;
 
-        if (!_isUnlocked) {
-            InteractionUIManager.Instance.Show(transform.parent, _missingRequirementMessage);
+        if (!HasRequirement()) {
+            InteractionUIManager.Instance.Show(transform.parent, _missingMessage);
             return;
         }
 
@@ -54,9 +65,5 @@ public class Lever : MonoBehaviour, IInteractable
             _targetDoor.Open();
             InteractionUIManager.Instance.Hide();
         }
-    }
-
-    public void Unlock() {
-        _isUnlocked = true;
     }
 }

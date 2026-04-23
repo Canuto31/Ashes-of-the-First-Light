@@ -1,5 +1,5 @@
+using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class UI_Interaction : MonoBehaviour
@@ -9,7 +9,16 @@ public class UI_Interaction : MonoBehaviour
     [SerializeField] private GameObject panel;
     [SerializeField] private TextMeshProUGUI text;
 
-    private void Awake() {
+    private Coroutine _currentRoutine;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         Hide();
     }
@@ -18,6 +27,23 @@ public class UI_Interaction : MonoBehaviour
     {
         panel.SetActive(true);
         text.text = message;
+    }
+
+    public void ShowTextTimed(string message, float duration)
+    {
+        if (_currentRoutine != null)
+            StopCoroutine(_currentRoutine);
+
+        _currentRoutine = StartCoroutine(ShowRoutine(message, duration));
+    }
+
+    private IEnumerator ShowRoutine(string message, float duration)
+    {
+        ShowText(message);
+
+        yield return new WaitForSeconds(duration);
+
+        Hide();
     }
 
     public void Hide()
