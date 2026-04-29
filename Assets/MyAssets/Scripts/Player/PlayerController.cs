@@ -77,6 +77,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        if (!GameStateManager.Instance.IsPlaying()) return;
+        
         CheckGround();
         CheckWall();
         UpdateState();
@@ -91,6 +93,12 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!GameStateManager.Instance.IsPlaying())
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        
         HandleMovement();
         ApplyBetterGravity();
         HandleWallSlide();

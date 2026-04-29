@@ -63,7 +63,7 @@ public class Lever : MonoBehaviour, IInteractable
         if (_targetDoor != null)
         {
             _targetDoor.Open();
-            InteractionUIManager.Instance.Hide();
+            InteractionUIManager.Instance.Clear();
         }
     }
 }

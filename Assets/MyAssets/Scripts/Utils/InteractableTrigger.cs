@@ -34,13 +34,15 @@ public class InteractableTrigger : MonoBehaviour
         _playerInside = false;
         _playerInput = null;
 
-        InteractionUIManager.Instance.Hide();
+        InteractionUIManager.Instance.Clear();
 
         //UI_Interaction.Instance.Hide();
     }
 
     private void Update()
     {
+        if (!GameStateManager.Instance.IsPlaying()) return;
+        
         if (!_playerInside || _playerInput == null) return;
 
         if (_playerInput.InteractPressed)

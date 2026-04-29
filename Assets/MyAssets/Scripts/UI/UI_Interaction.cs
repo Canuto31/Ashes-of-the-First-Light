@@ -25,6 +25,9 @@ public class UI_Interaction : MonoBehaviour
 
     public void ShowText(string message)
     {
+        if (!GameStateManager.Instance.IsPlaying())
+            return;
+        
         panel.SetActive(true);
         text.text = message;
     }

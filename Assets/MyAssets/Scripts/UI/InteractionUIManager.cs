@@ -16,11 +16,20 @@ public class InteractionUIManager : MonoBehaviour
 
     private void Awake() {
         Instance = this;
-        Hide();
+        Clear();
     }
 
     private void LateUpdate() {
         if (_currentTarget == null) return;
+
+        if (!GameStateManager.Instance.IsPlaying())
+        {
+            _panel.SetActive(false);
+            return;
+        }
+        
+        if (!_panel.activeSelf)
+            _panel.SetActive(true);
 
         transform.position = _currentTarget.position + _offset;
     }
@@ -31,7 +40,13 @@ public class InteractionUIManager : MonoBehaviour
         _panel.SetActive(true);
     }
 
-    public void Hide() {
+    public void HideVisual()
+    {
+        _panel.SetActive(false);
+    }
+
+    public void Clear()
+    {
         _currentTarget = null;
         _panel.SetActive(false);
     }
