@@ -13,6 +13,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool InteractPressed { get; private set; }
     public bool ToggleLanternPressed { get; private set; }
     public bool ToggleMenuPressed { get; private set; }
+    public bool NextPagePressed { get; private set; }
+    public bool PreviousPagePressed { get; private set; }
 
     private void Awake() {
         _playerInputActions = new InputSystem_Actions();
@@ -38,6 +40,9 @@ public class PlayerInputHandler : MonoBehaviour
         _playerInputActions.Player.ToggleLantern.performed += ctx => ToggleLanternPressed = true;
         
         _playerInputActions.Player.ToggleMenu.performed += ctx => ToggleMenuPressed = true;
+        
+        _playerInputActions.Player.NextPage.performed += ctx => NextPagePressed = true;
+        _playerInputActions.Player.PreviousPage.performed += ctx => PreviousPagePressed = true;
     }
     
     private void OnDisable() {
@@ -52,5 +57,7 @@ public class PlayerInputHandler : MonoBehaviour
         InteractPressed = false;
         ToggleLanternPressed = false;
         ToggleMenuPressed = false;
+        NextPagePressed = false;
+        PreviousPagePressed = false;
     }
 }

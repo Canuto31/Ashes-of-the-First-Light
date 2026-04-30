@@ -68,6 +68,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "NextPage",
+                    "type": "Button",
+                    "id": "d1e41fb0-3912-4a53-ad4e-06db68b417be",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PreviousPage",
+                    "type": "Button",
+                    "id": "2ab751b7-a098-45c2-8a06-9e484919a7be",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -266,6 +284,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "ToggleMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "17463e99-77fc-4f86-97b9-dafa46684780",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "NextPage",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8f8099cb-5872-4573-ac25-fcb2b2641c95",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PreviousPage",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

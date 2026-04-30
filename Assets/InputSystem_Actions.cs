@@ -154,6 +154,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""NextPage"",
+                    ""type"": ""Button"",
+                    ""id"": ""d1e41fb0-3912-4a53-ad4e-06db68b417be"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PreviousPage"",
+                    ""type"": ""Button"",
+                    ""id"": ""2ab751b7-a098-45c2-8a06-9e484919a7be"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -352,6 +370,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""ToggleMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""17463e99-77fc-4f86-97b9-dafa46684780"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NextPage"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8f8099cb-5872-4573-ac25-fcb2b2641c95"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PreviousPage"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -946,6 +986,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_ToggleLantern = m_Player.FindAction("ToggleLantern", throwIfNotFound: true);
         m_Player_ToggleMenu = m_Player.FindAction("ToggleMenu", throwIfNotFound: true);
+        m_Player_NextPage = m_Player.FindAction("NextPage", throwIfNotFound: true);
+        m_Player_PreviousPage = m_Player.FindAction("PreviousPage", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1046,6 +1088,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_ToggleLantern;
     private readonly InputAction m_Player_ToggleMenu;
+    private readonly InputAction m_Player_NextPage;
+    private readonly InputAction m_Player_PreviousPage;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1085,6 +1129,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ToggleMenu".
         /// </summary>
         public InputAction @ToggleMenu => m_Wrapper.m_Player_ToggleMenu;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/NextPage".
+        /// </summary>
+        public InputAction @NextPage => m_Wrapper.m_Player_NextPage;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/PreviousPage".
+        /// </summary>
+        public InputAction @PreviousPage => m_Wrapper.m_Player_PreviousPage;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1132,6 +1184,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleMenu.started += instance.OnToggleMenu;
             @ToggleMenu.performed += instance.OnToggleMenu;
             @ToggleMenu.canceled += instance.OnToggleMenu;
+            @NextPage.started += instance.OnNextPage;
+            @NextPage.performed += instance.OnNextPage;
+            @NextPage.canceled += instance.OnNextPage;
+            @PreviousPage.started += instance.OnPreviousPage;
+            @PreviousPage.performed += instance.OnPreviousPage;
+            @PreviousPage.canceled += instance.OnPreviousPage;
         }
 
         /// <summary>
@@ -1164,6 +1222,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ToggleMenu.started -= instance.OnToggleMenu;
             @ToggleMenu.performed -= instance.OnToggleMenu;
             @ToggleMenu.canceled -= instance.OnToggleMenu;
+            @NextPage.started -= instance.OnNextPage;
+            @NextPage.performed -= instance.OnNextPage;
+            @NextPage.canceled -= instance.OnNextPage;
+            @PreviousPage.started -= instance.OnPreviousPage;
+            @PreviousPage.performed -= instance.OnPreviousPage;
+            @PreviousPage.canceled -= instance.OnPreviousPage;
         }
 
         /// <summary>
@@ -1513,6 +1577,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleMenu(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "NextPage" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNextPage(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PreviousPage" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPreviousPage(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
