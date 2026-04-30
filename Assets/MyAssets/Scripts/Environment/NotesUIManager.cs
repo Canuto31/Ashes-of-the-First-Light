@@ -17,6 +17,8 @@ public class NotesUIManager : MonoBehaviour
     private NoteData _currentNote;
     private int _currentPage;
 
+    private bool _ignoreInputThisFrame;
+
     private void Awake()
     {
         Instance = this;
@@ -27,6 +29,12 @@ public class NotesUIManager : MonoBehaviour
     {
         if (GameStateManager.Instance.GetState() != GameStateManager.GameState.ReadingMenu)
             return;
+
+        if (_ignoreInputThisFrame)
+        {
+            _ignoreInputThisFrame = false;
+            return;
+        }
 
         HandleInput();
     }
@@ -55,6 +63,8 @@ public class NotesUIManager : MonoBehaviour
         _panel.SetActive(true);
         
         GameStateManager.Instance.SetState(GameStateManager.GameState.ReadingMenu);
+        
+        _ignoreInputThisFrame = true;
         
         UI_Interaction.Instance.Hide();
         InteractionUIManager.Instance.HideVisual();

@@ -15,10 +15,22 @@ public class PickupNote : MonoBehaviour, IInteractable
 
         NotesManager.Instance.AddNote(_note);
         
-        UI_Interaction.Instance.ShowTextTimed(_note.noteTitle + " acquired", 1.5f);
+        UI_Interaction.Instance.ShowTextTimed(_note.noteTitle + " acquired\nPress E to read", 2f);
+        
+        string tutorialId = "NOTE_READING";
+
+        if (!TutorialManager.Instance.HasSeen(tutorialId))
+        {
+            TutorialUIManager.Instance.ShowTutorial(tutorialId, "Use A / D to change pages\nPress E to exit", () =>
+            {
+                NotesUIManager.Instance.OpenNote(_note);
+            });
+        }
+        else
+        {
+            NotesUIManager.Instance.OpenNote(_note);
+        }
         
         Destroy(gameObject);
-        
-        NotesUIManager.Instance.OpenNote(_note);
     }
 }
