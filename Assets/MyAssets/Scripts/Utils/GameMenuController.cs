@@ -19,9 +19,9 @@ public class GameMenuController : MonoBehaviour
 
         if (currentState == GameStateManager.GameState.Playing)
         {
-            GameStateManager.Instance.SetState(GameStateManager.GameState.Menu);
+            GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
         }
-        else if (currentState == GameStateManager.GameState.Menu)
+        else if (currentState == GameStateManager.GameState.BookMenu)
         {
             GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
         }

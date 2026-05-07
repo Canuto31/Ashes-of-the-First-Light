@@ -172,6 +172,51 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""NextBookPage"",
+                    ""type"": ""Button"",
+                    ""id"": ""c09faa81-2b44-47df-8353-b131486795a5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PreviousBookPage"",
+                    ""type"": ""Button"",
+                    ""id"": ""05e52fe5-21db-4f42-8273-0ce10eca75f2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Confirm"",
+                    ""type"": ""Button"",
+                    ""id"": ""296eba8f-faaf-444f-a07b-5f1125736e8b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""NavigateUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""4e075572-7235-49e1-b34c-44ec80f87d3a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""NavigateDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""2e65f7db-0e60-4f94-91dc-ceed041d69c1"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -392,6 +437,61 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""PreviousPage"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1090dee7-b234-48c9-a42f-8423ade4d3b9"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NextBookPage"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a197cca4-1438-4df7-b836-7f33d0216be3"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PreviousBookPage"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c2d887d5-78c6-48c4-8375-a4429602fe41"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Confirm"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""66ece0aa-433a-400d-8639-8eaf4f4c3346"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NavigateUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8859492a-9e5f-4a68-8872-0d4c22117502"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NavigateDown"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -988,6 +1088,11 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_ToggleMenu = m_Player.FindAction("ToggleMenu", throwIfNotFound: true);
         m_Player_NextPage = m_Player.FindAction("NextPage", throwIfNotFound: true);
         m_Player_PreviousPage = m_Player.FindAction("PreviousPage", throwIfNotFound: true);
+        m_Player_NextBookPage = m_Player.FindAction("NextBookPage", throwIfNotFound: true);
+        m_Player_PreviousBookPage = m_Player.FindAction("PreviousBookPage", throwIfNotFound: true);
+        m_Player_Confirm = m_Player.FindAction("Confirm", throwIfNotFound: true);
+        m_Player_NavigateUp = m_Player.FindAction("NavigateUp", throwIfNotFound: true);
+        m_Player_NavigateDown = m_Player.FindAction("NavigateDown", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1090,6 +1195,11 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_ToggleMenu;
     private readonly InputAction m_Player_NextPage;
     private readonly InputAction m_Player_PreviousPage;
+    private readonly InputAction m_Player_NextBookPage;
+    private readonly InputAction m_Player_PreviousBookPage;
+    private readonly InputAction m_Player_Confirm;
+    private readonly InputAction m_Player_NavigateUp;
+    private readonly InputAction m_Player_NavigateDown;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1137,6 +1247,26 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/PreviousPage".
         /// </summary>
         public InputAction @PreviousPage => m_Wrapper.m_Player_PreviousPage;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/NextBookPage".
+        /// </summary>
+        public InputAction @NextBookPage => m_Wrapper.m_Player_NextBookPage;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/PreviousBookPage".
+        /// </summary>
+        public InputAction @PreviousBookPage => m_Wrapper.m_Player_PreviousBookPage;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Confirm".
+        /// </summary>
+        public InputAction @Confirm => m_Wrapper.m_Player_Confirm;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/NavigateUp".
+        /// </summary>
+        public InputAction @NavigateUp => m_Wrapper.m_Player_NavigateUp;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/NavigateDown".
+        /// </summary>
+        public InputAction @NavigateDown => m_Wrapper.m_Player_NavigateDown;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1190,6 +1320,21 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @PreviousPage.started += instance.OnPreviousPage;
             @PreviousPage.performed += instance.OnPreviousPage;
             @PreviousPage.canceled += instance.OnPreviousPage;
+            @NextBookPage.started += instance.OnNextBookPage;
+            @NextBookPage.performed += instance.OnNextBookPage;
+            @NextBookPage.canceled += instance.OnNextBookPage;
+            @PreviousBookPage.started += instance.OnPreviousBookPage;
+            @PreviousBookPage.performed += instance.OnPreviousBookPage;
+            @PreviousBookPage.canceled += instance.OnPreviousBookPage;
+            @Confirm.started += instance.OnConfirm;
+            @Confirm.performed += instance.OnConfirm;
+            @Confirm.canceled += instance.OnConfirm;
+            @NavigateUp.started += instance.OnNavigateUp;
+            @NavigateUp.performed += instance.OnNavigateUp;
+            @NavigateUp.canceled += instance.OnNavigateUp;
+            @NavigateDown.started += instance.OnNavigateDown;
+            @NavigateDown.performed += instance.OnNavigateDown;
+            @NavigateDown.canceled += instance.OnNavigateDown;
         }
 
         /// <summary>
@@ -1228,6 +1373,21 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @PreviousPage.started -= instance.OnPreviousPage;
             @PreviousPage.performed -= instance.OnPreviousPage;
             @PreviousPage.canceled -= instance.OnPreviousPage;
+            @NextBookPage.started -= instance.OnNextBookPage;
+            @NextBookPage.performed -= instance.OnNextBookPage;
+            @NextBookPage.canceled -= instance.OnNextBookPage;
+            @PreviousBookPage.started -= instance.OnPreviousBookPage;
+            @PreviousBookPage.performed -= instance.OnPreviousBookPage;
+            @PreviousBookPage.canceled -= instance.OnPreviousBookPage;
+            @Confirm.started -= instance.OnConfirm;
+            @Confirm.performed -= instance.OnConfirm;
+            @Confirm.canceled -= instance.OnConfirm;
+            @NavigateUp.started -= instance.OnNavigateUp;
+            @NavigateUp.performed -= instance.OnNavigateUp;
+            @NavigateUp.canceled -= instance.OnNavigateUp;
+            @NavigateDown.started -= instance.OnNavigateDown;
+            @NavigateDown.performed -= instance.OnNavigateDown;
+            @NavigateDown.canceled -= instance.OnNavigateDown;
         }
 
         /// <summary>
@@ -1591,6 +1751,41 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnPreviousPage(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "NextBookPage" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNextBookPage(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PreviousBookPage" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPreviousBookPage(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Confirm" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnConfirm(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "NavigateUp" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNavigateUp(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "NavigateDown" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnNavigateDown(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

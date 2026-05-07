@@ -12,9 +12,16 @@ public class PlayerInputHandler : MonoBehaviour
     public bool JumpHeld { get; private set; }
     public bool InteractPressed { get; private set; }
     public bool ToggleLanternPressed { get; private set; }
+    
+    //UI
     public bool ToggleMenuPressed { get; private set; }
     public bool NextPagePressed { get; private set; }
     public bool PreviousPagePressed { get; private set; }
+    public bool NextBookPagePressed { get; private set; }
+    public bool PreviousBookPagePressed { get; private set; }
+    public bool NavigateUpPressed { get; private set; }
+    public bool NavigateDownPressed { get; private set; }
+    public bool ConfirmPressed { get; private set; }
 
     private void Awake() {
         _playerInputActions = new InputSystem_Actions();
@@ -43,6 +50,14 @@ public class PlayerInputHandler : MonoBehaviour
         
         _playerInputActions.Player.NextPage.performed += ctx => NextPagePressed = true;
         _playerInputActions.Player.PreviousPage.performed += ctx => PreviousPagePressed = true;
+        
+        _playerInputActions.Player.NextBookPage.performed += ctx => NextBookPagePressed = true;
+        _playerInputActions.Player.PreviousBookPage.performed += ctx => PreviousBookPagePressed = true;
+        
+        _playerInputActions.Player.NavigateUp.performed += ctx => NavigateUpPressed = true;
+        _playerInputActions.Player.NavigateDown.performed += ctx => NavigateDownPressed = true;
+
+        _playerInputActions.Player.Confirm.performed += ctx => ConfirmPressed = true;
     }
     
     private void OnDisable() {
@@ -59,5 +74,19 @@ public class PlayerInputHandler : MonoBehaviour
         ToggleMenuPressed = false;
         NextPagePressed = false;
         PreviousPagePressed = false;
+        
+        NextBookPagePressed = false;
+        PreviousBookPagePressed = false;
+        NavigateUpPressed = false;
+        NavigateDownPressed = false;
+        ConfirmPressed = false;
+    }
+    
+    public bool ConsumeToggleMenu()
+    {
+        if (!ToggleMenuPressed) return false;
+
+        ToggleMenuPressed = false;
+        return true;
     }
 }

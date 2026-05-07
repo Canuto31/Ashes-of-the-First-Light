@@ -27,7 +27,7 @@ public class NotesUIManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.ReadingMenu)
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
         if (_ignoreInputThisFrame)
@@ -62,7 +62,7 @@ public class NotesUIManager : MonoBehaviour
         
         _panel.SetActive(true);
         
-        GameStateManager.Instance.SetState(GameStateManager.GameState.ReadingMenu);
+        GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
         
         _ignoreInputThisFrame = true;
         

@@ -9,8 +9,7 @@ public class GameStateManager : MonoBehaviour
     {
         Playing,
         Tutorial,
-        ReadingMenu,
-        Menu
+        BookMenu
     }
 
     private GameState _currentState;

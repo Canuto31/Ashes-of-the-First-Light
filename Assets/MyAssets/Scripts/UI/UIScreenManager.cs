@@ -14,7 +14,7 @@ public class UIScreenManager : MonoBehaviour
     {
         var state = GameStateManager.Instance.GetState();
 
-        if (state == GameStateManager.GameState.Menu)
+        if (state == GameStateManager.GameState.BookMenu)
         {
             if (!_pauseMenu.activeSelf)
             {
