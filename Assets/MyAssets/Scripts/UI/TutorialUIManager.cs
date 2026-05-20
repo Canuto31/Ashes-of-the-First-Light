@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 
@@ -14,6 +15,8 @@ public class TutorialUIManager : MonoBehaviour
 
     private Action _onCloseCallback;
     private string _currentTutorialId;
+    
+    private bool _canClose;
 
     private void Awake()
     {
@@ -26,11 +29,13 @@ public class TutorialUIManager : MonoBehaviour
         if (GameStateManager.Instance.GetState() != GameStateManager.GameState.Tutorial)
             return;
 
-        if (_input != null && _input.InteractPressed)
+        if (_canClose && _input != null && _input.InteractPressed)
+        {
             CloseTutorial();
+        }
     }
 
-    public void ShowTutorial(string tutorialId, string message, Action onClose)
+    public void ShowTutorial(string tutorialId, string message, Action onClose = null)
     {
         _currentTutorialId = tutorialId;
         _onCloseCallback = onClose;
@@ -38,14 +43,20 @@ public class TutorialUIManager : MonoBehaviour
         _text.text = message;
         _panel.SetActive(true);
         
+        _canClose = false;
+        
         GameStateManager.Instance.SetState(GameStateManager.GameState.Tutorial);
         
         UI_Interaction.Instance.Hide();
         InteractionUIManager.Instance.HideVisual();
+        
+        StartCoroutine(EnableCloseDelay());
     }
 
     private void CloseTutorial()
     {
+        Debug.Log("CLOSING TUTORIAL");
+        
         _panel.SetActive(false);
         
         TutorialManager.Instance.SetSeen(_currentTutorialId);
@@ -53,5 +64,12 @@ public class TutorialUIManager : MonoBehaviour
         GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
         
         _onCloseCallback?.Invoke();
+    }
+    
+    private IEnumerator EnableCloseDelay()
+    {
+        yield return null;
+
+        _canClose = true;
     }
 }

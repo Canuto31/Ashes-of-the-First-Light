@@ -6,6 +6,8 @@ public class NotesManager : MonoBehaviour
     public static NotesManager Instance;
     
     private List<NoteData> _notes = new List<NoteData>();
+    
+    private NoteData _lastCollectedNote;
 
     private void Awake()
     {
@@ -17,6 +19,9 @@ public class NotesManager : MonoBehaviour
         if (!_notes.Contains(note))
         {
             _notes.Add(note);
+            
+            _lastCollectedNote = note;
+            
             Debug.Log("Note added: " + note.noteTitle);
         }
     }
@@ -24,5 +29,10 @@ public class NotesManager : MonoBehaviour
     public List<NoteData> GetNotes()
     {
         return _notes;
+    }
+
+    public NoteData GetLastCollectedNote()
+    {
+        return _lastCollectedNote;
     }
 }

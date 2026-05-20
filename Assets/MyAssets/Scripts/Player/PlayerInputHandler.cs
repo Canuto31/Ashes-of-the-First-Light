@@ -22,6 +22,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool NavigateUpPressed { get; private set; }
     public bool NavigateDownPressed { get; private set; }
     public bool ConfirmPressed { get; private set; }
+    
+    public bool OpenItemPressed { get; private set; }
 
     private void Awake() {
         _playerInputActions = new InputSystem_Actions();
@@ -58,6 +60,8 @@ public class PlayerInputHandler : MonoBehaviour
         _playerInputActions.Player.NavigateDown.performed += ctx => NavigateDownPressed = true;
 
         _playerInputActions.Player.Confirm.performed += ctx => ConfirmPressed = true;
+        
+        _playerInputActions.Player.OpenItem.performed += ctx => OpenItemPressed = true;
     }
     
     private void OnDisable() {
@@ -80,6 +84,8 @@ public class PlayerInputHandler : MonoBehaviour
         NavigateUpPressed = false;
         NavigateDownPressed = false;
         ConfirmPressed = false;
+        
+        OpenItemPressed = false;
     }
     
     public bool ConsumeToggleMenu()

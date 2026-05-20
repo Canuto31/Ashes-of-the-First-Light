@@ -11,6 +11,7 @@ public class TutorialManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        _shownTutorials.Clear();
     }
 
     public bool HasSeen(string tutorialId)

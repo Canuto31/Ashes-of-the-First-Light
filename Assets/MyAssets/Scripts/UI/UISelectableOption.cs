@@ -4,18 +4,19 @@ using UnityEngine;
 public class UISelectableOption : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private GameObject _selectorArrow;
     [SerializeField] private TextMeshProUGUI _optionText;
 
+    [SerializeField] private Color _normalColor = Color.gray;
+    [SerializeField] private Color _selectedColor = Color.white;
+
     [Header("Settings")] 
-    [SerializeField] private float _selectedScale = 1.1f;
+    [SerializeField] private float _normalSize = 28f;
+    [SerializeField] private float _selectedSize = 34f;
 
     public void SetSelected(bool selected)
     {
-        _selectorArrow.SetActive(selected);
+        _optionText.color = selected ? _selectedColor : _normalColor;
         
-        _optionText.alpha = selected ? 1f : 0.5f;
-        
-        transform.localScale = selected ? Vector3.one * _selectedScale : Vector3.one;
+        _optionText.alpha = selected ? _selectedSize : _normalSize;
     }
 }

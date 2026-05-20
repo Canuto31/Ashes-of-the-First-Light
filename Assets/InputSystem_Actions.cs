@@ -217,6 +217,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""OpenItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""98674bc3-3aad-4e31-a810-437ec92d4ea5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -492,6 +501,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""NavigateDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""44577ecf-75f2-42ec-b1cd-65838d6d7430"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""OpenItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1093,6 +1113,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Confirm = m_Player.FindAction("Confirm", throwIfNotFound: true);
         m_Player_NavigateUp = m_Player.FindAction("NavigateUp", throwIfNotFound: true);
         m_Player_NavigateDown = m_Player.FindAction("NavigateDown", throwIfNotFound: true);
+        m_Player_OpenItem = m_Player.FindAction("OpenItem", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1200,6 +1221,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Confirm;
     private readonly InputAction m_Player_NavigateUp;
     private readonly InputAction m_Player_NavigateDown;
+    private readonly InputAction m_Player_OpenItem;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1268,6 +1290,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @NavigateDown => m_Wrapper.m_Player_NavigateDown;
         /// <summary>
+        /// Provides access to the underlying input action "Player/OpenItem".
+        /// </summary>
+        public InputAction @OpenItem => m_Wrapper.m_Player_OpenItem;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1335,6 +1361,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @NavigateDown.started += instance.OnNavigateDown;
             @NavigateDown.performed += instance.OnNavigateDown;
             @NavigateDown.canceled += instance.OnNavigateDown;
+            @OpenItem.started += instance.OnOpenItem;
+            @OpenItem.performed += instance.OnOpenItem;
+            @OpenItem.canceled += instance.OnOpenItem;
         }
 
         /// <summary>
@@ -1388,6 +1417,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @NavigateDown.started -= instance.OnNavigateDown;
             @NavigateDown.performed -= instance.OnNavigateDown;
             @NavigateDown.canceled -= instance.OnNavigateDown;
+            @OpenItem.started -= instance.OnOpenItem;
+            @OpenItem.performed -= instance.OnOpenItem;
+            @OpenItem.canceled -= instance.OnOpenItem;
         }
 
         /// <summary>
@@ -1786,6 +1818,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnNavigateDown(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "OpenItem" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenItem(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
