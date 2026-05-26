@@ -140,6 +140,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DecreaseHealth",
+                    "type": "Button",
+                    "id": "22b2942c-d623-41d5-81ff-56acdeee127f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "IncreaseHealth",
+                    "type": "Button",
+                    "id": "eb42e0ba-5b95-45de-a2ea-fcc8f5c1ba34",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -426,6 +444,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "OpenItem",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "70a2a9a3-d817-4ed9-a2a0-1bbf094fd15e",
+                    "path": "<Keyboard>/downArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DecreaseHealth",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "844898f5-122f-424a-84d0-f761f8b0ba0c",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "IncreaseHealth",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

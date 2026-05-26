@@ -6,7 +6,7 @@ public class PickupNote : MonoBehaviour, IInteractable
 
     public string GetInteractionText()
     {
-        return "Read " + _note.noteTitle;
+        return _note.noteTitle;
     }
 
     public void Interact()

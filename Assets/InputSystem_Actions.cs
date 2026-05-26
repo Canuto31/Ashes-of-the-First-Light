@@ -226,6 +226,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DecreaseHealth"",
+                    ""type"": ""Button"",
+                    ""id"": ""22b2942c-d623-41d5-81ff-56acdeee127f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""IncreaseHealth"",
+                    ""type"": ""Button"",
+                    ""id"": ""eb42e0ba-5b95-45de-a2ea-fcc8f5c1ba34"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -512,6 +530,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""OpenItem"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""70a2a9a3-d817-4ed9-a2a0-1bbf094fd15e"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DecreaseHealth"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""844898f5-122f-424a-84d0-f761f8b0ba0c"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""IncreaseHealth"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1114,6 +1154,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_NavigateUp = m_Player.FindAction("NavigateUp", throwIfNotFound: true);
         m_Player_NavigateDown = m_Player.FindAction("NavigateDown", throwIfNotFound: true);
         m_Player_OpenItem = m_Player.FindAction("OpenItem", throwIfNotFound: true);
+        m_Player_DecreaseHealth = m_Player.FindAction("DecreaseHealth", throwIfNotFound: true);
+        m_Player_IncreaseHealth = m_Player.FindAction("IncreaseHealth", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1222,6 +1264,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_NavigateUp;
     private readonly InputAction m_Player_NavigateDown;
     private readonly InputAction m_Player_OpenItem;
+    private readonly InputAction m_Player_DecreaseHealth;
+    private readonly InputAction m_Player_IncreaseHealth;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1294,6 +1338,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @OpenItem => m_Wrapper.m_Player_OpenItem;
         /// <summary>
+        /// Provides access to the underlying input action "Player/DecreaseHealth".
+        /// </summary>
+        public InputAction @DecreaseHealth => m_Wrapper.m_Player_DecreaseHealth;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/IncreaseHealth".
+        /// </summary>
+        public InputAction @IncreaseHealth => m_Wrapper.m_Player_IncreaseHealth;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1364,6 +1416,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @OpenItem.started += instance.OnOpenItem;
             @OpenItem.performed += instance.OnOpenItem;
             @OpenItem.canceled += instance.OnOpenItem;
+            @DecreaseHealth.started += instance.OnDecreaseHealth;
+            @DecreaseHealth.performed += instance.OnDecreaseHealth;
+            @DecreaseHealth.canceled += instance.OnDecreaseHealth;
+            @IncreaseHealth.started += instance.OnIncreaseHealth;
+            @IncreaseHealth.performed += instance.OnIncreaseHealth;
+            @IncreaseHealth.canceled += instance.OnIncreaseHealth;
         }
 
         /// <summary>
@@ -1420,6 +1478,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @OpenItem.started -= instance.OnOpenItem;
             @OpenItem.performed -= instance.OnOpenItem;
             @OpenItem.canceled -= instance.OnOpenItem;
+            @DecreaseHealth.started -= instance.OnDecreaseHealth;
+            @DecreaseHealth.performed -= instance.OnDecreaseHealth;
+            @DecreaseHealth.canceled -= instance.OnDecreaseHealth;
+            @IncreaseHealth.started -= instance.OnIncreaseHealth;
+            @IncreaseHealth.performed -= instance.OnIncreaseHealth;
+            @IncreaseHealth.canceled -= instance.OnIncreaseHealth;
         }
 
         /// <summary>
@@ -1825,6 +1889,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnOpenItem(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DecreaseHealth" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDecreaseHealth(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "IncreaseHealth" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnIncreaseHealth(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.
