@@ -7,6 +7,7 @@ public class PlayerInputHandler : MonoBehaviour
 
     public Vector2 MoveInput { get; private set; }
     public bool DashPressed { get; private set; }
+    public bool SprintHeld { get; private set; }
     public bool AttackPressed { get; private set; }
     public bool JumpPressed { get; private set; }
     public bool JumpHeld { get; private set; }
@@ -27,6 +28,8 @@ public class PlayerInputHandler : MonoBehaviour
 
     public bool IncreaseHealthPressed { get; private set; }
     public bool DecreaseHealthPressed { get; private set; }
+    public bool RestoreSolarEnergyPressed { get; private set; }
+    public bool ConsumeSolarEnergyPressed { get; private set; }
 
     private void Awake()
     {
@@ -48,6 +51,16 @@ public class PlayerInputHandler : MonoBehaviour
         _playerInputActions.Player.Jump.canceled += ctx => JumpHeld = false;
 
         _playerInputActions.Player.Dash.performed += ctx => DashPressed = true;
+        
+        _playerInputActions.Player.Sprint.performed += ctx =>
+        {
+            SprintHeld = true;
+        };
+
+        _playerInputActions.Player.Sprint.canceled += ctx =>
+        {
+            SprintHeld = false;
+        };
         _playerInputActions.Player.Attack.performed += ctx => AttackPressed = true;
 
         _playerInputActions.Player.Interact.performed += ctx => InteractPressed = true;
@@ -71,6 +84,9 @@ public class PlayerInputHandler : MonoBehaviour
 
         _playerInputActions.Player.IncreaseHealth.performed += ctx => IncreaseHealthPressed = true;
         _playerInputActions.Player.DecreaseHealth.performed += ctx => DecreaseHealthPressed = true;
+        
+        _playerInputActions.Player.RestoreSolarEnergy.performed += ctx => RestoreSolarEnergyPressed = true;
+        _playerInputActions.Player.ConsumeSolarEnergy.performed += ctx => ConsumeSolarEnergyPressed = true;
     }
 
     private void OnDisable()
@@ -100,6 +116,9 @@ public class PlayerInputHandler : MonoBehaviour
         
         IncreaseHealthPressed = false;
         DecreaseHealthPressed = false;
+        
+        RestoreSolarEnergyPressed = false;
+        ConsumeSolarEnergyPressed = false;
     }
 
     public bool ConsumeToggleMenu()

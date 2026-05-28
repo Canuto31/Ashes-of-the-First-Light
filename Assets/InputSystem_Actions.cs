@@ -244,6 +244,33 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Sprint"",
+                    ""type"": ""Button"",
+                    ""id"": ""4e2d529f-d36e-4c94-8fcf-7fd94eb8b1fb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ConsumeSolarEnergy"",
+                    ""type"": ""Button"",
+                    ""id"": ""75c873ed-3e66-4c65-92dc-bb86ed678587"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RestoreSolarEnergy"",
+                    ""type"": ""Button"",
+                    ""id"": ""e046ccc5-55dc-456c-b6a1-e8dfe2b41937"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -393,7 +420,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""9c78a10d-054b-4cd8-9b44-735c2763149b"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/alt"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -552,6 +579,39 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""IncreaseHealth"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d3b19ac2-74f6-4a47-aa37-bb1bb1e65f74"",
+                    ""path"": ""<Keyboard>/leftShift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Sprint"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""49633b3c-9b32-4b2e-a766-9e0535719d7a"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ConsumeSolarEnergy"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6b8e539d-4b2a-4643-b200-b3635266cbcf"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RestoreSolarEnergy"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1156,6 +1216,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_OpenItem = m_Player.FindAction("OpenItem", throwIfNotFound: true);
         m_Player_DecreaseHealth = m_Player.FindAction("DecreaseHealth", throwIfNotFound: true);
         m_Player_IncreaseHealth = m_Player.FindAction("IncreaseHealth", throwIfNotFound: true);
+        m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
+        m_Player_ConsumeSolarEnergy = m_Player.FindAction("ConsumeSolarEnergy", throwIfNotFound: true);
+        m_Player_RestoreSolarEnergy = m_Player.FindAction("RestoreSolarEnergy", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1266,6 +1329,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_OpenItem;
     private readonly InputAction m_Player_DecreaseHealth;
     private readonly InputAction m_Player_IncreaseHealth;
+    private readonly InputAction m_Player_Sprint;
+    private readonly InputAction m_Player_ConsumeSolarEnergy;
+    private readonly InputAction m_Player_RestoreSolarEnergy;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1346,6 +1412,18 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @IncreaseHealth => m_Wrapper.m_Player_IncreaseHealth;
         /// <summary>
+        /// Provides access to the underlying input action "Player/Sprint".
+        /// </summary>
+        public InputAction @Sprint => m_Wrapper.m_Player_Sprint;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ConsumeSolarEnergy".
+        /// </summary>
+        public InputAction @ConsumeSolarEnergy => m_Wrapper.m_Player_ConsumeSolarEnergy;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/RestoreSolarEnergy".
+        /// </summary>
+        public InputAction @RestoreSolarEnergy => m_Wrapper.m_Player_RestoreSolarEnergy;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1422,6 +1500,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @IncreaseHealth.started += instance.OnIncreaseHealth;
             @IncreaseHealth.performed += instance.OnIncreaseHealth;
             @IncreaseHealth.canceled += instance.OnIncreaseHealth;
+            @Sprint.started += instance.OnSprint;
+            @Sprint.performed += instance.OnSprint;
+            @Sprint.canceled += instance.OnSprint;
+            @ConsumeSolarEnergy.started += instance.OnConsumeSolarEnergy;
+            @ConsumeSolarEnergy.performed += instance.OnConsumeSolarEnergy;
+            @ConsumeSolarEnergy.canceled += instance.OnConsumeSolarEnergy;
+            @RestoreSolarEnergy.started += instance.OnRestoreSolarEnergy;
+            @RestoreSolarEnergy.performed += instance.OnRestoreSolarEnergy;
+            @RestoreSolarEnergy.canceled += instance.OnRestoreSolarEnergy;
         }
 
         /// <summary>
@@ -1484,6 +1571,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @IncreaseHealth.started -= instance.OnIncreaseHealth;
             @IncreaseHealth.performed -= instance.OnIncreaseHealth;
             @IncreaseHealth.canceled -= instance.OnIncreaseHealth;
+            @Sprint.started -= instance.OnSprint;
+            @Sprint.performed -= instance.OnSprint;
+            @Sprint.canceled -= instance.OnSprint;
+            @ConsumeSolarEnergy.started -= instance.OnConsumeSolarEnergy;
+            @ConsumeSolarEnergy.performed -= instance.OnConsumeSolarEnergy;
+            @ConsumeSolarEnergy.canceled -= instance.OnConsumeSolarEnergy;
+            @RestoreSolarEnergy.started -= instance.OnRestoreSolarEnergy;
+            @RestoreSolarEnergy.performed -= instance.OnRestoreSolarEnergy;
+            @RestoreSolarEnergy.canceled -= instance.OnRestoreSolarEnergy;
         }
 
         /// <summary>
@@ -1903,6 +1999,27 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnIncreaseHealth(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Sprint" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSprint(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ConsumeSolarEnergy" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnConsumeSolarEnergy(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RestoreSolarEnergy" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRestoreSolarEnergy(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

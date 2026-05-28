@@ -158,6 +158,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Button",
+                    "id": "4e2d529f-d36e-4c94-8fcf-7fd94eb8b1fb",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ConsumeSolarEnergy",
+                    "type": "Button",
+                    "id": "75c873ed-3e66-4c65-92dc-bb86ed678587",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RestoreSolarEnergy",
+                    "type": "Button",
+                    "id": "e046ccc5-55dc-456c-b6a1-e8dfe2b41937",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -307,7 +334,7 @@
                 {
                     "name": "",
                     "id": "9c78a10d-054b-4cd8-9b44-735c2763149b",
-                    "path": "<Keyboard>/shift",
+                    "path": "<Keyboard>/alt",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -466,6 +493,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "IncreaseHealth",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d3b19ac2-74f6-4a47-aa37-bb1bb1e65f74",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "49633b3c-9b32-4b2e-a766-9e0535719d7a",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ConsumeSolarEnergy",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6b8e539d-4b2a-4643-b200-b3635266cbcf",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RestoreSolarEnergy",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

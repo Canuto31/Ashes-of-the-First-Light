@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     public float maxSpeed = 6f;
     public float acceleration = 20f;
     public float deceleration = 25f;
+    public float sprintMultiplier = 1.5f;
 
     [Header("Jump")]
     public float jumpForce = 12f;
@@ -58,21 +59,23 @@ public class PlayerController : MonoBehaviour
     [Header("Dash")]
     public float dashForce = 15f;
     public float dashDuration = 0.2f;
-    public float dashCooldown = 1f;
+    public float dashStaminaCost = 25f;
 
     private bool _isDashing;
     private float _dashTimeCounter;
-    private float _dashCooldownCounter;
 
     private bool _isGrounded;
     private bool _wasGrounded;
     private bool _hasJumped;
+    
+    private PlayerStamina _playerStamina;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _input = GetComponent<PlayerInputHandler>();
         _stateMachine = new PlayerStateMachine();
+        _playerStamina = GetComponent<PlayerStamina>();
     }
 
     private void Update()
@@ -134,7 +137,15 @@ public class PlayerController : MonoBehaviour
     {
         if (_isWallJumping || _isDashing) return;
 
-        float targetSpeed = _input.MoveInput.x * maxSpeed;
+        float currentSpeed = maxSpeed;
+
+        if (_input.SprintHeld && _input.MoveInput.x != 0)
+        {
+            currentSpeed *= sprintMultiplier;
+        }
+
+        float targetSpeed = _input.MoveInput.x * currentSpeed;
+        
         float speedDiff = targetSpeed - _rb.linearVelocityX;
 
         float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
@@ -152,21 +163,32 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void TryDash()
     {
-        if (_input.DashPressed && _dashCooldownCounter <= 0f)
+        if (_input.DashPressed && CanDash())
         {
             StartDash();
         }
+    }
+    
+    private bool CanDash()
+    {
+        if (_playerStamina == null)
+            return false;
+
+        if (_playerStamina.CurrentStamina < dashStaminaCost)
+            return false;
+
+        return true;
     }
 
     private void StartDash()
     {
         _isDashing = true;
         _dashTimeCounter = dashDuration;
-        _dashCooldownCounter = dashCooldown;
 
         float direction = Mathf.Sign(_input.MoveInput.x);
         if (direction == 0) direction = transform.localScale.x;
 
+        _playerStamina.DrainStamina(dashStaminaCost);
         _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
     }
 
@@ -180,11 +202,6 @@ public class PlayerController : MonoBehaviour
             {
                 _isDashing = false;
             }
-        }
-
-        if (_dashCooldownCounter > 0f)
-        {
-            _dashCooldownCounter -= Time.deltaTime;
         }
     }
 

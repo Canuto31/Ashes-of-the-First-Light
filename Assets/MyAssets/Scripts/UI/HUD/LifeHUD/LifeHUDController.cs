@@ -7,6 +7,10 @@ public class LifeHUDController : BaseHUDModule
     [Header("References")]
     [SerializeField] private Image _lifeBarFill;
     [SerializeField] private Image _damageFlash;
+    
+    [SerializeField] private float smoothSpeed = 10f;
+
+    private float _targetFill;
 
     [Header("Damage Flash")] 
     [SerializeField] private float _flashFadeSpeed = 5f;
@@ -44,6 +48,12 @@ public class LifeHUDController : BaseHUDModule
     private void Update()
     {
         HandleDamageFlashFade();
+        
+        _lifeBarFill.fillAmount = Mathf.Lerp(
+            _lifeBarFill.fillAmount,
+            _targetFill,
+            smoothSpeed * Time.deltaTime
+        );
     }
 
     private void OnDestroy()
@@ -57,7 +67,7 @@ public class LifeHUDController : BaseHUDModule
 
     public void UpdateLife(float currentLife, float maxLife)
     {
-        _lifeBarFill.fillAmount = currentLife / maxLife;
+        _targetFill = currentLife / maxLife;
     }
 
     private void ShowDamageFlash()
