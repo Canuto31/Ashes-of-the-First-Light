@@ -271,6 +271,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LockSlot"",
+                    ""type"": ""Button"",
+                    ""id"": ""4c7edee6-91cb-4853-bb55-fb3848c73c2e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UnlockSlot"",
+                    ""type"": ""Button"",
+                    ""id"": ""e7a7eda3-0aa8-4aa0-8038-cd883d9c3e6e"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -612,6 +630,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""RestoreSolarEnergy"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""83fe758f-cce9-4655-ad8a-88c8947c78ea"",
+                    ""path"": ""<Keyboard>/comma"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""LockSlot"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""89e2f60c-71d8-4b04-b800-00e9387a597b"",
+                    ""path"": ""<Keyboard>/period"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""UnlockSlot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1219,6 +1259,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Sprint = m_Player.FindAction("Sprint", throwIfNotFound: true);
         m_Player_ConsumeSolarEnergy = m_Player.FindAction("ConsumeSolarEnergy", throwIfNotFound: true);
         m_Player_RestoreSolarEnergy = m_Player.FindAction("RestoreSolarEnergy", throwIfNotFound: true);
+        m_Player_LockSlot = m_Player.FindAction("LockSlot", throwIfNotFound: true);
+        m_Player_UnlockSlot = m_Player.FindAction("UnlockSlot", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1332,6 +1374,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Sprint;
     private readonly InputAction m_Player_ConsumeSolarEnergy;
     private readonly InputAction m_Player_RestoreSolarEnergy;
+    private readonly InputAction m_Player_LockSlot;
+    private readonly InputAction m_Player_UnlockSlot;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1424,6 +1468,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @RestoreSolarEnergy => m_Wrapper.m_Player_RestoreSolarEnergy;
         /// <summary>
+        /// Provides access to the underlying input action "Player/LockSlot".
+        /// </summary>
+        public InputAction @LockSlot => m_Wrapper.m_Player_LockSlot;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/UnlockSlot".
+        /// </summary>
+        public InputAction @UnlockSlot => m_Wrapper.m_Player_UnlockSlot;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Player; }
@@ -1509,6 +1561,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @RestoreSolarEnergy.started += instance.OnRestoreSolarEnergy;
             @RestoreSolarEnergy.performed += instance.OnRestoreSolarEnergy;
             @RestoreSolarEnergy.canceled += instance.OnRestoreSolarEnergy;
+            @LockSlot.started += instance.OnLockSlot;
+            @LockSlot.performed += instance.OnLockSlot;
+            @LockSlot.canceled += instance.OnLockSlot;
+            @UnlockSlot.started += instance.OnUnlockSlot;
+            @UnlockSlot.performed += instance.OnUnlockSlot;
+            @UnlockSlot.canceled += instance.OnUnlockSlot;
         }
 
         /// <summary>
@@ -1580,6 +1638,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @RestoreSolarEnergy.started -= instance.OnRestoreSolarEnergy;
             @RestoreSolarEnergy.performed -= instance.OnRestoreSolarEnergy;
             @RestoreSolarEnergy.canceled -= instance.OnRestoreSolarEnergy;
+            @LockSlot.started -= instance.OnLockSlot;
+            @LockSlot.performed -= instance.OnLockSlot;
+            @LockSlot.canceled -= instance.OnLockSlot;
+            @UnlockSlot.started -= instance.OnUnlockSlot;
+            @UnlockSlot.performed -= instance.OnUnlockSlot;
+            @UnlockSlot.canceled -= instance.OnUnlockSlot;
         }
 
         /// <summary>
@@ -2020,6 +2084,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRestoreSolarEnergy(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "LockSlot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLockSlot(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "UnlockSlot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUnlockSlot(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

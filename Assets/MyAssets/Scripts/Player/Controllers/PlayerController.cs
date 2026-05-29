@@ -139,7 +139,9 @@ public class PlayerController : MonoBehaviour
 
         float currentSpeed = maxSpeed;
 
-        if (_input.SprintHeld && _input.MoveInput.x != 0)
+        if (_input.SprintHeld &&
+            _input.MoveInput.x != 0 &&
+            _playerStamina.CanSprint)
         {
             currentSpeed *= sprintMultiplier;
         }

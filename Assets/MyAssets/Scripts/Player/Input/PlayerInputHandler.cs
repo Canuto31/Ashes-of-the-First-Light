@@ -30,6 +30,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool DecreaseHealthPressed { get; private set; }
     public bool RestoreSolarEnergyPressed { get; private set; }
     public bool ConsumeSolarEnergyPressed { get; private set; }
+    public bool LockSlotPressed { get; private set; }
+    public bool UnlockSlotPressed { get; private set; }
 
     private void Awake()
     {
@@ -87,6 +89,9 @@ public class PlayerInputHandler : MonoBehaviour
         
         _playerInputActions.Player.RestoreSolarEnergy.performed += ctx => RestoreSolarEnergyPressed = true;
         _playerInputActions.Player.ConsumeSolarEnergy.performed += ctx => ConsumeSolarEnergyPressed = true;
+        
+        _playerInputActions.Player.LockSlot.performed += ctx => LockSlotPressed = true;
+        _playerInputActions.Player.UnlockSlot.performed += ctx => UnlockSlotPressed = true;
     }
 
     private void OnDisable()
@@ -119,6 +124,9 @@ public class PlayerInputHandler : MonoBehaviour
         
         RestoreSolarEnergyPressed = false;
         ConsumeSolarEnergyPressed = false;
+        
+        LockSlotPressed = false;
+        UnlockSlotPressed = false;
     }
 
     public bool ConsumeToggleMenu()

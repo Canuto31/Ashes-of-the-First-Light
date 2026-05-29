@@ -185,6 +185,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "LockSlot",
+                    "type": "Button",
+                    "id": "4c7edee6-91cb-4853-bb55-fb3848c73c2e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UnlockSlot",
+                    "type": "Button",
+                    "id": "e7a7eda3-0aa8-4aa0-8038-cd883d9c3e6e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -526,6 +544,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "RestoreSolarEnergy",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "83fe758f-cce9-4655-ad8a-88c8947c78ea",
+                    "path": "<Keyboard>/comma",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LockSlot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "89e2f60c-71d8-4b04-b800-00e9387a597b",
+                    "path": "<Keyboard>/period",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "UnlockSlot",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

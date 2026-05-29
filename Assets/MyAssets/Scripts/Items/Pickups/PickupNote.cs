@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class PickupNote : MonoBehaviour, IInteractable
@@ -16,23 +17,43 @@ public class PickupNote : MonoBehaviour, IInteractable
 
         NotesManager.Instance.AddNote(_note);
 
+        BookMenuManager.Instance.QueueContextPage(
+            BookMenuManager.BookPage.Notes
+        );
+
         string tutorialId = "NOTE_READING";
 
         if (!TutorialManager.Instance.HasSeen(tutorialId))
         {
-            TutorialUIManager.Instance.ShowTutorial(
-                tutorialId,
-                "Use A / D to change pages"
+            StartCoroutine(
+                FirstNoteSequence(tutorialId)
             );
         }
+        else
+        {
+            UI_Interaction.Instance.ShowTextTimed(
+                _note.noteTitle + " acquired\nPress TAB to read",
+                2f
+            );
+
+            Destroy(gameObject);
+        }
+    }
+    
+    private IEnumerator FirstNoteSequence(string tutorialId)
+    {
+        TutorialUIManager.Instance.ShowTutorial(
+            tutorialId,
+            "Use A / D to change pages"
+        );
+
+        yield return new WaitUntil(() =>
+            GameStateManager.Instance.IsPlaying()
+        );
 
         UI_Interaction.Instance.ShowTextTimed(
             _note.noteTitle + " acquired\nPress TAB to read",
             2f
-        );
-
-        BookMenuManager.Instance.QueueContextPage(
-            BookMenuManager.BookPage.Notes
         );
 
         Destroy(gameObject);
