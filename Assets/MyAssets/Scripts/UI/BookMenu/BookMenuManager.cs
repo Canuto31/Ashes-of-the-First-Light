@@ -6,6 +6,7 @@ public class BookMenuManager : MonoBehaviour
     [SerializeField] private GameObject _bookRoot;
     [SerializeField] private GameObject[] _pages;
     [SerializeField] private NotesPageController _notesPageController;
+    [SerializeField] private TutorialPageController _tutorialPageController;
 
     private PlayerInputHandler _input;
 
@@ -130,6 +131,10 @@ public class BookMenuManager : MonoBehaviour
             _notesPageController.RefreshNotes();
             _notesPageController.FocusLastCollectedNote();
         }
+        else if (_currentPage == (int)BookPage.Tutorials)
+        {
+            _tutorialPageController.RefreshTutorials();
+        }
 
         _justOpenedBook = true;
 
@@ -169,6 +174,17 @@ public class BookMenuManager : MonoBehaviour
         for (int i = 0; i < _pages.Length; i++)
         {
             _pages[i].SetActive(i == index);
+        }
+
+        switch ((BookPage)index)
+        {
+            case BookPage.Notes:
+                _notesPageController.RefreshNotes();
+                break;
+
+            case BookPage.Tutorials:
+                _tutorialPageController.RefreshTutorials();
+                break;
         }
     }
 

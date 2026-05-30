@@ -3,7 +3,11 @@ using UnityEngine;
 
 public class PickupNote : MonoBehaviour, IInteractable
 {
-    [SerializeField] private NoteData _note;
+    [SerializeField] 
+    private NoteData _note;
+    
+    [SerializeField]
+    private TutorialData _readingTutorial;
 
     public string GetInteractionText()
     {
@@ -21,12 +25,11 @@ public class PickupNote : MonoBehaviour, IInteractable
             BookMenuManager.BookPage.Notes
         );
 
-        string tutorialId = "NOTE_READING";
-
-        if (!TutorialManager.Instance.HasSeen(tutorialId))
+        if (!TutorialManager.Instance.HasSeen(
+                _readingTutorial.tutorialId))
         {
             StartCoroutine(
-                FirstNoteSequence(tutorialId)
+                FirstNoteSequence(_readingTutorial.tutorialId)
             );
         }
         else
@@ -43,8 +46,7 @@ public class PickupNote : MonoBehaviour, IInteractable
     private IEnumerator FirstNoteSequence(string tutorialId)
     {
         TutorialUIManager.Instance.ShowTutorial(
-            tutorialId,
-            "Use A / D to change pages"
+            _readingTutorial
         );
 
         yield return new WaitUntil(() =>
