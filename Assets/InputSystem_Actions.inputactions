@@ -528,7 +528,7 @@
                 {
                     "name": "",
                     "id": "49633b3c-9b32-4b2e-a766-9e0535719d7a",
-                    "path": "<Keyboard>/leftArrow",
+                    "path": "<Keyboard>/semicolon",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -539,7 +539,7 @@
                 {
                     "name": "",
                     "id": "6b8e539d-4b2a-4643-b200-b3635266cbcf",
-                    "path": "<Keyboard>/rightArrow",
+                    "path": "<Keyboard>/quote",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

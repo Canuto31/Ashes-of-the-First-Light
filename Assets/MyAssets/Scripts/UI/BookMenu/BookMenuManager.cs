@@ -7,6 +7,7 @@ public class BookMenuManager : MonoBehaviour
     [SerializeField] private GameObject[] _pages;
     [SerializeField] private NotesPageController _notesPageController;
     [SerializeField] private TutorialPageController _tutorialPageController;
+    [SerializeField] private InventoryPageController _inventoryPageController;
 
     private PlayerInputHandler _input;
 
@@ -24,6 +25,7 @@ public class BookMenuManager : MonoBehaviour
     {
         Notes,
         Tutorials,
+        Inventory,
         Settings
     }
 
@@ -181,6 +183,10 @@ public class BookMenuManager : MonoBehaviour
             case BookPage.Notes:
                 _notesPageController.RefreshNotes();
                 break;
+            
+            case BookPage.Inventory:
+                _inventoryPageController.RefreshInventory();
+                break;
 
             case BookPage.Tutorials:
                 _tutorialPageController.RefreshTutorials();
@@ -204,9 +210,12 @@ public class BookMenuManager : MonoBehaviour
 
             case BookPage.Tutorials:
                 return 1;
+            
+            case BookPage.Inventory:
+                return 2;
 
             case BookPage.Settings:
-                return 2;
+                return 3;
         }
 
         return 0;
