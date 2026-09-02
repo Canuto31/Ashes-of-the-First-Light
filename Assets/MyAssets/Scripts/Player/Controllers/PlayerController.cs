@@ -70,6 +70,9 @@ public class PlayerController : MonoBehaviour
     
     private PlayerStamina _playerStamina;
 
+    [SerializeField]
+    private Animator animator;
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -158,6 +161,19 @@ public class PlayerController : MonoBehaviour
             _rb.linearVelocityX + movement * Time.fixedDeltaTime,
             _rb.linearVelocityY
         );
+        
+        if (_input.MoveInput.x != 0)
+        {
+            animator.SetInteger("AnimState", 1);
+            if (_input.MoveInput.x < 0)
+                transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            else
+                transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+        else
+        {
+            animator.SetInteger("AnimState", 0);
+        }
     }
 
     // --------------------
@@ -250,6 +266,8 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocityX,
                 _rb.linearVelocityY * 0.5f
             );
+            
+            animator.SetFloat("AirSpeedY", -1f);
         }
     }
 
@@ -257,6 +275,9 @@ public class PlayerController : MonoBehaviour
     {
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
         _jumpBufferCounter = 0f;
+        
+        //animator.SetInteger("AirSpeedY", 1);
+        animator.SetTrigger("Jump");
     }
 
     // --------------------
@@ -380,9 +401,16 @@ public class PlayerController : MonoBehaviour
         _isGrounded = groundedNow;
 
         if (_isGrounded)
+        {
             _coyoteTimeCounter = coyoteTime;
+            animator.SetBool("Grounded", true);
+            animator.SetFloat("AirSpeedY", 0f);
+        }
         else
+        {
             _coyoteTimeCounter -= Time.deltaTime;
+            animator.SetBool("Grounded", false);
+        }
 
         _wasGrounded = _isGrounded;
     }
