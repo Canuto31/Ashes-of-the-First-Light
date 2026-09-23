@@ -64597,6 +64597,7 @@ GameObject:
   - component: {fileID: 1890735319}
   - component: {fileID: 1890735320}
   - component: {fileID: 1890735321}
+  - component: {fileID: 1890735322}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -64640,6 +64641,7 @@ MonoBehaviour:
   dashForce: 15
   dashDuration: 0.2
   dashStaminaCost: 25
+  _AttackDuration: 0.5
   animator: {fileID: 386550011}
 --- !u!114 &1890735314
 MonoBehaviour:
@@ -64803,6 +64805,28 @@ MonoBehaviour:
   _drainRate: 25
   _regenRate: 20
   _exhaustRecoveryPercent: 0.2
+--- !u!95 &1890735322
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1890735312}
+  m_Enabled: 0
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 3c2a5b7097b0fe44394328c0bdb9252e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1906179271
 GameObject:
   m_ObjectHideFlags: 0

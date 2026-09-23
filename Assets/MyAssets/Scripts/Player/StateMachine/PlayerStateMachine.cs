@@ -5,7 +5,8 @@ public enum PlayerState
     Grounded,
     Airborne,
     WallSliding,
-    Dashing
+    Dashing,
+    Attacking
 }
 
 public class PlayerStateMachine

@@ -69,6 +69,9 @@ public class PlayerController : MonoBehaviour
     private bool _hasJumped;
     
     private PlayerStamina _playerStamina;
+    
+    [Header("Attack")]
+    private bool _isAttacking;
 
     [SerializeField]
     private Animator animator;
@@ -95,6 +98,8 @@ public class PlayerController : MonoBehaviour
         HandleJump();
 
         TryDash();
+
+        HandleAttack();
     }
 
     private void FixedUpdate()
@@ -126,6 +131,10 @@ public class PlayerController : MonoBehaviour
         else if (!_isGrounded)
         {
             _stateMachine.ChangeState(PlayerState.Airborne);
+        }
+        else if (_isAttacking)
+        {
+            _stateMachine.ChangeState(PlayerState.Attacking);
         }
         else
         {
@@ -208,6 +217,7 @@ public class PlayerController : MonoBehaviour
 
         _playerStamina.DrainStamina(dashStaminaCost);
         _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
+        animator.SetTrigger("Roll");
     }
 
     private void HandleDash()
@@ -221,6 +231,23 @@ public class PlayerController : MonoBehaviour
                 _isDashing = false;
             }
         }
+    }
+    
+    // --------------------
+    // ATTACK
+    // --------------------
+    private void HandleAttack()
+    {
+        if (_input.AttackPressed && !_isAttacking)
+        {
+            _isAttacking = true;
+            animator.SetTrigger("Attack1");
+        }
+    }
+    
+    public void EndAttack()
+    {
+        _isAttacking = false;
     }
 
     // --------------------
@@ -276,7 +303,6 @@ public class PlayerController : MonoBehaviour
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
         _jumpBufferCounter = 0f;
         
-        //animator.SetInteger("AirSpeedY", 1);
         animator.SetTrigger("Jump");
     }
 
@@ -297,10 +323,14 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocityX,
                 -wallSlideSpeed
             );
+            
+            /*animator.SetBool("WallSlide", true);
+            animator.SetFloat("AirSpeedY", -1f);*/
         }
         else
         {
             _isWallSliding = false;
+            //animator.SetBool("WallSlide", false);
         }
     }
 
