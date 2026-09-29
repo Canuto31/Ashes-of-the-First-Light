@@ -1,0 +1,3465 @@
+using System.Collections;
+using Cinemachine;
+using UnityEngine;
+
+public class CameraDirector : MonoBehaviour
+{
+    public static CameraDirector Instance;
+
+    [Header("Main Player Camera")]
+    [SerializeField] private CinemachineVirtualCamera _playerCamera;
+
+    [Header("Settings")]
+    [SerializeField] private int _activePriority = 20;
+    [SerializeField] private int _defaultPriority = 10;
+
+    private bool _isPlayingCinematic = false;
+    private Coroutine _currentRoutine;
+
+    private void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+    }
+
+    public void FocusOn(CinemachineVirtualCamera targetCamera, float duration)
+    {
+        if (_currentRoutine != null)
+        {
+            StopCoroutine(_currentRoutine);
+        }
+
+        _currentRoutine = StartCoroutine(FocusRoutine(targetCamera, duration));
+    }
+
+    private IEnumerator FocusRoutine(CinemachineVirtualCamera targetCamera, float duration)
+    {
+        _isPlayingCinematic = true;
+
+        Debug.Log("Switching to target camera");
+
+        // Activar cámara objetivo
+        targetCamera.Priority = _activePriority;
+        _playerCamera.Priority = _defaultPriority;
+
+        yield return new WaitForSeconds(duration);
+
+        Debug.Log("Returning to player camera");
+
+        // Volver al jugador
+        targetCamera.Priority = _defaultPriority;
+        _playerCamera.Priority = _activePriority;
+
+        _isPlayingCinematic = false;
+        _currentRoutine = null;
+    }
+
+    public void SetCamera(CinemachineVirtualCamera targetCamera)
+    {
+        if (_isPlayingCinematic) return;
+
+        targetCamera.Priority = _activePriority;
+        _playerCamera.Priority = _defaultPriority;
+    }
+
+    public bool IsPlayingCinematic()
+    {
+        return _isPlayingCinematic;
+    }
+}
+using Cinemachine;
+using UnityEngine;
+
+public class CameraTrigger : MonoBehaviour
+{
+    [Header("Camera")]
+    [SerializeField] private CinemachineVirtualCamera _cameraTarget;
+    
+    [Header("Settings")]
+    [SerializeField] private float _duration = 2f;
+    [SerializeField] private bool _triggerOnce = true;
+
+    [Header("Interaction")]
+    [SerializeField] private bool _requireInput = false;
+
+    private bool _hasTriggered = false;
+    private bool _playerInside = false;
+    private IInteractable _interactable;
+
+    private PlayerInputHandler _playerInput;
+
+    private void Awake() {
+        _interactable = GetComponentInParent<IInteractable>();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other) 
+    {
+        if (!other.CompareTag("Player")) return;
+
+        _playerInside = true;
+
+        _playerInput = other.GetComponent<PlayerInputHandler>();
+
+        UI_Interaction.Instance.ShowText(_interactable.GetInteractionText());
+
+        /*if (!_requireInput)
+        {
+            TryActivate();
+        }*/
+    }
+
+    private void OnTriggerExit2D(Collider2D other) 
+    {
+        if (!other.CompareTag("Player")) return;
+
+        _playerInside = false;
+        _playerInput = null;
+
+        UI_Interaction.Instance.Hide();
+    }
+
+    private void Update() {
+        if (_requireInput && _playerInside)
+        {
+            if (_playerInput.InteractPressed)
+            {
+                _interactable.Interact();
+            }
+        }
+    }
+
+    private void TryActivate()
+    {
+        if (_hasTriggered && _triggerOnce) return;
+
+        if (_cameraTarget == null)
+        {
+            Debug.LogWarning("Camera target is not assigned in CameraTrigger on " + gameObject.name);
+            return;
+        }
+
+        CameraDirector.Instance.FocusOn(_cameraTarget, _duration);
+
+        _hasTriggered = true;
+    }
+}
+using System;
+using UnityEngine;
+
+public class GameStateManager : MonoBehaviour
+{
+    public static GameStateManager Instance;
+
+    public enum GameState
+    {
+        Playing,
+        Tutorial,
+        BookMenu
+    }
+
+    private GameState _currentState;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        _currentState = GameState.Playing;
+    }
+
+    public void SetState(GameState newState)
+    {
+        _currentState = newState;
+        Debug.Log("Game state changed to: " + _currentState);
+    }
+
+    public GameState GetState()
+    {
+        return _currentState;
+    }
+
+    public bool IsPlaying()
+    {
+        return _currentState == GameState.Playing;
+    }
+}
+public interface IInteractable
+{
+    void Interact();
+    string GetInteractionText();
+}
+using System;
+using UnityEngine;
+
+public class CheckpointManager : MonoBehaviour
+{
+    public static CheckpointManager Instance;
+
+    private Vector3 _lastCheckpointPosition;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public void SetCheckpoint(Vector3 position)
+    {
+        _lastCheckpointPosition = position;
+        
+        Debug.Log("Checkpoint saved ad: " + position);
+    }
+
+    public void ReturnToCheckpoint(GameObject player)
+    {
+        player.transform.position = _lastCheckpointPosition;
+        
+        var rb = player.GetComponent<Rigidbody2D>();
+        if (rb != null)
+            rb.linearVelocity = Vector2.zero;
+        
+        Debug.Log("Returned to checkpoint");
+    }
+}
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TutorialCodexManager : MonoBehaviour
+{
+    public static TutorialCodexManager Instance;
+
+    private readonly List<TutorialData> _unlockedTutorials;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        Instance = this;
+    }
+
+    public void UnlockTutorial(TutorialData tutorial)
+    {
+        if (HasTutorial(tutorial))
+            return;
+        
+        _unlockedTutorials.Add(tutorial);
+    }
+
+    public List<TutorialData> GetUnlockedTutorials()
+    {
+        return _unlockedTutorials;
+    }
+    
+    public bool HasTutorial(TutorialData tutorial)
+    {
+        return _unlockedTutorials.Contains(tutorial);
+    }
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class TutorialManager : MonoBehaviour
+{
+    public static TutorialManager Instance;
+
+    private HashSet<string> _shownTutorials = new();
+
+    private List<TutorialData> _unlockedTutorials = new();
+
+    private void Awake()
+    {
+        Instance = this;
+
+        _shownTutorials.Clear();
+        _unlockedTutorials.Clear();
+    }
+
+    public bool HasSeen(string tutorialId)
+    {
+        return _shownTutorials.Contains(tutorialId);
+    }
+
+    public void SetSeen(string tutorialId)
+    {
+        _shownTutorials.Add(tutorialId);
+    }
+
+    public void UnlockTutorial(TutorialData tutorial)
+    {
+        if (_unlockedTutorials.Contains(tutorial))
+            return;
+
+        _unlockedTutorials.Add(tutorial);
+    }
+
+    public bool HasUnlockedTutorial(TutorialData tutorial)
+    {
+        return _unlockedTutorials.Contains(tutorial);
+    }
+
+    public List<TutorialData> GetUnlockedTutorials()
+    {
+        return _unlockedTutorials;
+    }
+}
+using System;
+using UnityEngine;
+
+public class UIScreenManager : MonoBehaviour
+{
+    [SerializeField] private GameObject _pauseMenu;
+
+    private void Start()
+    {
+        _pauseMenu.SetActive(false);
+    }
+
+    private void Update()
+    {
+        var state = GameStateManager.Instance.GetState();
+
+        if (state == GameStateManager.GameState.BookMenu)
+        {
+            if (!_pauseMenu.activeSelf)
+            {
+                _pauseMenu.SetActive(true);
+                UI_Interaction.Instance.Hide();
+                InteractionUIManager.Instance.HideVisual();
+            }
+        }
+        else
+        {
+            if (_pauseMenu.activeSelf)
+                _pauseMenu.SetActive(false);
+        }
+    }
+}
+using UnityEngine;
+
+public class Billboard : MonoBehaviour
+{
+    private Camera _cam;
+
+    private void Start() {
+        _cam = Camera.main;
+    }
+
+    private void LateUpdate() {
+        transform.forward = _cam.transform.forward;
+    }
+}
+using UnityEngine;
+
+public class CheckpointSource : MonoBehaviour, IInteractable
+{
+    [SerializeField] private Transform _respawnPoint;
+
+    public string GetInteractionText()
+    {
+        return "Rest at the fountain";
+    }
+
+    public void Interact()
+    {
+        if (!GameStateManager.Instance.IsPlaying()) return;
+        
+        Vector3 point = _respawnPoint != null ? _respawnPoint.position : transform.position;
+
+        CheckpointManager.Instance.SetCheckpoint(point);
+        
+        UI_Interaction.Instance.ShowTextTimed("Checkpoint saved", 1.5f);
+    }
+}
+using System.Collections;
+using UnityEngine;
+
+public class DoorController : MonoBehaviour
+{
+    public enum DoorType
+    {
+        Sliding,
+        Hinged
+    }
+
+    [Header("Door Type")]
+    [SerializeField] private DoorType _doorType;
+
+    [Header("Sliding Settings")]
+    [SerializeField] private float _openHeight = 3f;
+
+    [Header("Hinged Settings")]
+    [SerializeField] private float _openAngle = 90f;
+
+    [Header("Common Settings")]
+    [SerializeField] private float _speed = 2f;
+
+    [Header("Timing")]
+    [SerializeField] private float _openDelay = 1.5f; // 👈 NUEVO
+
+    private bool _isOpen = false;
+
+    private Vector3 _closedPosition;
+    private Vector3 _openPosition;
+
+    private Quaternion _closedRotation;
+    private Quaternion _openRotation;
+
+    private void Start()
+    {
+        _closedPosition = transform.position;
+        _closedRotation = transform.rotation;
+
+        if (_doorType == DoorType.Sliding)
+        {
+            _openPosition = _closedPosition + Vector3.up * _openHeight;
+        }
+        else if (_doorType == DoorType.Hinged)
+        {
+            _openRotation = _closedRotation * Quaternion.Euler(0f, 0f, _openAngle);
+        }
+    }
+
+    public void Open()
+    {
+        if (_isOpen) return;
+
+        _isOpen = true;
+        StartCoroutine(OpenWithDelay());
+    }
+
+    private IEnumerator OpenWithDelay()
+    {
+        // ⏳ Espera antes de abrir
+        yield return new WaitForSeconds(_openDelay);
+
+        if (_doorType == DoorType.Sliding)
+        {
+            yield return StartCoroutine(OpenSliding());
+        }
+        else if (_doorType == DoorType.Hinged)
+        {
+            yield return StartCoroutine(OpenHinged());
+        }
+    }
+
+    private IEnumerator OpenSliding()
+    {
+        float time = 0f;
+
+        while (time < 1f)
+        {
+            time += Time.deltaTime * _speed;
+
+            float t = Mathf.SmoothStep(0f, 1f, time);
+
+            transform.position = Vector3.Lerp(
+                _closedPosition,
+                _openPosition,
+                t
+            );
+
+            yield return null;
+        }
+
+        transform.position = _openPosition;
+    }
+
+    private IEnumerator OpenHinged()
+    {
+        float time = 0f;
+
+        while (time < 1f)
+        {
+            time += Time.deltaTime * _speed;
+
+            float t = Mathf.SmoothStep(0f, 1f, time);
+
+            transform.rotation = Quaternion.Lerp(
+                _closedRotation,
+                _openRotation,
+                t
+            );
+
+            yield return null;
+        }
+
+        transform.rotation = _openRotation;
+    }
+}
+using System.Collections;
+using Cinemachine;
+using UnityEngine;
+
+public class Lever : MonoBehaviour, IInteractable
+{
+    [Header("Camera")]
+    [SerializeField] private CinemachineVirtualCamera _targetCamera;
+    [SerializeField] private float _cameraDuration = 2f;
+
+    [Header("Door")]
+    [SerializeField] private DoorController _targetDoor;
+
+    [Header("Requirements")]
+    [SerializeField] private InventoryItem _requiredItem;
+    [SerializeField] private string _missingMessage = "You need something";
+
+    private bool _hasBeenUsed = false;
+    
+    // ----------------------------
+
+    private bool HasRequirement()
+    {
+        if (_requiredItem == null)
+            return true;
+        
+        return PlayerInventory.Instance.HasItem(_requiredItem);
+    }
+
+    public string GetInteractionText()
+    {
+        if (_hasBeenUsed)
+            return "";
+
+        if (!HasRequirement())
+            return "Locked";
+
+        return "Press E to interact";
+    }
+
+    public void Interact()
+    {
+        if (_hasBeenUsed) return;
+
+        if (!HasRequirement()) {
+            InteractionUIManager.Instance.Show(transform.parent, _missingMessage);
+            return;
+        }
+
+        StartCoroutine(LeverSequence());
+    }
+
+    private IEnumerator LeverSequence()
+    {
+        _hasBeenUsed = true;
+
+        //GetComponent<Collider2D>().enabled = false;
+
+        CameraDirector.Instance.FocusOn(_targetCamera, _cameraDuration);
+
+        yield return new WaitForSeconds(1f);
+
+        if (_targetDoor != null)
+        {
+            _targetDoor.Open();
+            InteractionUIManager.Instance.Clear();
+        }
+    }
+}
+using UnityEngine;
+
+public class LightReactiveObject : MonoBehaviour
+{
+    [Header("References")]
+    [SerializeField] private PlayerLamp _playerLamp;
+
+    [Header("Targets")]
+    [SerializeField] private GameObject[] _targets;
+
+    [Header("Behavior")]
+    [SerializeField] private bool _activeInLight = true;
+
+    private void Update()
+    {
+        if (_playerLamp == null || _targets == null || _targets.Length == 0) return;
+
+        bool shouldBeActive;
+
+        // Si la luz está apagada → todo es oscuridad
+        if (!_playerLamp.IsLightOn())
+        {
+            shouldBeActive = !_activeInLight;
+        }
+        else
+        {
+            bool anyInLight = IsAnyTargetInLight();
+            shouldBeActive = _activeInLight ? anyInLight : !anyInLight;
+        }
+
+        SetTargetsActive(shouldBeActive);
+    }
+
+    private bool IsAnyTargetInLight()
+    {
+        Vector3 lightPos = _playerLamp.GetLightPosition();
+        float radius = _playerLamp.GetLightRadius();
+
+        foreach (var target in _targets)
+        {
+            if (target == null) continue;
+
+            float distance = Vector2.Distance(
+                target.transform.position,
+                lightPos
+            );
+
+            if (distance <= radius)
+                return true; // 🔥 ya con uno basta
+        }
+
+        return false;
+    }
+
+    private void SetTargetsActive(bool state)
+    {
+        foreach (var target in _targets)
+        {
+            if (target != null && target.activeSelf != state)
+            {
+                target.SetActive(state);
+            }
+        }
+    }
+
+    // 🔵 DEBUG VISUAL
+    private void OnDrawGizmos()
+    {
+        if (_targets == null) return;
+
+        Gizmos.color = _activeInLight ? Color.green : Color.red;
+
+        foreach (var target in _targets)
+        {
+            if (target != null)
+            {
+                Gizmos.DrawWireSphere(target.transform.position, 0.3f);
+            }
+        }
+    }
+}
+using UnityEngine;
+
+public class InteractableTrigger : MonoBehaviour
+{
+    private IInteractable _interactable;
+    private PlayerInputHandler _playerInput;
+
+    private bool _playerInside = false;
+
+    private void Awake()
+    {
+        _interactable = GetComponentInParent<IInteractable>();
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        _playerInside = true;
+        _playerInput = other.GetComponent<PlayerInputHandler>();
+
+        InteractionUIManager.Instance.Show(
+            transform.parent,
+            _interactable.GetInteractionText()
+        );
+
+        //UI_Interaction.Instance.ShowText(_interactable.GetInteractionText());
+    }
+
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        if (!other.CompareTag("Player")) return;
+
+        _playerInside = false;
+        _playerInput = null;
+
+        InteractionUIManager.Instance.Clear();
+
+        //UI_Interaction.Instance.Hide();
+    }
+
+    private void Update()
+    {
+        if (!GameStateManager.Instance.IsPlaying()) return;
+        
+        if (!_playerInside || _playerInput == null) return;
+
+        if (_playerInput.InteractPressed)
+        {
+            _interactable.Interact();
+        }
+    }
+}
+public enum InventoryCategory
+{
+    All,
+    Consumable,
+    Equipment,
+    KeyItem,
+    Material
+}
+using System;
+
+[Serializable]
+public class InventoryEntry
+{
+    public InventoryItem Item;
+    public int Quantity;
+    public bool Identified;
+
+    public InventoryEntry(InventoryItem item, int quantity = 1, bool identified = false)
+    {
+        Item = item;
+        Quantity = quantity;
+        Identified = identified;
+    }
+}
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "Game/Inventory Item")]
+public class InventoryItem : ScriptableObject
+{
+    public string itemId;
+    public string itemName;
+    public Sprite icon;
+
+    [Header("Inventory")] 
+    public InventoryCategory category;
+
+    [TextArea] 
+    public string description;
+}
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "NoteData", menuName = "Game/NoteData")]
+public class NoteData : ScriptableObject
+{
+    [Header("Note Info")]
+    public string noteTitle;
+
+    [TextArea(5, 10)]
+    public string[] pages;
+}
+using TMPro;
+using UnityEngine;
+
+public class InventoryCategoryOptionUI : MonoBehaviour
+{
+    [SerializeField] private TextMeshProUGUI _text;
+
+    public void SetTitle(string title)
+    {
+        _text.text = title;
+    }
+}
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class InventoryItemOptionUI : MonoBehaviour
+{
+    [SerializeField] private Image _icon;
+    [SerializeField] private TextMeshProUGUI _title;
+
+    public void Setup(InventoryItem item)
+    {
+        _icon.sprite = item.icon;
+        _title.text = item.itemName;
+    }
+}
+using TMPro;
+using UnityEngine;
+
+public class NoteOptionUI : MonoBehaviour
+{
+    [SerializeField] private TextMeshProUGUI _optionText;
+
+    public void SetTitle(string title)
+    {
+        _optionText.text = title;
+    }
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NotesManager : MonoBehaviour
+{
+    public static NotesManager Instance;
+    
+    private List<NoteData> _notes = new List<NoteData>();
+    
+    private NoteData _lastCollectedNote;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    public void AddNote(NoteData note)
+    {
+        if (!_notes.Contains(note))
+        {
+            _notes.Add(note);
+            
+            _lastCollectedNote = note;
+            
+            Debug.Log("Note added: " + note.noteTitle);
+        }
+    }
+
+    public List<NoteData> GetNotes()
+    {
+        return _notes;
+    }
+
+    public NoteData GetLastCollectedNote()
+    {
+        return _lastCollectedNote;
+    }
+}
+using System;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class NotesPageController : MonoBehaviour
+{
+    [Header("List")] 
+    [SerializeField] private Transform _notesContainer;
+    [SerializeField] private GameObject _notesOptionPrefab;
+    
+    [Header("Content")]
+    [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _contentText;
+    [SerializeField] private TextMeshProUGUI _pageIndicatorText;
+
+    private PlayerInputHandler _input;
+
+    private List<NoteData> _notes;
+
+    private List<UISelectableOption> _spawnOptions = new List<UISelectableOption>();
+
+    private int _currentNoteIndex;
+    private int _currentPageIndex;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+        
+        RefreshNotes();
+    }
+
+    private void Update()
+    {
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+            return;
+
+        HandleNoteNavigation();
+
+        HandlePageNavigation();
+    }
+
+    public void RefreshNotes()
+    {
+        foreach (Transform child in _notesContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        _spawnOptions.Clear();
+        
+        _notes = NotesManager.Instance.GetNotes();
+
+        foreach (NoteData note in _notes)
+        {
+            GameObject optionObj = Instantiate(_notesOptionPrefab, _notesContainer);
+            
+            UISelectableOption option= optionObj.GetComponent<UISelectableOption>();
+            
+            NoteOptionUI optionUI = optionObj.GetComponent<NoteOptionUI>();
+
+            optionUI.SetTitle(note.noteTitle);
+            
+            _spawnOptions.Add(option);
+        }
+
+        if (_notes.Count > 0)
+        {
+            SelectNote(0);
+        }
+        else
+        {
+            ClearContent();
+        }
+    }
+
+    private void ClearContent()
+    {
+        _titleText.text = "";
+        _contentText.text = "";
+        _pageIndicatorText.text = "";
+    }
+
+    private void SelectNote(int index)
+    {
+        _currentNoteIndex = index;
+        
+        _currentPageIndex = 0;
+
+        UpdateVisuals();
+
+        UpdateContent();
+    }
+
+    private void UpdateVisuals()
+    {
+        for (int i = 0; i < _spawnOptions.Count; i++)
+        {
+            bool selected = i == _currentNoteIndex;
+            
+            _spawnOptions[i].SetSelected(selected);
+        }
+    }
+
+    private void UpdateContent()
+    {
+        if (_notes.Count == 0) return;
+        
+        NoteData note = _notes[_currentNoteIndex];
+        
+        _titleText.text = note.noteTitle;
+        
+        _contentText.text = note.pages[_currentPageIndex];
+        
+        _pageIndicatorText.text = (_currentPageIndex + 1) + " / " + note.pages.Length;
+    }
+
+    private void HandleNoteNavigation()
+    {
+        if (_notes == null || _notes.Count == 0) return;
+
+        if (_input.NavigateUpPressed)
+        {
+            _currentNoteIndex--;
+            
+            if (_currentNoteIndex < 0) 
+                _currentNoteIndex = _notes.Count - 1;
+            
+            SelectNote(_currentNoteIndex);
+        } else if (_input.NavigateDownPressed)
+        {
+            _currentNoteIndex++;
+            
+            if (_currentNoteIndex >= _notes.Count)
+                _currentNoteIndex = 0;
+            
+            SelectNote(_currentNoteIndex);
+        }
+    }
+
+    private void HandlePageNavigation()
+    {
+        if (_notes == null || _notes.Count == 0) return;
+        
+        NoteData note = _notes[_currentNoteIndex];
+
+        if (_input.NextPagePressed)
+        {
+            if (_currentPageIndex < note.pages.Length - 1)
+            {
+                _currentPageIndex++;
+            
+                UpdateContent();
+            }
+        } else if (_input.PreviousPagePressed)
+        {
+            if (_currentPageIndex > 0)
+            {
+                _currentPageIndex--;
+                
+                UpdateContent();
+            }
+        }
+    }
+
+    public void FocusLastCollectedNote()
+    {
+        NoteData lastNote = NotesManager.Instance.GetLastCollectedNote();
+
+        if (lastNote == null) return;
+        
+        int index = _notes.IndexOf(lastNote);
+
+        if (index >= 0)
+        {
+            SelectNote(index);
+        }
+    }
+}
+using System;
+using TMPro;
+using UnityEngine;
+
+public class NotesUIManager : MonoBehaviour
+{
+    public static NotesUIManager Instance;
+    
+    [SerializeField] private PlayerInputHandler _input;
+    
+    [Header("UI")]
+    [SerializeField] private GameObject _panel;
+    [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _contentText;
+    [SerializeField] private TextMeshProUGUI _pageIndicator;
+
+    private NoteData _currentNote;
+    private int _currentPage;
+
+    private bool _ignoreInputThisFrame;
+
+    private void Awake()
+    {
+        Instance = this;
+        _panel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+            return;
+
+        if (_ignoreInputThisFrame)
+        {
+            _ignoreInputThisFrame = false;
+            return;
+        }
+
+        HandleInput();
+    }
+
+    private void HandleInput()
+    {
+        if (_input == null) return;
+
+        if (_input.NextPagePressed)
+            NextPage();
+
+        if (_input.PreviousPagePressed)
+            PreviousPage();
+
+        if (_input.InteractPressed)
+            CloseNote();
+    }
+
+    public void OpenNote(NoteData note)
+    {
+        _currentNote = note;
+        _currentPage = 0;
+
+        UpdateUI();
+        
+        _panel.SetActive(true);
+        
+        GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
+        
+        _ignoreInputThisFrame = true;
+        
+        UI_Interaction.Instance.Hide();
+        InteractionUIManager.Instance.HideVisual();
+    }
+
+    private void CloseNote()
+    {
+        _panel.SetActive(false);
+        
+        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+    }
+
+    private void NextPage()
+    {
+        if (_currentPage < _currentNote.pages.Length - 1)
+        {
+            _currentPage++;
+            UpdateUI();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (_currentPage > 0)
+        {
+            _currentPage--;
+            UpdateUI();
+        }
+    }
+
+    private void UpdateUI()
+    {
+        _titleText.text = _currentNote.noteTitle;
+        _contentText.text = _currentNote.pages[_currentPage];
+        _pageIndicator.text = (_currentPage + 1) + "/" + _currentNote.pages.Length;
+    }
+}
+using System.Collections;
+using UnityEngine;
+
+public class PickupItem : MonoBehaviour, IInteractable
+{
+    [SerializeField] private InventoryItem _item;
+    [SerializeField] private int _quantity = 1;
+
+    public string GetInteractionText()
+    {
+        return "Pick up " + _item.itemName;
+    }
+
+    public void Interact()
+    {
+        PlayerInventory.Instance.AddItem(_item, _quantity);
+
+        UI_Interaction.Instance.ShowTextTimed(_item.itemName + " acquired", 1f);
+
+        Destroy(gameObject);
+    }
+}
+using System.Collections;
+using UnityEngine;
+
+public class PickupNote : MonoBehaviour, IInteractable
+{
+    [SerializeField] 
+    private NoteData _note;
+    
+    [SerializeField]
+    private TutorialData _readingTutorial;
+
+    public string GetInteractionText()
+    {
+        return _note.noteTitle;
+    }
+
+    public void Interact()
+    {
+        if (!GameStateManager.Instance.IsPlaying())
+            return;
+
+        NotesManager.Instance.AddNote(_note);
+
+        BookMenuManager.Instance.QueueContextPage(
+            BookMenuManager.BookPage.Notes
+        );
+
+        if (!TutorialManager.Instance.HasSeen(
+                _readingTutorial.tutorialId))
+        {
+            StartCoroutine(
+                FirstNoteSequence(_readingTutorial.tutorialId)
+            );
+        }
+        else
+        {
+            UI_Interaction.Instance.ShowTextTimed(
+                _note.noteTitle + " acquired\nPress TAB to read",
+                2f
+            );
+
+            Destroy(gameObject);
+        }
+    }
+    
+    private IEnumerator FirstNoteSequence(string tutorialId)
+    {
+        TutorialUIManager.Instance.ShowTutorial(
+            _readingTutorial
+        );
+
+        yield return new WaitUntil(() =>
+            GameStateManager.Instance.IsPlaying()
+        );
+
+        UI_Interaction.Instance.ShowTextTimed(
+            _note.noteTitle + " acquired\nPress TAB to read",
+            2f
+        );
+
+        Destroy(gameObject);
+    }
+}
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "TutorialData", menuName = "Game/TutorialData")]
+public class TutorialData : ScriptableObject
+{
+    public string tutorialId;
+
+    [Header("Book")] 
+    public string title;
+
+    [TextArea(3, 10)] 
+    public string description;
+    
+    [Header("Popup")]
+    [TextArea(2, 5)]
+    public string popupMessage;
+
+    public Sprite icon;
+}
+using TMPro;
+using UnityEngine;
+
+public class TutorialOptionUI : MonoBehaviour
+{
+    [SerializeField] private TextMeshProUGUI _optionText;
+
+    public void SetTitle(string title)
+    {
+        _optionText.text = title;
+    }
+}
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class TutorialPageController : MonoBehaviour
+{
+    [Header("List")]
+    [SerializeField] private Transform _tutorialsContainer;
+    [SerializeField] private GameObject _tutorialOptionPrefab;
+
+    [Header("Content")]
+    [SerializeField] private TextMeshProUGUI _titleText;
+    [SerializeField] private TextMeshProUGUI _contentText;
+
+    private PlayerInputHandler _input;
+
+    private List<TutorialData> _tutorials;
+
+    private readonly List<UISelectableOption> _spawnedOptions = new();
+
+    private int _currentTutorialIndex;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+
+        RefreshTutorials();
+    }
+
+    private void Update()
+    {
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+            return;
+
+        HandleTutorialNavigation();
+    }
+
+    public void RefreshTutorials()
+    {
+        foreach (Transform child in _tutorialsContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        _spawnedOptions.Clear();
+
+        _tutorials = TutorialManager.Instance.GetUnlockedTutorials();
+
+        foreach (TutorialData tutorial in _tutorials)
+        {
+            GameObject optionObj =
+                Instantiate(_tutorialOptionPrefab, _tutorialsContainer);
+
+            UISelectableOption option =
+                optionObj.GetComponent<UISelectableOption>();
+
+            TutorialOptionUI optionUI =
+                optionObj.GetComponent<TutorialOptionUI>();
+
+            optionUI.SetTitle(tutorial.title);
+
+            _spawnedOptions.Add(option);
+        }
+
+        if (_tutorials.Count > 0)
+        {
+            SelectTutorial(0);
+        }
+        else
+        {
+            ClearContent();
+        }
+    }
+
+    private void ClearContent()
+    {
+        _titleText.text = "";
+        _contentText.text = "";
+    }
+
+    private void SelectTutorial(int index)
+    {
+        _currentTutorialIndex = index;
+
+        UpdateVisuals();
+
+        UpdateContent();
+    }
+
+    private void UpdateVisuals()
+    {
+        for (int i = 0; i < _spawnedOptions.Count; i++)
+        {
+            bool selected = i == _currentTutorialIndex;
+
+            _spawnedOptions[i].SetSelected(selected);
+        }
+    }
+
+    private void UpdateContent()
+    {
+        if (_tutorials.Count == 0)
+            return;
+
+        TutorialData tutorial =
+            _tutorials[_currentTutorialIndex];
+
+        _titleText.text = tutorial.title;
+
+        _contentText.text = tutorial.description;
+    }
+
+    private void HandleTutorialNavigation()
+    {
+        if (_tutorials == null || _tutorials.Count == 0)
+            return;
+
+        if (_input.NavigateUpPressed)
+        {
+            _currentTutorialIndex--;
+
+            if (_currentTutorialIndex < 0)
+                _currentTutorialIndex = _tutorials.Count - 1;
+
+            SelectTutorial(_currentTutorialIndex);
+        }
+        else if (_input.NavigateDownPressed)
+        {
+            _currentTutorialIndex++;
+
+            if (_currentTutorialIndex >= _tutorials.Count)
+                _currentTutorialIndex = 0;
+
+            SelectTutorial(_currentTutorialIndex);
+        }
+    }
+}
+using System;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerHealth : MonoBehaviour
+{
+    [Header("Health")]
+    [SerializeField] private float _maxHealth = 100f;
+    
+    private PlayerInputHandler _input;
+    
+    private float _currentHealth;
+    
+    public float CurrentHealth => _currentHealth;
+    public float MaxHealth => _maxHealth;
+    
+    public event Action<float, float> OnHealthChanged;
+    public event Action OnDeath;
+    public event Action OnDamageTaken;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+        
+        _currentHealth = _maxHealth;
+
+        NotifyHealthChanged();
+    }
+
+    private void Update()
+    {
+        if (_input == null)
+            return;
+        
+        if (_input.IncreaseHealthPressed)
+            Heal(10);
+        
+        if (_input.DecreaseHealthPressed)
+            TakeDamage(10);
+    }
+
+    public void TakeDamage(float amount)
+    {
+        _currentHealth -= amount;
+        
+        if (_currentHealth < 0f)
+            _currentHealth = 0f;
+
+        NotifyHealthChanged();
+        OnDamageTaken?.Invoke();
+
+        if (_currentHealth <= 0f)
+            Die();
+    }
+
+    public void Heal(float amount)
+    {
+        _currentHealth += amount;
+        
+        if (_currentHealth > _maxHealth)
+            _currentHealth = _maxHealth;
+
+        NotifyHealthChanged();
+    }
+
+    private void NotifyHealthChanged()
+    {
+        OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+    }
+
+    private void Die()
+    {
+        Debug.Log("Player Dead");
+        
+        OnDeath?.Invoke();
+    }
+}
+using System;
+using UnityEngine;
+
+public class PlayerStamina : MonoBehaviour
+{
+    [Header("Stamina")]
+    [SerializeField] private float _maxstamina = 100f;
+
+    [SerializeField] private float _drainRate = 25f;
+    [SerializeField] private float _regenRate = 20f;
+    [SerializeField] private float _exhaustRecoveryPercent = 0.2f;
+
+    private float _currentStamina;
+    private bool _isExhausted;
+
+    private PlayerInputHandler _input;
+    
+    public float CurrentStamina => _currentStamina;
+    public float MaxStamina => _maxstamina;
+    public bool IsExhausted => _isExhausted;
+    
+    public bool CanSprint =>
+        !_isExhausted;
+    
+    
+    public event Action<float, float> OnStaminaChanged;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+        
+        _currentStamina = _maxstamina;
+
+        NotifyStaminaChanged();
+    }
+
+    private void Update()
+    {
+        HandleStamina();
+    }
+
+    private void HandleStamina()
+    {
+        bool isRunning =
+            _input.MoveInput != Vector2.zero &&
+            _input.SprintHeld &&
+            CanSprint;
+
+        if (isRunning)
+        {
+            DrainStamina(_drainRate * Time.deltaTime);
+        }
+        else
+        {
+            RegenerateStamina(_regenRate * Time.deltaTime);
+        }
+    }
+
+    public void DrainStamina(float amount)
+    {
+        _currentStamina -= amount;
+        
+        if (_currentStamina <= 0)
+        {
+            _currentStamina = 0;
+            _isExhausted = true;
+        }
+
+        NotifyStaminaChanged();
+    }
+
+    public void RegenerateStamina(float amount)
+    {
+        _currentStamina += amount;
+        
+        if (_currentStamina > _maxstamina)
+            _currentStamina = _maxstamina;
+
+        if (_isExhausted)
+        {
+            float recoveryThreshold =
+                _maxstamina * _exhaustRecoveryPercent;
+
+            if (_currentStamina >= recoveryThreshold)
+            {
+                _isExhausted = false;
+            }
+        }
+        
+        NotifyStaminaChanged();
+    }
+
+    private void NotifyStaminaChanged()
+    {
+        OnStaminaChanged?.Invoke(_currentStamina, _maxstamina);
+    }
+}
+using UnityEngine;
+
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerInputHandler))]
+public class PlayerController : MonoBehaviour
+{
+    private Rigidbody2D _rb;
+    private PlayerInputHandler _input;
+    private PlayerStateMachine _stateMachine;
+
+    [Header("Movement")]
+    public float maxSpeed = 6f;
+    public float acceleration = 20f;
+    public float deceleration = 25f;
+    public float sprintMultiplier = 1.5f;
+
+    [Header("Jump")]
+    public float jumpForce = 12f;
+    public float gravityMultiplier = 2f;
+
+    [Header("Ground Check")]
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
+
+    [Header("Jump Assist")]
+    public float coyoteTime = 0.1f;
+    private float _coyoteTimeCounter;
+
+    [Header("Jump Buffer")]
+    public float jumpBufferTime = 0.1f;
+    private float _jumpBufferCounter;
+
+    [Header("Extra Jumps")]
+    public int maxExtraJumps = 1;
+    private int _extraJumpsRemaining;
+
+    [Header("Wall Check")]
+    public Transform wallCheckLeft;
+    public Transform wallCheckRight;
+    public float wallCheckDistance = 0.5f;
+
+    private bool _isTouchingWall;
+    private bool _wasTouchingWall;
+    private int _wallDir;
+
+    [Header("Wall Slide")]
+    public float wallSlideSpeed = 2f;
+    private bool _isWallSliding;
+
+    [Header("Wall Jump")]
+    public float wallJumpForceX = 8f;
+    public float wallJumpForceY = 12f;
+    public float wallJumpLockTime = 0.2f;
+
+    private bool _isWallJumping;
+    private float _wallJumpLockCounter;
+
+    [Header("Dash")]
+    public float dashForce = 15f;
+    public float dashDuration = 0.2f;
+    public float dashStaminaCost = 25f;
+
+    private bool _isDashing;
+    private float _dashTimeCounter;
+
+    private bool _isGrounded;
+    private bool _wasGrounded;
+    private bool _hasJumped;
+    
+    private PlayerStamina _playerStamina;
+    
+    [Header("Attack")]
+    private bool _isAttacking;
+
+    [SerializeField]
+    private Animator animator;
+
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+        _input = GetComponent<PlayerInputHandler>();
+        _stateMachine = new PlayerStateMachine();
+        _playerStamina = GetComponent<PlayerStamina>();
+    }
+
+    private void Update()
+    {
+        if (!GameStateManager.Instance.IsPlaying()) return;
+        
+        CheckGround();
+        CheckWall();
+        UpdateState();
+
+        UpdateJumpBuffer();
+        HandleWallJumpLock();
+        HandleDash();
+        HandleJump();
+
+        TryDash();
+
+        HandleAttack();
+    }
+
+    private void FixedUpdate()
+    {
+        if (!GameStateManager.Instance.IsPlaying())
+        {
+            _rb.linearVelocity = Vector2.zero;
+            return;
+        }
+        
+        HandleMovement();
+        ApplyBetterGravity();
+        HandleWallSlide();
+    }
+
+    // --------------------
+    // STATE MACHINE
+    // --------------------
+    private void UpdateState()
+    {
+        if (_isDashing)
+        {
+            _stateMachine.ChangeState(PlayerState.Dashing);
+        }
+        else if (_isWallSliding)
+        {
+            _stateMachine.ChangeState(PlayerState.WallSliding);
+        }
+        else if (!_isGrounded)
+        {
+            _stateMachine.ChangeState(PlayerState.Airborne);
+        }
+        else if (_isAttacking)
+        {
+            _stateMachine.ChangeState(PlayerState.Attacking);
+        }
+        else
+        {
+            _stateMachine.ChangeState(PlayerState.Grounded);
+        }
+    }
+
+    // --------------------
+    // MOVEMENT
+    // --------------------
+    private void HandleMovement()
+    {
+        if (_isWallJumping || _isDashing) return;
+
+        float currentSpeed = maxSpeed;
+
+        if (_input.SprintHeld &&
+            _input.MoveInput.x != 0 &&
+            _playerStamina.CanSprint)
+        {
+            currentSpeed *= sprintMultiplier;
+        }
+
+        float targetSpeed = _input.MoveInput.x * currentSpeed;
+        
+        float speedDiff = targetSpeed - _rb.linearVelocityX;
+
+        float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
+
+        float movement = speedDiff * accelRate;
+
+        _rb.linearVelocity = new Vector2(
+            _rb.linearVelocityX + movement * Time.fixedDeltaTime,
+            _rb.linearVelocityY
+        );
+        
+        if (_input.MoveInput.x != 0)
+        {
+            animator.SetInteger("AnimState", 1);
+            if (_input.MoveInput.x < 0)
+                transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            else
+                transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+        else
+        {
+            animator.SetInteger("AnimState", 0);
+        }
+    }
+
+    // --------------------
+    // DASH
+    // --------------------
+    private void TryDash()
+    {
+        if (_input.DashPressed && CanDash())
+        {
+            StartDash();
+        }
+    }
+    
+    private bool CanDash()
+    {
+        if (_playerStamina == null)
+            return false;
+
+        if (_playerStamina.CurrentStamina < dashStaminaCost)
+            return false;
+
+        return true;
+    }
+
+    private void StartDash()
+    {
+        _isDashing = true;
+        _dashTimeCounter = dashDuration;
+
+        float direction = Mathf.Sign(_input.MoveInput.x);
+        if (direction == 0) direction = transform.localScale.x;
+
+        _playerStamina.DrainStamina(dashStaminaCost);
+        _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
+        animator.SetTrigger("Roll");
+    }
+
+    private void HandleDash()
+    {
+        if (_isDashing)
+        {
+            _dashTimeCounter -= Time.deltaTime;
+
+            if (_dashTimeCounter <= 0f)
+            {
+                _isDashing = false;
+            }
+        }
+    }
+    
+    // --------------------
+    // ATTACK
+    // --------------------
+    private void HandleAttack()
+    {
+        if (_input.AttackPressed && !_isAttacking)
+        {
+            _isAttacking = true;
+            animator.SetTrigger("Attack1");
+        }
+    }
+    
+    public void EndAttack()
+    {
+        _isAttacking = false;
+    }
+
+    // --------------------
+    // JUMP
+    // --------------------
+    private void HandleJump()
+    {
+        if (_stateMachine.CurrentState == PlayerState.Dashing) return;
+
+        // WALL JUMP
+        if (_jumpBufferCounter > 0f && _isWallSliding)
+        {
+            _rb.linearVelocity = new Vector2(
+                -_wallDir * wallJumpForceX,
+                wallJumpForceY
+            );
+
+            _isWallJumping = true;
+            _wallJumpLockCounter = wallJumpLockTime;
+
+            _jumpBufferCounter = 0f;
+            return;
+        }
+
+        // SALTO BASE
+        if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f && !_hasJumped)
+        {
+            Jump();
+            _hasJumped = true;
+            _coyoteTimeCounter = 0f;
+        }
+        // DOUBLE JUMP
+        else if (_jumpBufferCounter > 0f && _extraJumpsRemaining > 0 && !_isGrounded)
+        {
+            Jump();
+            _extraJumpsRemaining--;
+        }
+
+        // CORTE
+        if (!_input.JumpHeld && _rb.linearVelocityY > 0)
+        {
+            _rb.linearVelocity = new Vector2(
+                _rb.linearVelocityX,
+                _rb.linearVelocityY * 0.5f
+            );
+            
+            animator.SetFloat("AirSpeedY", -1f);
+        }
+    }
+
+    private void Jump()
+    {
+        _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
+        _jumpBufferCounter = 0f;
+        
+        animator.SetTrigger("Jump");
+    }
+
+    // --------------------
+    // WALL SLIDE
+    // --------------------
+    private void HandleWallSlide()
+    {
+        float inputDir = _input.MoveInput.x;
+
+        bool pushingToWall = _isTouchingWall && inputDir == _wallDir;
+
+        if (pushingToWall && !_isGrounded && _rb.linearVelocityY < 0)
+        {
+            _isWallSliding = true;
+
+            _rb.linearVelocity = new Vector2(
+                _rb.linearVelocityX,
+                -wallSlideSpeed
+            );
+            
+            /*animator.SetBool("WallSlide", true);
+            animator.SetFloat("AirSpeedY", -1f);*/
+        }
+        else
+        {
+            _isWallSliding = false;
+            //animator.SetBool("WallSlide", false);
+        }
+    }
+
+    // --------------------
+    // WALL LOCK
+    // --------------------
+    private void HandleWallJumpLock()
+    {
+        if (_isWallJumping)
+        {
+            _wallJumpLockCounter -= Time.deltaTime;
+
+            if (_wallJumpLockCounter <= 0f)
+            {
+                _isWallJumping = false;
+            }
+        }
+    }
+
+    // --------------------
+    // WALL CHECK
+    // --------------------
+    private void CheckWall()
+    {
+        bool hitRight = Physics2D.Raycast(
+            wallCheckRight.position,
+            Vector2.right,
+            wallCheckDistance,
+            groundLayer
+        );
+
+        bool hitLeft = Physics2D.Raycast(
+            wallCheckLeft.position,
+            Vector2.left,
+            wallCheckDistance,
+            groundLayer
+        );
+
+        bool touchingWallNow = hitRight || hitLeft;
+
+        if (hitRight) _wallDir = 1;
+        else if (hitLeft) _wallDir = -1;
+        else _wallDir = 0;
+
+        if (touchingWallNow && !_wasTouchingWall && !_isGrounded)
+        {
+            _extraJumpsRemaining = maxExtraJumps;
+        }
+
+        _isTouchingWall = touchingWallNow;
+        _wasTouchingWall = touchingWallNow;
+    }
+
+    // --------------------
+    // BUFFER
+    // --------------------
+    private void UpdateJumpBuffer()
+    {
+        if (_input.JumpPressed)
+        {
+            _jumpBufferCounter = jumpBufferTime;
+        }
+        else
+        {
+            _jumpBufferCounter -= Time.deltaTime;
+        }
+    }
+
+    // --------------------
+    // GRAVITY
+    // --------------------
+    private void ApplyBetterGravity()
+    {
+        if (_rb.linearVelocityY < 0 && !_isDashing)
+        {
+            _rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
+                                  (gravityMultiplier - 1) * Time.fixedDeltaTime;
+        }
+    }
+
+    // --------------------
+    // GROUND
+    // --------------------
+    private void CheckGround()
+    {
+        bool groundedNow = Physics2D.OverlapCircle(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer
+        );
+
+        if (groundedNow && !_wasGrounded)
+        {
+            _extraJumpsRemaining = maxExtraJumps;
+            _hasJumped = false;
+        }
+
+        _isGrounded = groundedNow;
+
+        if (_isGrounded)
+        {
+            _coyoteTimeCounter = coyoteTime;
+            animator.SetBool("Grounded", true);
+            animator.SetFloat("AirSpeedY", 0f);
+        }
+        else
+        {
+            _coyoteTimeCounter -= Time.deltaTime;
+            animator.SetBool("Grounded", false);
+        }
+
+        _wasGrounded = _isGrounded;
+    }
+}
+using UnityEngine;
+
+public class PlayerLamp : MonoBehaviour
+{
+    [SerializeField] private Transform _lightTransform;
+    [SerializeField] private PlayerInputHandler _input;
+    
+    [Header("Light Settings")]
+    [SerializeField] private float _minScale = 15f;
+    [SerializeField] private float _maxScale = 30f;
+
+    private float _currentScale;
+    private bool _isLightOn = true;
+
+    private void Start()
+    {
+        _currentScale = _minScale;
+        UpdateLight();
+    }
+    
+    private void Update()
+    {
+        if (_input.ToggleLanternPressed)
+        {
+            ToggleLight();
+        }
+
+        // TEST (puedes quitar luego)
+        if (_input.InteractPressed)
+        {
+            IncreaseLight(1f);
+        }
+    }
+
+    private void ToggleLight()
+    {
+        _isLightOn = !_isLightOn;
+        _lightTransform.gameObject.SetActive(_isLightOn);
+    }
+
+    public void IncreaseLight(float amount)
+    {
+        _currentScale += amount;
+        _currentScale = Mathf.Clamp(_currentScale, _minScale, _maxScale);
+
+        UpdateLight();
+    }
+
+    private void UpdateLight()
+    {
+        _lightTransform.localScale = new Vector3(_currentScale, _currentScale, 1f);
+    }
+
+    // 🔥 EXPONER DATOS PARA OTROS SISTEMAS
+
+    public bool IsLightOn()
+    {
+        return _isLightOn;
+    }
+
+    public float GetLightRadius()
+    {
+        return _currentScale;
+    }
+
+    public Vector3 GetLightPosition()
+    {
+        return _lightTransform.position;
+    }
+
+    // 🔵 DEBUG VISUAL
+
+    private void OnDrawGizmos()
+    {
+        if (_lightTransform == null) return;
+
+        Gizmos.color = Color.yellow;
+
+        // En editor, usa minScale si no ha iniciado
+        float radius = Application.isPlaying ? _currentScale : _minScale;
+
+        Gizmos.DrawWireSphere(_lightTransform.position, radius);
+    }
+}
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerInputHandler : MonoBehaviour
+{
+    private InputSystem_Actions _playerInputActions;
+
+    public Vector2 MoveInput { get; private set; }
+    public bool DashPressed { get; private set; }
+    public bool SprintHeld { get; private set; }
+    public bool AttackPressed { get; private set; }
+    public bool JumpPressed { get; private set; }
+    public bool JumpHeld { get; private set; }
+    public bool InteractPressed { get; private set; }
+    public bool ToggleLanternPressed { get; private set; }
+
+    //UI
+    public bool ToggleMenuPressed { get; private set; }
+    public bool NextPagePressed { get; private set; }
+    public bool PreviousPagePressed { get; private set; }
+    public bool NextBookPagePressed { get; private set; }
+    public bool PreviousBookPagePressed { get; private set; }
+    public bool NavigateUpPressed { get; private set; }
+    public bool NavigateDownPressed { get; private set; }
+    public bool ConfirmPressed { get; private set; }
+
+    public bool OpenItemPressed { get; private set; }
+
+    public bool IncreaseHealthPressed { get; private set; }
+    public bool DecreaseHealthPressed { get; private set; }
+    public bool RestoreSolarEnergyPressed { get; private set; }
+    public bool ConsumeSolarEnergyPressed { get; private set; }
+    public bool LockSlotPressed { get; private set; }
+    public bool UnlockSlotPressed { get; private set; }
+
+    private void Awake()
+    {
+        _playerInputActions = new InputSystem_Actions();
+    }
+
+    private void OnEnable()
+    {
+        _playerInputActions.Player.Enable();
+
+        _playerInputActions.Player.Move.performed += ctx => MoveInput = ctx.ReadValue<Vector2>();
+        _playerInputActions.Player.Move.canceled += ctx => MoveInput = Vector2.zero;
+
+        _playerInputActions.Player.Jump.performed += ctx =>
+        {
+            JumpPressed = true;
+            JumpHeld = true;
+        };
+        _playerInputActions.Player.Jump.canceled += ctx => JumpHeld = false;
+
+        _playerInputActions.Player.Dash.performed += ctx => DashPressed = true;
+        
+        _playerInputActions.Player.Sprint.performed += ctx =>
+        {
+            SprintHeld = true;
+        };
+
+        _playerInputActions.Player.Sprint.canceled += ctx =>
+        {
+            SprintHeld = false;
+        };
+        _playerInputActions.Player.Attack.performed += ctx => AttackPressed = true;
+
+        _playerInputActions.Player.Interact.performed += ctx => InteractPressed = true;
+
+        _playerInputActions.Player.ToggleLantern.performed += ctx => ToggleLanternPressed = true;
+
+        _playerInputActions.Player.ToggleMenu.performed += ctx => ToggleMenuPressed = true;
+
+        _playerInputActions.Player.NextPage.performed += ctx => NextPagePressed = true;
+        _playerInputActions.Player.PreviousPage.performed += ctx => PreviousPagePressed = true;
+
+        _playerInputActions.Player.NextBookPage.performed += ctx => NextBookPagePressed = true;
+        _playerInputActions.Player.PreviousBookPage.performed += ctx => PreviousBookPagePressed = true;
+
+        _playerInputActions.Player.NavigateUp.performed += ctx => NavigateUpPressed = true;
+        _playerInputActions.Player.NavigateDown.performed += ctx => NavigateDownPressed = true;
+
+        _playerInputActions.Player.Confirm.performed += ctx => ConfirmPressed = true;
+
+        _playerInputActions.Player.OpenItem.performed += ctx => OpenItemPressed = true;
+
+        _playerInputActions.Player.IncreaseHealth.performed += ctx => IncreaseHealthPressed = true;
+        _playerInputActions.Player.DecreaseHealth.performed += ctx => DecreaseHealthPressed = true;
+        
+        _playerInputActions.Player.RestoreSolarEnergy.performed += ctx => RestoreSolarEnergyPressed = true;
+        _playerInputActions.Player.ConsumeSolarEnergy.performed += ctx => ConsumeSolarEnergyPressed = true;
+        
+        _playerInputActions.Player.LockSlot.performed += ctx => LockSlotPressed = true;
+        _playerInputActions.Player.UnlockSlot.performed += ctx => UnlockSlotPressed = true;
+    }
+
+    private void OnDisable()
+    {
+        _playerInputActions.Player.Disable();
+    }
+
+    private void LateUpdate()
+    {
+        // Reset the input booleans
+        JumpPressed = false;
+        DashPressed = false;
+        AttackPressed = false;
+        InteractPressed = false;
+        ToggleLanternPressed = false;
+        ToggleMenuPressed = false;
+        NextPagePressed = false;
+        PreviousPagePressed = false;
+
+        NextBookPagePressed = false;
+        PreviousBookPagePressed = false;
+        NavigateUpPressed = false;
+        NavigateDownPressed = false;
+        ConfirmPressed = false;
+
+        OpenItemPressed = false;
+        
+        IncreaseHealthPressed = false;
+        DecreaseHealthPressed = false;
+        
+        RestoreSolarEnergyPressed = false;
+        ConsumeSolarEnergyPressed = false;
+        
+        LockSlotPressed = false;
+        UnlockSlotPressed = false;
+    }
+
+    public bool ConsumeToggleMenu()
+    {
+        if (!ToggleMenuPressed) return false;
+
+        ToggleMenuPressed = false;
+        return true;
+    }
+}
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerInventory : MonoBehaviour
+{
+    public static PlayerInventory Instance;
+
+    private List<InventoryEntry> _items = new();
+
+    private void Awake() {
+        Instance = this;
+    }
+
+    public void AddItem(InventoryItem item, int quantity = 1)
+    {
+        InventoryEntry entry = GetEntry(item);
+
+        if (entry != null)
+        {
+            entry.Quantity += quantity;
+        }
+        else
+        {
+            bool identified = item.category != InventoryCategory.Consumable;
+            
+            _items.Add(new InventoryEntry(item, quantity, identified));
+        }
+
+        Debug.Log($"Item collected: {item.itemName} x{quantity}");
+    }
+
+    public bool RemoveItem(InventoryItem item, int quantity = 1)
+    {
+        InventoryEntry entry = GetEntry(item);
+
+        if (entry == null)
+            return false;
+
+        if (entry.Quantity < quantity)
+            return false;
+        
+        entry.Quantity -= quantity;
+        
+        if (entry.Quantity <= 0)
+            _items.Remove(entry);
+
+        return true;
+    }
+
+    public bool HasItem(InventoryItem item)
+    {
+        return GetEntry(item) != null;
+    }
+
+    public InventoryEntry GetEntry(InventoryItem item)
+    {
+        return _items.Find(entry => entry.Item == item);
+    }
+
+    public List<InventoryEntry> GetItems()
+    {
+        return _items;
+    }
+
+    public List<InventoryEntry> GetItemsByCategory(InventoryCategory category)
+    {
+        if (category == InventoryCategory.All)
+            return new List<InventoryEntry>(_items);
+        
+        return _items.FindAll(entry => entry.Item.category == category);
+    }
+
+    public void IdentifyItem(InventoryItem item)
+    {
+        InventoryEntry entry = GetEntry(item);
+        
+        if (entry != null)
+            entry.Identified = true;
+    }
+}
+using UnityEngine;
+
+public enum PlayerState
+{
+    Grounded,
+    Airborne,
+    WallSliding,
+    Dashing,
+    Attacking
+}
+
+public class PlayerStateMachine
+{
+    public PlayerState CurrentState { get; private set; }
+
+    public void ChangeState(PlayerState newState)
+    {
+        CurrentState = newState;
+    }
+}
+using UnityEngine;
+
+public class BookMenuManager : MonoBehaviour
+{
+    [Header("References")]
+    [SerializeField] private GameObject _bookRoot;
+    [SerializeField] private GameObject[] _pages;
+    [SerializeField] private NotesPageController _notesPageController;
+    [SerializeField] private TutorialPageController _tutorialPageController;
+    [SerializeField] private InventoryPageController _inventoryPageController;
+
+    private PlayerInputHandler _input;
+
+    private int _currentPage;
+    private bool _justOpenedBook;
+
+    public static BookMenuManager Instance;
+
+    // Context Page
+    private bool _hasPendingContextPage;
+    private BookPage _pendingPage;
+    private float _contextPageTimer;
+
+    public enum BookPage
+    {
+        Notes,
+        Tutorials,
+        Inventory,
+        Settings
+    }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+
+        _currentPage = 0;
+
+        ShowPage(_currentPage);
+
+        _bookRoot.SetActive(false);
+    }
+
+    private void Update()
+    {
+        UpdateContextPageTimer();
+
+        HandleBookToggle();
+
+        HandleContextPageOpen();
+
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+            return;
+
+        HandlePageNavigation();
+    }
+
+    private void HandleBookToggle()
+    {
+        if (!_input.ConsumeToggleMenu())
+            return;
+
+        if (GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu)
+        {
+            CloseBook();
+        }
+        else if (GameStateManager.Instance.IsPlaying())
+        {
+            OpenBookAtPage(BookPage.Notes);
+        }
+    }
+
+    private void HandleContextPageOpen()
+    {
+        if (!_input.OpenItemPressed)
+            return;
+
+        if (!_hasPendingContextPage)
+            return;
+
+        _currentPage = GetPageIndex(_pendingPage);
+
+        OpenBook();
+
+        _hasPendingContextPage = false;
+    }
+
+    private void UpdateContextPageTimer()
+    {
+        if (!_hasPendingContextPage)
+            return;
+
+        _contextPageTimer -= Time.deltaTime;
+
+        if (_contextPageTimer <= 0f)
+        {
+            _hasPendingContextPage = false;
+        }
+    }
+
+    private void HandlePageNavigation()
+    {
+        if (_justOpenedBook)
+        {
+            _justOpenedBook = false;
+            return;
+        }
+
+        if (_input.NextBookPagePressed)
+        {
+            NextPage();
+        }
+        else if (_input.PreviousBookPagePressed)
+        {
+            PreviousPage();
+        }
+    }
+
+    private void OpenBook()
+    {
+        GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
+
+        _bookRoot.SetActive(true);
+
+        ShowPage(_currentPage);
+
+        if (_currentPage == (int)BookPage.Notes)
+        {
+            _notesPageController.RefreshNotes();
+            _notesPageController.FocusLastCollectedNote();
+        }
+        else if (_currentPage == (int)BookPage.Tutorials)
+        {
+            _tutorialPageController.RefreshTutorials();
+        }
+
+        _justOpenedBook = true;
+
+        UI_Interaction.Instance.Hide();
+        InteractionUIManager.Instance.HideVisual();
+    }
+
+    private void CloseBook()
+    {
+        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+
+        _bookRoot.SetActive(false);
+    }
+
+    private void NextPage()
+    {
+        _currentPage++;
+
+        if (_currentPage >= _pages.Length)
+            _currentPage = 0;
+
+        ShowPage(_currentPage);
+    }
+
+    private void PreviousPage()
+    {
+        _currentPage--;
+
+        if (_currentPage < 0)
+            _currentPage = _pages.Length - 1;
+
+        ShowPage(_currentPage);
+    }
+
+    private void ShowPage(int index)
+    {
+        for (int i = 0; i < _pages.Length; i++)
+        {
+            _pages[i].SetActive(i == index);
+        }
+
+        switch ((BookPage)index)
+        {
+            case BookPage.Notes:
+                _notesPageController.RefreshNotes();
+                break;
+            
+            case BookPage.Inventory:
+                _inventoryPageController.RefreshInventory();
+                break;
+
+            case BookPage.Tutorials:
+                _tutorialPageController.RefreshTutorials();
+                break;
+        }
+    }
+
+    public void OpenBookAtPage(BookPage page)
+    {
+        _currentPage = GetPageIndex(page);
+
+        OpenBook();
+    }
+
+    private int GetPageIndex(BookPage page)
+    {
+        switch (page)
+        {
+            case BookPage.Notes:
+                return 0;
+
+            case BookPage.Tutorials:
+                return 1;
+            
+            case BookPage.Inventory:
+                return 2;
+
+            case BookPage.Settings:
+                return 3;
+        }
+
+        return 0;
+    }
+
+    public void QueueContextPage(BookPage page)
+    {
+        _hasPendingContextPage = true;
+
+        _pendingPage = page;
+
+        _contextPageTimer = 2f;
+    }
+}
+using UnityEngine;
+
+public class SettingsPageController : MonoBehaviour
+{
+    [Header("Options")]
+    [SerializeField] private UISelectableOption[] _options;
+
+    private PlayerInputHandler _input;
+
+    private int _currentOption;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+
+        UpdateVisuals();
+    }
+
+    private void Update()
+    {
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+            return;
+
+        HandleNavigation();
+        HandleConfirm();
+    }
+
+    private void HandleNavigation()
+    {
+        if (_input.NavigateUpPressed)
+        {
+            NavigateUp();
+        }
+        else if (_input.NavigateDownPressed)
+        {
+            NavigateDown();
+        }
+    }
+
+    private void NavigateUp()
+    {
+        _currentOption--;
+        
+        if (_currentOption < 0)
+            _currentOption = _options.Length - 1;
+
+        UpdateVisuals();
+    }
+
+    private void NavigateDown()
+    {
+        _currentOption++;
+        
+        if (_currentOption >= _options.Length)
+            _currentOption = 0;
+
+        UpdateVisuals();
+    }
+
+    private void UpdateVisuals()
+    {
+        for (int i = 0; i < _options.Length; i++)
+        {
+            bool isSelected = (i == _currentOption);
+            
+            _options[i].SetSelected(isSelected);
+        }
+    }
+
+    private void HandleConfirm()
+    {
+        if (!_input.ConfirmPressed) return;
+
+        switch (_currentOption)
+        {
+            case 0:
+                ResumeGame();
+                break;
+            case 1:
+                ReturnToCheckpoint();
+                break;
+            case 2:
+                ExitGame();
+                break;
+        }
+    }
+
+    private void ResumeGame()
+    {
+        FindFirstObjectByType<BookMenuManager>().SendMessage("CloseBook");
+    }
+
+    private void ReturnToCheckpoint()
+    {
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        
+        CheckpointManager.Instance.ReturnToCheckpoint(player);
+        
+        FindFirstObjectByType<BookMenuManager>().SendMessage("CloseBook");
+    }
+
+    private void ExitGame()
+    {
+        Debug.Log("Exit Game");
+    }
+}
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class InventoryPageController : MonoBehaviour
+{
+    [Header("Categories")] 
+    [SerializeField] private Transform _categoryContainer;
+    [SerializeField] private GameObject _categoryOptionPrefab;
+
+    private readonly List<UISelectableOption> _categoryOptions = new();
+
+    private readonly InventoryCategory[] _categories =
+    {
+        InventoryCategory.All,
+        InventoryCategory.Consumable,
+        InventoryCategory.Equipment,
+        InventoryCategory.KeyItem,
+        InventoryCategory.Material
+    };
+
+    private int _currentCategoryIndex;
+    private void Start()
+    {
+        RefreshInventory();
+    }
+
+    public void RefreshInventory()
+    {
+        CreateCategories();
+    }
+
+    private void CreateCategories()
+    {
+        foreach (Transform child in _categoryContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        _categoryOptions.Clear();
+
+        foreach (InventoryCategory category in _categories)
+        {
+            GameObject optionObj = Instantiate(_categoryOptionPrefab, _categoryContainer);
+
+            InventoryCategoryOptionUI optionUI = optionObj.GetComponent<InventoryCategoryOptionUI>();
+            
+            UISelectableOption selectable = optionObj.GetComponent<UISelectableOption>();
+            
+            optionUI.SetTitle(GetCategoryName(category));
+            
+            _categoryOptions.Add(selectable);
+        }
+
+        SelectCategory(0);
+    }
+
+    private void SelectCategory(int index)
+    {
+        _currentCategoryIndex = index;
+
+        UpdateCategoryVisuals();
+    }
+
+    private void UpdateCategoryVisuals()
+    {
+        for (int i = 0; i < _categoryOptions.Count; i++)
+        {
+            bool selected = i == _currentCategoryIndex;
+            
+            _categoryOptions[i].SetSelected(selected);
+        }
+    }
+
+    private string GetCategoryName(InventoryCategory category)
+    {
+        switch (category)
+        {
+            case InventoryCategory.All:
+                return "All";
+            case InventoryCategory.Consumable:
+                return "Consumables";
+
+            case InventoryCategory.Equipment:
+                return "Equipment";
+
+            case InventoryCategory.KeyItem:
+                return "Key Items";
+
+            case InventoryCategory.Material:
+                return "Materials";
+        }
+
+        return "";
+    }
+}
+using System;
+using UnityEngine;
+
+public abstract class BaseHUDModule : MonoBehaviour
+{
+    [SerializeField] protected CanvasGroup _canvasGroup;
+
+    protected virtual void Awake()
+    {
+        if (_canvasGroup == null)
+            _canvasGroup = GetComponent<CanvasGroup>();
+    }
+
+    public virtual void Show()
+    {
+        gameObject.SetActive(true);
+        
+        _canvasGroup.alpha = 1;
+        _canvasGroup.interactable = true;
+        _canvasGroup.blocksRaycasts = true;
+    }
+
+    public virtual void Hide()
+    {
+        gameObject.SetActive(false);
+        
+        _canvasGroup.alpha = 0;
+        _canvasGroup.interactable = false;
+        _canvasGroup.blocksRaycasts = false;
+    }
+
+    public virtual void SetOpacity(float opacity)
+    {
+        _canvasGroup.alpha = opacity;
+    }
+}
+using System;
+using UnityEngine;
+
+public class UIManager : MonoBehaviour
+{
+    public static UIManager Instance;
+
+    [Header("HUD")]
+    [SerializeField] private LifeHUDController _lifeHUD;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
+        Instance = this;
+    }
+    
+    public LifeHUDController LifeHUD => _lifeHUD;
+}
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class LifeHUDController : BaseHUDModule
+{
+    [Header("References")]
+    [SerializeField] private Image _lifeBarFill;
+    [SerializeField] private Image _damageFlash;
+    
+    [SerializeField] private float smoothSpeed = 10f;
+
+    private float _targetFill;
+
+    [Header("Damage Flash")] 
+    [SerializeField] private float _flashFadeSpeed = 5f;
+    [SerializeField] private float _flashAlpha = 0.7f;
+    
+    private PlayerHealth _playerHealth;
+    
+    private bool _isFlashing;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        
+        _playerHealth = FindFirstObjectByType<PlayerHealth>();
+    }
+    
+    private void Start()
+    {
+        if (_damageFlash != null)
+        {
+            Color color = _damageFlash.color;
+            color.a = 0;
+            _damageFlash.color = color;
+        }
+        
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnHealthChanged += UpdateLife;
+            _playerHealth.OnDamageTaken += ShowDamageFlash;
+            
+            UpdateLife(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
+        }
+    }
+
+    private void Update()
+    {
+        HandleDamageFlashFade();
+        
+        _lifeBarFill.fillAmount = Mathf.Lerp(
+            _lifeBarFill.fillAmount,
+            _targetFill,
+            smoothSpeed * Time.deltaTime
+        );
+    }
+
+    private void OnDestroy()
+    {
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnHealthChanged -= UpdateLife;
+            _playerHealth.OnDamageTaken -= ShowDamageFlash;
+        }
+    }
+
+    public void UpdateLife(float currentLife, float maxLife)
+    {
+        _targetFill = currentLife / maxLife;
+    }
+
+    private void ShowDamageFlash()
+    {
+        if (_damageFlash == null)
+            return;
+        
+        Color color = _damageFlash.color;
+        color.a = _flashAlpha;
+        
+        _damageFlash.color = color;
+        
+        _isFlashing = true;
+    }
+
+    private void HandleDamageFlashFade()
+    {
+        if (!_isFlashing || _damageFlash == null)
+            return;
+        
+        Color color = _damageFlash.color;
+
+        color.a = Mathf.Lerp(color.a, 0f, _flashFadeSpeed * Time.deltaTime);
+        
+        _damageFlash.color = color;
+
+        if (color.a <= 0.01f)
+        {
+            color.a = 0f;
+            _damageFlash.color = color;
+            
+            _isFlashing = false;
+        }
+    }
+}
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class QuickSlotHUDController : MonoBehaviour
+{
+    [SerializeField] private QuickSlotUI[] _slots;
+
+    [SerializeField] private int _unlockedSlots = 1;
+
+    private PlayerInputHandler _input;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+        RefreshSlots();
+    }
+
+    private void Update()
+    {
+        HandleDebugInput();
+    }
+
+    private void HandleDebugInput()
+    {
+        if (_input.UnlockSlotPressed)
+        {
+            _unlockedSlots++;
+            
+            _unlockedSlots = Mathf.Clamp(
+                _unlockedSlots,
+                1,
+                _slots.Length
+            );
+
+            RefreshSlots();
+        }
+        
+        if (_input.LockSlotPressed)
+        {
+            _unlockedSlots--;
+            
+            _unlockedSlots = Mathf.Clamp(
+                _unlockedSlots,
+                1,
+                _slots.Length
+            );
+
+            RefreshSlots();
+        }
+    }
+
+    private void RefreshSlots()
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            if (i < _unlockedSlots)
+            {
+                _slots[i].SetState(
+                    QuickSlotState.Unlocked
+                );
+            }
+            else
+            {
+                _slots[i].SetState(
+                    QuickSlotState.Locked
+                );
+            }
+        }
+    }
+}
+public enum QuickSlotState
+{
+    Locked,
+    Unlocked,
+    Equipped
+}
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class QuickSlotUI : MonoBehaviour
+{
+    [Header("References")] 
+    [SerializeField] private Image _itemIcon;
+    [SerializeField] private Image _lockIcon;
+    [SerializeField] private TextMeshProUGUI _keyLabel;
+
+    public void Setkey(string key)
+    {
+        _keyLabel.text = key;
+    }
+
+    public void SetState(QuickSlotState state)
+    {
+        switch (state)
+        {
+            case QuickSlotState.Locked:
+                _lockIcon.gameObject.SetActive(true);
+                _itemIcon.gameObject.SetActive(false);
+
+                break;
+            case QuickSlotState.Unlocked:
+                _lockIcon.gameObject.SetActive(false);
+                _itemIcon.gameObject.SetActive(true);
+
+                break;
+            case QuickSlotState.Equipped:
+                _lockIcon.gameObject.SetActive(false);
+                _itemIcon.gameObject.SetActive(true);
+
+                break;
+        }
+    }
+}
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class SolarHUDController : MonoBehaviour
+{
+    [Header("Solar Fragments")]
+    [SerializeField] private Image[] _solarFragments;
+
+    [Header("Colors")]
+    [SerializeField] private Color _fullColor = Color.yellow;
+    [SerializeField] private Color _partialColor = new Color(1f, 0.5f, 0f);
+    [SerializeField] private Color _emptyColor = Color.grey;
+
+    [Header("Debug")]
+    [SerializeField] private float _currentSolarEnergy = 3.5f;
+
+    private PlayerInputHandler _input;
+
+    private const int MAX_FRAGMENTS = 6;
+
+    private void Start()
+    {
+        _input = FindFirstObjectByType<PlayerInputHandler>();
+        UpdateSolarHUD();
+    }
+
+    private void Update()
+    {
+        DebudControls();
+    }
+
+    private void DebudControls()
+    {
+        if (_input.ConsumeSolarEnergyPressed)
+        {
+            ConsumeSolarEnergy(0.5f);
+        }
+
+        if (_input.RestoreSolarEnergyPressed)
+        {
+            RestoreSolarEnergy(0.5f);
+        }
+    }
+
+    private void ConsumeSolarEnergy(float amount)
+    {
+        _currentSolarEnergy -= amount;
+        
+        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy, 0f, MAX_FRAGMENTS);
+
+        UpdateSolarHUD();
+    }
+
+    private void RestoreSolarEnergy(float amount)
+    {
+        _currentSolarEnergy += amount;
+        
+        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy, 0, MAX_FRAGMENTS);
+
+        UpdateSolarHUD();
+    }
+
+    private void UpdateSolarHUD()
+    {
+        for (int i = 0; i < _solarFragments.Length; i++)
+        {
+            float fragmentValue = _currentSolarEnergy - i;
+
+            if (fragmentValue >= 1)
+            {
+                _solarFragments[i].color = _fullColor;
+            }
+            else if (fragmentValue >= 0.5f)
+            {
+                _solarFragments[i].color = _partialColor;
+            }
+            else
+            {
+                _solarFragments[i].color = _emptyColor;
+            }
+        }
+    }
+}
+using System;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class StaminaHUDController : BaseHUDModule
+{
+    [SerializeField] private Image _staminaFill;
+
+    [SerializeField] private float smoothSpeed = 10f;
+
+    private float _targetFill;
+
+    private PlayerStamina _playerStamina;
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        _playerStamina = FindFirstObjectByType<PlayerStamina>();
+    }
+
+    private void Start()
+    {
+        if (_playerStamina != null)
+        {
+            _playerStamina.OnStaminaChanged += UpdateStamina;
+
+            UpdateStamina(_playerStamina.CurrentStamina, _playerStamina.MaxStamina);
+        }
+    }
+
+    private void Update()
+    {
+        _staminaFill.fillAmount = Mathf.Lerp(
+            _staminaFill.fillAmount,
+            _targetFill,
+            smoothSpeed * Time.deltaTime
+        );
+    }
+
+    private void OnDestroy()
+    {
+        if (_playerStamina != null)
+        {
+            _playerStamina.OnStaminaChanged -= UpdateStamina;
+        }
+    }
+
+    private void UpdateStamina(float current, float max)
+    {
+        _targetFill = current / max;
+    }
+}
+using TMPro;
+using UnityEngine;
+
+public class InteractionUIManager : MonoBehaviour
+{
+    public static InteractionUIManager Instance;
+
+    [Header("References")]
+    [SerializeField] private GameObject _panel;
+    [SerializeField] private TextMeshProUGUI _text;
+
+    [Header("Settings")]
+    [SerializeField] private Vector3 _offset = new Vector3(0, 1f, 0);
+
+    private Transform _currentTarget;
+
+    private void Awake() {
+        Instance = this;
+        Clear();
+    }
+
+    private void LateUpdate() {
+        if (_currentTarget == null) return;
+
+        if (!GameStateManager.Instance.IsPlaying())
+        {
+            _panel.SetActive(false);
+            return;
+        }
+        
+        if (!_panel.activeSelf)
+            _panel.SetActive(true);
+
+        transform.position = _currentTarget.position + _offset;
+    }
+
+    public void Show(Transform target, string message) {
+        _currentTarget = target;
+        _text.text = message;
+        _panel.SetActive(true);
+    }
+
+    public void HideVisual()
+    {
+        _panel.SetActive(false);
+    }
+
+    public void Clear()
+    {
+        _currentTarget = null;
+        _panel.SetActive(false);
+    }
+}
+using System.Collections;
+using TMPro;
+using UnityEngine;
+
+public class UI_Interaction : MonoBehaviour
+{
+    public static UI_Interaction Instance;
+
+    [Header("References")]
+    [SerializeField] private CanvasGroup _canvasGroup;
+    [SerializeField] private TextMeshProUGUI _text;
+
+    [Header("Animation")]
+    [SerializeField] private float _fadeDuration = 0.2f;
+
+    private Coroutine _currentRoutine;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        HideImmediate();
+    }
+
+    public void ShowText(string message)
+    {
+        if (!GameStateManager.Instance.IsPlaying())
+            return;
+
+        _text.text = message;
+
+        if (_currentRoutine != null)
+            StopCoroutine(_currentRoutine);
+
+        _currentRoutine = StartCoroutine(FadeCanvas(1f));
+    }
+
+    public void ShowTextTimed(string message, float duration)
+    {
+        if (_currentRoutine != null)
+            StopCoroutine(_currentRoutine);
+
+        _currentRoutine = StartCoroutine(ShowRoutine(message, duration));
+    }
+
+    private IEnumerator ShowRoutine(string message, float duration)
+    {
+        _text.text = message;
+
+        yield return FadeCanvas(1f);
+
+        yield return new WaitForSeconds(duration);
+
+        yield return FadeCanvas(0f);
+    }
+
+    private IEnumerator FadeCanvas(float targetAlpha)
+    {
+        float startAlpha = _canvasGroup.alpha;
+
+        float elapsed = 0f;
+
+        while (elapsed < _fadeDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            _canvasGroup.alpha = Mathf.Lerp(
+                startAlpha,
+                targetAlpha,
+                elapsed / _fadeDuration
+            );
+
+            yield return null;
+        }
+
+        _canvasGroup.alpha = targetAlpha;
+    }
+
+    public void Hide()
+    {
+        if (_currentRoutine != null)
+            StopCoroutine(_currentRoutine);
+
+        _currentRoutine = StartCoroutine(FadeCanvas(0f));
+    }
+
+    private void HideImmediate()
+    {
+        _canvasGroup.alpha = 0f;
+    }
+}
+using System;
+using UnityEngine;
+
+public class GameMenuController : MonoBehaviour
+{
+    [SerializeField] private PlayerInputHandler _input;
+
+    private void Update()
+    {
+        if (_input.ToggleMenuPressed)
+        {
+            HandleMenu();
+        }
+    }
+
+    private void HandleMenu()
+    {
+        var currentState = GameStateManager.Instance.GetState();
+
+        if (currentState == GameStateManager.GameState.Playing)
+        {
+            GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
+        }
+        else if (currentState == GameStateManager.GameState.BookMenu)
+        {
+            GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+        }
+    }
+}
+using UnityEngine;
+
+public class PauseMenuActions : MonoBehaviour
+{
+    [SerializeField] private GameObject _player;
+
+    public void ReturnToCheckpoint()
+    {
+        CheckpointManager.Instance.ReturnToCheckpoint(_player);
+        
+        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+    }
+}
+using System;
+using System.Collections;
+using TMPro;
+using UnityEngine;
+
+public class TutorialUIManager : MonoBehaviour
+{
+    public static TutorialUIManager Instance;
+
+    [SerializeField] private PlayerInputHandler _input;
+
+    [Header("UI")] [SerializeField] private GameObject _panel;
+    [SerializeField] private TextMeshProUGUI _text;
+
+    private Action _onCloseCallback;
+    private string _currentTutorialId;
+
+    private bool _canClose;
+
+    private void Awake()
+    {
+        Instance = this;
+        _panel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.Tutorial)
+            return;
+
+        if (_canClose && _input != null && _input.InteractPressed)
+        {
+            CloseTutorial();
+        }
+    }
+
+    public void ShowTutorial(string tutorialId, string message, Action onClose = null)
+    {
+        _currentTutorialId = tutorialId;
+        _onCloseCallback = onClose;
+
+        _text.text = message;
+        _panel.SetActive(true);
+
+        _canClose = false;
+
+        GameStateManager.Instance.SetState(GameStateManager.GameState.Tutorial);
+
+        UI_Interaction.Instance.Hide();
+        InteractionUIManager.Instance.HideVisual();
+
+        StartCoroutine(EnableCloseDelay());
+    }
+
+    public void ShowTutorial(
+        TutorialData tutorial,
+        Action onClose = null)
+    {
+        TutorialManager.Instance.UnlockTutorial(tutorial);
+
+        ShowTutorial(
+            tutorial.tutorialId,
+            tutorial.popupMessage,
+            onClose
+        );
+    }
+
+    private void CloseTutorial()
+    {
+        Debug.Log("CLOSING TUTORIAL");
+
+        _panel.SetActive(false);
+
+        TutorialManager.Instance.SetSeen(_currentTutorialId);
+
+        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+
+        _onCloseCallback?.Invoke();
+    }
+
+    private IEnumerator EnableCloseDelay()
+    {
+        yield return null;
+
+        _canClose = true;
+    }
+}
+using TMPro;
+using UnityEngine;
+
+public class UISelectableOption : MonoBehaviour
+{
+    [Header("References")]
+    [SerializeField] private TextMeshProUGUI _optionText;
+
+    [SerializeField] private Color _normalColor = Color.gray;
+    [SerializeField] private Color _selectedColor = Color.white;
+
+    [Header("Settings")] 
+    [SerializeField] private float _normalSize = 28f;
+    [SerializeField] private float _selectedSize = 34f;
+
+    public void SetSelected(bool selected)
+    {
+        _optionText.color = selected ? _selectedColor : _normalColor;
+        
+        _optionText.alpha = selected ? _selectedSize : _normalSize;
+    }
+}
