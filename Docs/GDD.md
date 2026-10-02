@@ -67,6 +67,7 @@ Establishes core loop definitions: win/loss conditions, level transition rules, 
 ### Game Flowchart
 The game flowchart provides a visual representation of how different game elements interact:
 * **Menu** -> **Story Synopsis** -> **Game Play Loop** -> **Player Control** -> **Game Over (Win/Loss)**
+* A detailed Mermaid version is maintained in [GAMEPLAY_FLOW.md](GAMEPLAY_FLOW.md).
 
 ---
 
