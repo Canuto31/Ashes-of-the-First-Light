@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public enum PlayerState
 {
     Grounded,
@@ -15,6 +13,9 @@ public class PlayerStateMachine
 
     public void ChangeState(PlayerState newState)
     {
+        if (CurrentState == newState)
+            return;
+
         CurrentState = newState;
     }
 }

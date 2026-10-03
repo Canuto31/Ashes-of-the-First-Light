@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +16,7 @@ public class SolarHUDController : MonoBehaviour
 
     private PlayerInputHandler _input;
 
-    private const int MAX_FRAGMENTS = 6;
+    private const int MaxFragments = 6;
 
     private void Start()
     {
@@ -27,11 +26,14 @@ public class SolarHUDController : MonoBehaviour
 
     private void Update()
     {
-        DebudControls();
+        HandleDebugControls();
     }
 
-    private void DebudControls()
+    private void HandleDebugControls()
     {
+        if (_input == null)
+            return;
+
         if (_input.ConsumeSolarEnergyPressed)
         {
             ConsumeSolarEnergy(0.5f);
@@ -45,18 +47,14 @@ public class SolarHUDController : MonoBehaviour
 
     private void ConsumeSolarEnergy(float amount)
     {
-        _currentSolarEnergy -= amount;
-        
-        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy, 0f, MAX_FRAGMENTS);
+        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy - amount, 0f, MaxFragments);
 
         UpdateSolarHUD();
     }
 
     private void RestoreSolarEnergy(float amount)
     {
-        _currentSolarEnergy += amount;
-        
-        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy, 0, MAX_FRAGMENTS);
+        _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy + amount, 0f, MaxFragments);
 
         UpdateSolarHUD();
     }

@@ -13,40 +13,34 @@ public class LightReactiveObject : MonoBehaviour
 
     private void Update()
     {
-        if (_playerLamp == null || _targets == null || _targets.Length == 0) return;
+        if (_playerLamp == null || _targets == null || _targets.Length == 0)
+            return;
 
-        bool shouldBeActive;
+        SetTargetsActive(ShouldTargetsBeActive());
+    }
 
-        // Si la luz está apagada → todo es oscuridad
+    private bool ShouldTargetsBeActive()
+    {
         if (!_playerLamp.IsLightOn())
-        {
-            shouldBeActive = !_activeInLight;
-        }
-        else
-        {
-            bool anyInLight = IsAnyTargetInLight();
-            shouldBeActive = _activeInLight ? anyInLight : !anyInLight;
-        }
+            return !_activeInLight;
 
-        SetTargetsActive(shouldBeActive);
+        bool anyTargetInLight = IsAnyTargetInLight();
+        return _activeInLight ? anyTargetInLight : !anyTargetInLight;
     }
 
     private bool IsAnyTargetInLight()
     {
-        Vector3 lightPos = _playerLamp.GetLightPosition();
+        Vector3 lightPosition = _playerLamp.GetLightPosition();
         float radius = _playerLamp.GetLightRadius();
 
-        foreach (var target in _targets)
+        foreach (GameObject target in _targets)
         {
-            if (target == null) continue;
+            if (target == null)
+                continue;
 
-            float distance = Vector2.Distance(
-                target.transform.position,
-                lightPos
-            );
-
+            float distance = Vector2.Distance(target.transform.position, lightPosition);
             if (distance <= radius)
-                return true; // 🔥 ya con uno basta
+                return true;
         }
 
         return false;
@@ -54,28 +48,24 @@ public class LightReactiveObject : MonoBehaviour
 
     private void SetTargetsActive(bool state)
     {
-        foreach (var target in _targets)
+        foreach (GameObject target in _targets)
         {
             if (target != null && target.activeSelf != state)
-            {
                 target.SetActive(state);
-            }
         }
     }
 
-    // 🔵 DEBUG VISUAL
     private void OnDrawGizmos()
     {
-        if (_targets == null) return;
+        if (_targets == null)
+            return;
 
         Gizmos.color = _activeInLight ? Color.green : Color.red;
 
-        foreach (var target in _targets)
+        foreach (GameObject target in _targets)
         {
             if (target != null)
-            {
                 Gizmos.DrawWireSphere(target.transform.position, 0.3f);
-            }
         }
     }
 }

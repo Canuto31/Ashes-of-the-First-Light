@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -18,7 +17,7 @@ public class NotesPageController : MonoBehaviour
 
     private List<NoteData> _notes;
 
-    private List<UISelectableOption> _spawnOptions = new List<UISelectableOption>();
+    private readonly List<UISelectableOption> _spawnOptions = new();
 
     private int _currentNoteIndex;
     private int _currentPageIndex;
@@ -32,7 +31,8 @@ public class NotesPageController : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+        if (_input == null || GameStateManager.Instance == null ||
+            GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
         HandleNoteNavigation();
@@ -42,6 +42,9 @@ public class NotesPageController : MonoBehaviour
 
     public void RefreshNotes()
     {
+        if (_notesContainer == null || _notesOptionPrefab == null || NotesManager.Instance == null)
+            return;
+
         foreach (Transform child in _notesContainer)
         {
             Destroy(child.gameObject);
@@ -55,13 +58,13 @@ public class NotesPageController : MonoBehaviour
         {
             GameObject optionObj = Instantiate(_notesOptionPrefab, _notesContainer);
             
-            UISelectableOption option= optionObj.GetComponent<UISelectableOption>();
-            
+            UISelectableOption option = optionObj.GetComponent<UISelectableOption>();
             NoteOptionUI optionUI = optionObj.GetComponent<NoteOptionUI>();
 
-            optionUI.SetTitle(note.noteTitle);
-            
-            _spawnOptions.Add(option);
+            optionUI?.SetTitle(note.noteTitle);
+
+            if (option != null)
+                _spawnOptions.Add(option);
         }
 
         if (_notes.Count > 0)
@@ -83,6 +86,9 @@ public class NotesPageController : MonoBehaviour
 
     private void SelectNote(int index)
     {
+        if (_notes == null || index < 0 || index >= _notes.Count)
+            return;
+
         _currentNoteIndex = index;
         
         _currentPageIndex = 0;
@@ -104,9 +110,16 @@ public class NotesPageController : MonoBehaviour
 
     private void UpdateContent()
     {
-        if (_notes.Count == 0) return;
+        if (_notes == null || _notes.Count == 0)
+            return;
         
         NoteData note = _notes[_currentNoteIndex];
+
+        if (note == null || note.pages == null || note.pages.Length == 0)
+        {
+            ClearContent();
+            return;
+        }
         
         _titleText.text = note.noteTitle;
         
@@ -117,32 +130,28 @@ public class NotesPageController : MonoBehaviour
 
     private void HandleNoteNavigation()
     {
-        if (_notes == null || _notes.Count == 0) return;
+        if (_notes == null || _notes.Count == 0)
+            return;
 
         if (_input.NavigateUpPressed)
         {
-            _currentNoteIndex--;
-            
-            if (_currentNoteIndex < 0) 
-                _currentNoteIndex = _notes.Count - 1;
-            
-            SelectNote(_currentNoteIndex);
-        } else if (_input.NavigateDownPressed)
+            SelectNote((_currentNoteIndex - 1 + _notes.Count) % _notes.Count);
+        }
+        else if (_input.NavigateDownPressed)
         {
-            _currentNoteIndex++;
-            
-            if (_currentNoteIndex >= _notes.Count)
-                _currentNoteIndex = 0;
-            
-            SelectNote(_currentNoteIndex);
+            SelectNote((_currentNoteIndex + 1) % _notes.Count);
         }
     }
 
     private void HandlePageNavigation()
     {
-        if (_notes == null || _notes.Count == 0) return;
+        if (_notes == null || _notes.Count == 0)
+            return;
         
         NoteData note = _notes[_currentNoteIndex];
+
+        if (note == null || note.pages == null || note.pages.Length == 0)
+            return;
 
         if (_input.NextPagePressed)
         {
@@ -152,7 +161,8 @@ public class NotesPageController : MonoBehaviour
             
                 UpdateContent();
             }
-        } else if (_input.PreviousPagePressed)
+        }
+        else if (_input.PreviousPagePressed)
         {
             if (_currentPageIndex > 0)
             {
@@ -165,9 +175,10 @@ public class NotesPageController : MonoBehaviour
 
     public void FocusLastCollectedNote()
     {
-        NoteData lastNote = NotesManager.Instance.GetLastCollectedNote();
+        NoteData lastNote = NotesManager.Instance?.GetLastCollectedNote();
 
-        if (lastNote == null) return;
+        if (lastNote == null || _notes == null)
+            return;
         
         int index = _notes.IndexOf(lastNote);
 

@@ -1,14 +1,19 @@
-using System;
 using UnityEngine;
 
 public class CheckpointManager : MonoBehaviour
 {
-    public static CheckpointManager Instance;
+    public static CheckpointManager Instance { get; private set; }
 
     private Vector3 _lastCheckpointPosition;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
@@ -16,17 +21,20 @@ public class CheckpointManager : MonoBehaviour
     {
         _lastCheckpointPosition = position;
         
-        Debug.Log("Checkpoint saved ad: " + position);
+        Debug.Log("Checkpoint saved at: " + position);
     }
 
     public void ReturnToCheckpoint(GameObject player)
     {
+        if (player == null)
+            return;
+
         player.transform.position = _lastCheckpointPosition;
-        
-        var rb = player.GetComponent<Rigidbody2D>();
+
+        Rigidbody2D rb = player.GetComponent<Rigidbody2D>();
         if (rb != null)
             rb.linearVelocity = Vector2.zero;
-        
+
         Debug.Log("Returned to checkpoint");
     }
 }

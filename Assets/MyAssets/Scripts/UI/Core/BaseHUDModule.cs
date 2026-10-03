@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public abstract class BaseHUDModule : MonoBehaviour
@@ -14,7 +13,10 @@ public abstract class BaseHUDModule : MonoBehaviour
     public virtual void Show()
     {
         gameObject.SetActive(true);
-        
+
+        if (_canvasGroup == null)
+            return;
+
         _canvasGroup.alpha = 1;
         _canvasGroup.interactable = true;
         _canvasGroup.blocksRaycasts = true;
@@ -23,7 +25,10 @@ public abstract class BaseHUDModule : MonoBehaviour
     public virtual void Hide()
     {
         gameObject.SetActive(false);
-        
+
+        if (_canvasGroup == null)
+            return;
+
         _canvasGroup.alpha = 0;
         _canvasGroup.interactable = false;
         _canvasGroup.blocksRaycasts = false;
@@ -31,6 +36,7 @@ public abstract class BaseHUDModule : MonoBehaviour
 
     public virtual void SetOpacity(float opacity)
     {
-        _canvasGroup.alpha = opacity;
+        if (_canvasGroup != null)
+            _canvasGroup.alpha = Mathf.Clamp01(opacity);
     }
 }

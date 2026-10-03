@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UI_Interaction : MonoBehaviour
 {
-    public static UI_Interaction Instance;
+    public static UI_Interaction Instance { get; private set; }
 
     [Header("References")]
     [SerializeField] private CanvasGroup _canvasGroup;
@@ -30,7 +30,7 @@ public class UI_Interaction : MonoBehaviour
 
     public void ShowText(string message)
     {
-        if (!GameStateManager.Instance.IsPlaying())
+        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
             return;
 
         _text.text = message;
@@ -62,6 +62,12 @@ public class UI_Interaction : MonoBehaviour
 
     private IEnumerator FadeCanvas(float targetAlpha)
     {
+        if (_fadeDuration <= 0f)
+        {
+            _canvasGroup.alpha = targetAlpha;
+            yield break;
+        }
+
         float startAlpha = _canvasGroup.alpha;
 
         float elapsed = 0f;
@@ -93,5 +99,6 @@ public class UI_Interaction : MonoBehaviour
     private void HideImmediate()
     {
         _canvasGroup.alpha = 0f;
+        _currentRoutine = null;
     }
 }

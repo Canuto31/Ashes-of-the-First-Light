@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class GameMenuController : MonoBehaviour
@@ -7,15 +6,16 @@ public class GameMenuController : MonoBehaviour
 
     private void Update()
     {
-        if (_input.ToggleMenuPressed)
-        {
+        if (_input != null && _input.ToggleMenuPressed)
             HandleMenu();
-        }
     }
 
     private void HandleMenu()
     {
-        var currentState = GameStateManager.Instance.GetState();
+        if (GameStateManager.Instance == null)
+            return;
+
+        GameStateManager.GameState currentState = GameStateManager.Instance.GetState();
 
         if (currentState == GameStateManager.GameState.Playing)
         {

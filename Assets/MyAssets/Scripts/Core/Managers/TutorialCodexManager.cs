@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TutorialCodexManager : MonoBehaviour
 {
-    public static TutorialCodexManager Instance;
+    public static TutorialCodexManager Instance { get; private set; }
 
-    private readonly List<TutorialData> _unlockedTutorials;
+    private readonly List<TutorialData> _unlockedTutorials = new();
 
     private void Awake()
     {
@@ -21,9 +20,9 @@ public class TutorialCodexManager : MonoBehaviour
 
     public void UnlockTutorial(TutorialData tutorial)
     {
-        if (HasTutorial(tutorial))
+        if (tutorial == null || HasTutorial(tutorial))
             return;
-        
+
         _unlockedTutorials.Add(tutorial);
     }
 
@@ -34,6 +33,6 @@ public class TutorialCodexManager : MonoBehaviour
     
     public bool HasTutorial(TutorialData tutorial)
     {
-        return _unlockedTutorials.Contains(tutorial);
+        return tutorial != null && _unlockedTutorials.Contains(tutorial);
     }
 }

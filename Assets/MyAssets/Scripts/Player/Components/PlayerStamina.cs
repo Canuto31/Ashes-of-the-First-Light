@@ -14,15 +14,13 @@ public class PlayerStamina : MonoBehaviour
     private bool _isExhausted;
 
     private PlayerInputHandler _input;
-    
+
     public float CurrentStamina => _currentStamina;
     public float MaxStamina => _maxstamina;
     public bool IsExhausted => _isExhausted;
     
-    public bool CanSprint =>
-        !_isExhausted;
-    
-    
+    public bool CanSprint => !_isExhausted;
+
     public event Action<float, float> OnStaminaChanged;
 
     private void Start()
@@ -41,6 +39,9 @@ public class PlayerStamina : MonoBehaviour
 
     private void HandleStamina()
     {
+        if (_input == null)
+            return;
+
         bool isRunning =
             _input.MoveInput != Vector2.zero &&
             _input.SprintHeld &&
@@ -58,23 +59,23 @@ public class PlayerStamina : MonoBehaviour
 
     public void DrainStamina(float amount)
     {
-        _currentStamina -= amount;
-        
-        if (_currentStamina <= 0)
-        {
-            _currentStamina = 0;
+        if (amount <= 0f)
+            return;
+
+        _currentStamina = Mathf.Max(0f, _currentStamina - amount);
+
+        if (Mathf.Approximately(_currentStamina, 0f))
             _isExhausted = true;
-        }
 
         NotifyStaminaChanged();
     }
 
     public void RegenerateStamina(float amount)
     {
-        _currentStamina += amount;
-        
-        if (_currentStamina > _maxstamina)
-            _currentStamina = _maxstamina;
+        if (amount <= 0f || Mathf.Approximately(_currentStamina, _maxstamina))
+            return;
+
+        _currentStamina = Mathf.Min(_maxstamina, _currentStamina + amount);
 
         if (_isExhausted)
         {
@@ -82,11 +83,9 @@ public class PlayerStamina : MonoBehaviour
                 _maxstamina * _exhaustRecoveryPercent;
 
             if (_currentStamina >= recoveryThreshold)
-            {
                 _isExhausted = false;
-            }
         }
-        
+
         NotifyStaminaChanged();
     }
 

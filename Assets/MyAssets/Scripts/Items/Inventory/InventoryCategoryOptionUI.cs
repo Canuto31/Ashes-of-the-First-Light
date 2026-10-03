@@ -7,6 +7,7 @@ public class InventoryCategoryOptionUI : MonoBehaviour
 
     public void SetTitle(string title)
     {
-        _text.text = title;
+        if (_text != null)
+            _text.text = title;
     }
 }

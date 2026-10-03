@@ -13,25 +13,28 @@ public class CameraTrigger : MonoBehaviour
     [Header("Interaction")]
     [SerializeField] private bool _requireInput = false;
 
-    private bool _hasTriggered = false;
-    private bool _playerInside = false;
+    private bool _hasTriggered;
+    private bool _playerInside;
     private IInteractable _interactable;
 
     private PlayerInputHandler _playerInput;
 
-    private void Awake() {
+    private void Awake()
+    {
         _interactable = GetComponentInParent<IInteractable>();
     }
 
     private void OnTriggerEnter2D(Collider2D other) 
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         _playerInside = true;
 
         _playerInput = other.GetComponent<PlayerInputHandler>();
 
-        UI_Interaction.Instance.ShowText(_interactable.GetInteractionText());
+        if (_interactable != null)
+            UI_Interaction.Instance?.ShowText(_interactable.GetInteractionText());
 
         /*if (!_requireInput)
         {
@@ -41,27 +44,26 @@ public class CameraTrigger : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other) 
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         _playerInside = false;
         _playerInput = null;
 
-        UI_Interaction.Instance.Hide();
+        UI_Interaction.Instance?.Hide();
     }
 
-    private void Update() {
-        if (_requireInput && _playerInside)
-        {
-            if (_playerInput.InteractPressed)
-            {
-                _interactable.Interact();
-            }
-        }
+    private void Update()
+    {
+        if (_requireInput && _playerInside && _playerInput != null && _interactable != null &&
+            _playerInput.InteractPressed)
+            _interactable.Interact();
     }
 
     private void TryActivate()
     {
-        if (_hasTriggered && _triggerOnce) return;
+        if (_hasTriggered && _triggerOnce)
+            return;
 
         if (_cameraTarget == null)
         {
@@ -69,7 +71,7 @@ public class CameraTrigger : MonoBehaviour
             return;
         }
 
-        CameraDirector.Instance.FocusOn(_cameraTarget, _duration);
+        CameraDirector.Instance?.FocusOn(_cameraTarget, _duration);
 
         _hasTriggered = true;
     }

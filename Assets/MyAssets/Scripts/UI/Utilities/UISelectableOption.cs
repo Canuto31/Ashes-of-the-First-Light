@@ -15,8 +15,10 @@ public class UISelectableOption : MonoBehaviour
 
     public void SetSelected(bool selected)
     {
+        if (_optionText == null)
+            return;
+
         _optionText.color = selected ? _selectedColor : _normalColor;
-        
-        _optionText.alpha = selected ? _selectedSize : _normalSize;
+        _optionText.fontSize = selected ? _selectedSize : _normalSize;
     }
 }

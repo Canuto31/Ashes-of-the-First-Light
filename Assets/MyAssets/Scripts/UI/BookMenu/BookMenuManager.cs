@@ -14,7 +14,7 @@ public class BookMenuManager : MonoBehaviour
     private int _currentPage;
     private bool _justOpenedBook;
 
-    public static BookMenuManager Instance;
+    public static BookMenuManager Instance { get; private set; }
 
     // Context Page
     private bool _hasPendingContextPage;
@@ -31,6 +31,12 @@ public class BookMenuManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
@@ -42,11 +48,15 @@ public class BookMenuManager : MonoBehaviour
 
         ShowPage(_currentPage);
 
-        _bookRoot.SetActive(false);
+        if (_bookRoot != null)
+            _bookRoot.SetActive(false);
     }
 
     private void Update()
     {
+        if (_input == null || GameStateManager.Instance == null)
+            return;
+
         UpdateContextPageTimer();
 
         HandleBookToggle();
@@ -122,74 +132,74 @@ public class BookMenuManager : MonoBehaviour
 
     private void OpenBook()
     {
-        GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
+        if (_bookRoot == null || GameStateManager.Instance == null)
+            return;
 
+        GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
         _bookRoot.SetActive(true);
 
         ShowPage(_currentPage);
 
         if (_currentPage == (int)BookPage.Notes)
-        {
-            _notesPageController.RefreshNotes();
-            _notesPageController.FocusLastCollectedNote();
-        }
-        else if (_currentPage == (int)BookPage.Tutorials)
-        {
-            _tutorialPageController.RefreshTutorials();
-        }
+            _notesPageController?.FocusLastCollectedNote();
 
         _justOpenedBook = true;
 
-        UI_Interaction.Instance.Hide();
-        InteractionUIManager.Instance.HideVisual();
+        UI_Interaction.Instance?.Hide();
+        InteractionUIManager.Instance?.HideVisual();
     }
 
-    private void CloseBook()
+    public void CloseBook()
     {
-        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+        GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
 
-        _bookRoot.SetActive(false);
+        if (_bookRoot != null)
+            _bookRoot.SetActive(false);
     }
 
     private void NextPage()
     {
-        _currentPage++;
+        if (_pages.Length == 0)
+            return;
 
-        if (_currentPage >= _pages.Length)
-            _currentPage = 0;
+        _currentPage = (_currentPage + 1) % _pages.Length;
 
         ShowPage(_currentPage);
     }
 
     private void PreviousPage()
     {
-        _currentPage--;
+        if (_pages.Length == 0)
+            return;
 
-        if (_currentPage < 0)
-            _currentPage = _pages.Length - 1;
+        _currentPage = (_currentPage - 1 + _pages.Length) % _pages.Length;
 
         ShowPage(_currentPage);
     }
 
     private void ShowPage(int index)
     {
+        if (index < 0 || index >= _pages.Length)
+            return;
+
         for (int i = 0; i < _pages.Length; i++)
         {
-            _pages[i].SetActive(i == index);
+            if (_pages[i] != null)
+                _pages[i].SetActive(i == index);
         }
 
         switch ((BookPage)index)
         {
             case BookPage.Notes:
-                _notesPageController.RefreshNotes();
+                _notesPageController?.RefreshNotes();
                 break;
             
             case BookPage.Inventory:
-                _inventoryPageController.RefreshInventory();
+                _inventoryPageController?.RefreshInventory();
                 break;
 
             case BookPage.Tutorials:
-                _tutorialPageController.RefreshTutorials();
+                _tutorialPageController?.RefreshTutorials();
                 break;
         }
     }
@@ -201,25 +211,7 @@ public class BookMenuManager : MonoBehaviour
         OpenBook();
     }
 
-    private int GetPageIndex(BookPage page)
-    {
-        switch (page)
-        {
-            case BookPage.Notes:
-                return 0;
-
-            case BookPage.Tutorials:
-                return 1;
-            
-            case BookPage.Inventory:
-                return 2;
-
-            case BookPage.Settings:
-                return 3;
-        }
-
-        return 0;
-    }
+    private int GetPageIndex(BookPage page) => (int)page;
 
     public void QueueContextPage(BookPage page)
     {

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,6 +19,7 @@ public class InventoryPageController : MonoBehaviour
     };
 
     private int _currentCategoryIndex;
+
     private void Start()
     {
         RefreshInventory();
@@ -32,6 +32,9 @@ public class InventoryPageController : MonoBehaviour
 
     private void CreateCategories()
     {
+        if (_categoryContainer == null || _categoryOptionPrefab == null)
+            return;
+
         foreach (Transform child in _categoryContainer)
         {
             Destroy(child.gameObject);
@@ -47,9 +50,10 @@ public class InventoryPageController : MonoBehaviour
             
             UISelectableOption selectable = optionObj.GetComponent<UISelectableOption>();
             
-            optionUI.SetTitle(GetCategoryName(category));
-            
-            _categoryOptions.Add(selectable);
+            optionUI?.SetTitle(GetCategoryName(category));
+
+            if (selectable != null)
+                _categoryOptions.Add(selectable);
         }
 
         SelectCategory(0);
@@ -72,25 +76,16 @@ public class InventoryPageController : MonoBehaviour
         }
     }
 
-    private string GetCategoryName(InventoryCategory category)
+    private static string GetCategoryName(InventoryCategory category)
     {
-        switch (category)
+        return category switch
         {
-            case InventoryCategory.All:
-                return "All";
-            case InventoryCategory.Consumable:
-                return "Consumables";
-
-            case InventoryCategory.Equipment:
-                return "Equipment";
-
-            case InventoryCategory.KeyItem:
-                return "Key Items";
-
-            case InventoryCategory.Material:
-                return "Materials";
-        }
-
-        return "";
+            InventoryCategory.All => "All",
+            InventoryCategory.Consumable => "Consumables",
+            InventoryCategory.Equipment => "Equipment",
+            InventoryCategory.KeyItem => "Key Items",
+            InventoryCategory.Material => "Materials",
+            _ => string.Empty
+        };
     }
 }

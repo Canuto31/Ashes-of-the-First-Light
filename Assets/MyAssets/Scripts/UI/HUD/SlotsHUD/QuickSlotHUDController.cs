@@ -1,6 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class QuickSlotHUDController : MonoBehaviour
 {
@@ -23,28 +21,19 @@ public class QuickSlotHUDController : MonoBehaviour
 
     private void HandleDebugInput()
     {
+        if (_input == null || _slots == null || _slots.Length == 0)
+            return;
+
         if (_input.UnlockSlotPressed)
         {
-            _unlockedSlots++;
-            
-            _unlockedSlots = Mathf.Clamp(
-                _unlockedSlots,
-                1,
-                _slots.Length
-            );
+            _unlockedSlots = Mathf.Clamp(_unlockedSlots + 1, 1, _slots.Length);
 
             RefreshSlots();
         }
         
         if (_input.LockSlotPressed)
         {
-            _unlockedSlots--;
-            
-            _unlockedSlots = Mathf.Clamp(
-                _unlockedSlots,
-                1,
-                _slots.Length
-            );
+            _unlockedSlots = Mathf.Clamp(_unlockedSlots - 1, 1, _slots.Length);
 
             RefreshSlots();
         }
@@ -54,18 +43,14 @@ public class QuickSlotHUDController : MonoBehaviour
     {
         for (int i = 0; i < _slots.Length; i++)
         {
-            if (i < _unlockedSlots)
-            {
-                _slots[i].SetState(
-                    QuickSlotState.Unlocked
-                );
-            }
-            else
-            {
-                _slots[i].SetState(
-                    QuickSlotState.Locked
-                );
-            }
+            if (_slots[i] == null)
+                continue;
+
+            QuickSlotState state = i < _unlockedSlots
+                ? QuickSlotState.Unlocked
+                : QuickSlotState.Locked;
+
+            _slots[i].SetState(state);
         }
     }
 }

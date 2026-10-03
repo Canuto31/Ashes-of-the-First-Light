@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class PlayerAnimationEvents : MonoBehaviour
@@ -12,6 +11,7 @@ public class PlayerAnimationEvents : MonoBehaviour
 
     public void EndAttack()
     {
-        _playerController.EndAttack();
+        if (_playerController != null)
+            _playerController.EndAttack();
     }
 }

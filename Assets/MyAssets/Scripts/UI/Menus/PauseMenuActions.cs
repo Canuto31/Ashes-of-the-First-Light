@@ -6,8 +6,7 @@ public class PauseMenuActions : MonoBehaviour
 
     public void ReturnToCheckpoint()
     {
-        CheckpointManager.Instance.ReturnToCheckpoint(_player);
-        
-        GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
+        CheckpointManager.Instance?.ReturnToCheckpoint(_player);
+        GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
     }
 }

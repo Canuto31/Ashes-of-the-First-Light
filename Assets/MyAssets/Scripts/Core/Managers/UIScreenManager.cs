@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class UIScreenManager : MonoBehaviour
@@ -7,26 +6,28 @@ public class UIScreenManager : MonoBehaviour
 
     private void Start()
     {
-        _pauseMenu.SetActive(false);
+        if (_pauseMenu != null)
+            _pauseMenu.SetActive(false);
     }
 
     private void Update()
     {
-        var state = GameStateManager.Instance.GetState();
+        if (GameStateManager.Instance == null || _pauseMenu == null)
+            return;
 
-        if (state == GameStateManager.GameState.BookMenu)
+        bool shouldShowPauseMenu =
+            GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
+
+        if (shouldShowPauseMenu)
         {
             if (!_pauseMenu.activeSelf)
             {
                 _pauseMenu.SetActive(true);
-                UI_Interaction.Instance.Hide();
-                InteractionUIManager.Instance.HideVisual();
+                UI_Interaction.Instance?.Hide();
+                InteractionUIManager.Instance?.HideVisual();
             }
         }
-        else
-        {
-            if (_pauseMenu.activeSelf)
-                _pauseMenu.SetActive(false);
-        }
+        else if (_pauseMenu.activeSelf)
+            _pauseMenu.SetActive(false);
     }
 }

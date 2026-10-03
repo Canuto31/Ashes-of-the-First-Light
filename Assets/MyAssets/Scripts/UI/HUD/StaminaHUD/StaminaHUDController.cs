@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,6 +30,9 @@ public class StaminaHUDController : BaseHUDModule
 
     private void Update()
     {
+        if (_staminaFill == null)
+            return;
+
         _staminaFill.fillAmount = Mathf.Lerp(
             _staminaFill.fillAmount,
             _targetFill,
@@ -41,13 +43,11 @@ public class StaminaHUDController : BaseHUDModule
     private void OnDestroy()
     {
         if (_playerStamina != null)
-        {
             _playerStamina.OnStaminaChanged -= UpdateStamina;
-        }
     }
 
     private void UpdateStamina(float current, float max)
     {
-        _targetFill = current / max;
+        _targetFill = max > 0f ? Mathf.Clamp01(current / max) : 0f;
     }
 }

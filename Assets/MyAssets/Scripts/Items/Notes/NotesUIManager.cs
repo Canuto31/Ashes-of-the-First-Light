@@ -1,10 +1,9 @@
-using System;
 using TMPro;
 using UnityEngine;
 
 public class NotesUIManager : MonoBehaviour
 {
-    public static NotesUIManager Instance;
+    public static NotesUIManager Instance { get; private set; }
     
     [SerializeField] private PlayerInputHandler _input;
     
@@ -21,13 +20,20 @@ public class NotesUIManager : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         _panel.SetActive(false);
     }
 
     private void Update()
     {
-        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+        if (GameStateManager.Instance == null ||
+            GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
         if (_ignoreInputThisFrame)
@@ -41,7 +47,8 @@ public class NotesUIManager : MonoBehaviour
 
     private void HandleInput()
     {
-        if (_input == null) return;
+        if (_input == null)
+            return;
 
         if (_input.NextPagePressed)
             NextPage();
@@ -55,6 +62,9 @@ public class NotesUIManager : MonoBehaviour
 
     public void OpenNote(NoteData note)
     {
+        if (note == null || note.pages == null || note.pages.Length == 0)
+            return;
+
         _currentNote = note;
         _currentPage = 0;
 
@@ -66,8 +76,8 @@ public class NotesUIManager : MonoBehaviour
         
         _ignoreInputThisFrame = true;
         
-        UI_Interaction.Instance.Hide();
-        InteractionUIManager.Instance.HideVisual();
+        UI_Interaction.Instance?.Hide();
+        InteractionUIManager.Instance?.HideVisual();
     }
 
     private void CloseNote()
@@ -79,6 +89,9 @@ public class NotesUIManager : MonoBehaviour
 
     private void NextPage()
     {
+        if (_currentNote == null || _currentNote.pages == null)
+            return;
+
         if (_currentPage < _currentNote.pages.Length - 1)
         {
             _currentPage++;
@@ -88,6 +101,9 @@ public class NotesUIManager : MonoBehaviour
 
     private void PreviousPage()
     {
+        if (_currentNote == null)
+            return;
+
         if (_currentPage > 0)
         {
             _currentPage--;
@@ -97,6 +113,9 @@ public class NotesUIManager : MonoBehaviour
 
     private void UpdateUI()
     {
+        if (_currentNote == null || _currentNote.pages == null || _currentNote.pages.Length == 0)
+            return;
+
         _titleText.text = _currentNote.noteTitle;
         _contentText.text = _currentNote.pages[_currentPage];
         _pageIndicator.text = (_currentPage + 1) + "/" + _currentNote.pages.Length;

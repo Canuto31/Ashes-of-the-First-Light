@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class PickupItem : MonoBehaviour, IInteractable
@@ -8,14 +7,16 @@ public class PickupItem : MonoBehaviour, IInteractable
 
     public string GetInteractionText()
     {
-        return "Pick up " + _item.itemName;
+        return _item != null ? "Pick up " + _item.itemName : "Pick up item";
     }
 
     public void Interact()
     {
-        PlayerInventory.Instance.AddItem(_item, _quantity);
+        if (_item == null || PlayerInventory.Instance == null)
+            return;
 
-        UI_Interaction.Instance.ShowTextTimed(_item.itemName + " acquired", 1f);
+        PlayerInventory.Instance.AddItem(_item, _quantity);
+        UI_Interaction.Instance?.ShowTextTimed(_item.itemName + " acquired", 1f);
 
         Destroy(gameObject);
     }

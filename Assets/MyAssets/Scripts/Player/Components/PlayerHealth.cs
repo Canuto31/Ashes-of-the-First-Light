@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -10,7 +9,7 @@ public class PlayerHealth : MonoBehaviour
     private PlayerInputHandler _input;
     
     private float _currentHealth;
-    
+
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => _maxHealth;
     
@@ -41,24 +40,24 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(float amount)
     {
-        _currentHealth -= amount;
-        
-        if (_currentHealth < 0f)
-            _currentHealth = 0f;
+        if (amount <= 0f || Mathf.Approximately(_currentHealth, 0f))
+            return;
+
+        _currentHealth = Mathf.Max(0f, _currentHealth - amount);
 
         NotifyHealthChanged();
         OnDamageTaken?.Invoke();
 
-        if (_currentHealth <= 0f)
+        if (Mathf.Approximately(_currentHealth, 0f))
             Die();
     }
 
     public void Heal(float amount)
     {
-        _currentHealth += amount;
-        
-        if (_currentHealth > _maxHealth)
-            _currentHealth = _maxHealth;
+        if (amount <= 0f)
+            return;
+
+        _currentHealth = Mathf.Min(_maxHealth, _currentHealth + amount);
 
         NotifyHealthChanged();
     }
@@ -71,7 +70,7 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player Dead");
-        
+
         OnDeath?.Invoke();
     }
 }

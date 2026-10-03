@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
 
 public class GameStateManager : MonoBehaviour
 {
-    public static GameStateManager Instance;
+    public static GameStateManager Instance { get; private set; }
 
     public enum GameState
     {
@@ -16,15 +15,14 @@ public class GameStateManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
@@ -34,6 +32,9 @@ public class GameStateManager : MonoBehaviour
 
     public void SetState(GameState newState)
     {
+        if (_currentState == newState)
+            return;
+
         _currentState = newState;
         Debug.Log("Game state changed to: " + _currentState);
     }

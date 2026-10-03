@@ -3,27 +3,32 @@ using UnityEngine;
 
 public class NotesManager : MonoBehaviour
 {
-    public static NotesManager Instance;
-    
-    private List<NoteData> _notes = new List<NoteData>();
+    public static NotesManager Instance { get; private set; }
+
+    private readonly List<NoteData> _notes = new();
     
     private NoteData _lastCollectedNote;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
     public void AddNote(NoteData note)
     {
-        if (!_notes.Contains(note))
-        {
-            _notes.Add(note);
-            
-            _lastCollectedNote = note;
-            
-            Debug.Log("Note added: " + note.noteTitle);
-        }
+        if (note == null || _notes.Contains(note))
+            return;
+
+        _notes.Add(note);
+        _lastCollectedNote = note;
+
+        Debug.Log("Note added: " + note.noteTitle);
     }
 
     public List<NoteData> GetNotes()

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -49,11 +48,14 @@ public class LifeHUDController : BaseHUDModule
     {
         HandleDamageFlashFade();
         
-        _lifeBarFill.fillAmount = Mathf.Lerp(
-            _lifeBarFill.fillAmount,
-            _targetFill,
-            smoothSpeed * Time.deltaTime
-        );
+        if (_lifeBarFill != null)
+        {
+            _lifeBarFill.fillAmount = Mathf.Lerp(
+                _lifeBarFill.fillAmount,
+                _targetFill,
+                smoothSpeed * Time.deltaTime
+            );
+        }
     }
 
     private void OnDestroy()
@@ -67,7 +69,7 @@ public class LifeHUDController : BaseHUDModule
 
     public void UpdateLife(float currentLife, float maxLife)
     {
-        _targetFill = currentLife / maxLife;
+        _targetFill = maxLife > 0f ? Mathf.Clamp01(currentLife / maxLife) : 0f;
     }
 
     private void ShowDamageFlash()

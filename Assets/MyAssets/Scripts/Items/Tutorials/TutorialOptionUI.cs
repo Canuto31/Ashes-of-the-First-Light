@@ -7,6 +7,7 @@ public class TutorialOptionUI : MonoBehaviour
 
     public void SetTitle(string title)
     {
-        _optionText.text = title;
+        if (_optionText != null)
+            _optionText.text = title;
     }
 }

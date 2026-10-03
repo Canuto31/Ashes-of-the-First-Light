@@ -3,33 +3,37 @@ using UnityEngine;
 
 public class TutorialManager : MonoBehaviour
 {
-    public static TutorialManager Instance;
+    public static TutorialManager Instance { get; private set; }
 
-    private HashSet<string> _shownTutorials = new();
+    private readonly HashSet<string> _shownTutorials = new();
 
-    private List<TutorialData> _unlockedTutorials = new();
+    private readonly List<TutorialData> _unlockedTutorials = new();
 
     private void Awake()
     {
-        Instance = this;
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
-        _shownTutorials.Clear();
-        _unlockedTutorials.Clear();
+        Instance = this;
     }
 
     public bool HasSeen(string tutorialId)
     {
-        return _shownTutorials.Contains(tutorialId);
+        return !string.IsNullOrWhiteSpace(tutorialId) && _shownTutorials.Contains(tutorialId);
     }
 
     public void SetSeen(string tutorialId)
     {
-        _shownTutorials.Add(tutorialId);
+        if (!string.IsNullOrWhiteSpace(tutorialId))
+            _shownTutorials.Add(tutorialId);
     }
 
     public void UnlockTutorial(TutorialData tutorial)
     {
-        if (_unlockedTutorials.Contains(tutorial))
+        if (tutorial == null || _unlockedTutorials.Contains(tutorial))
             return;
 
         _unlockedTutorials.Add(tutorial);

@@ -29,7 +29,8 @@ public class TutorialPageController : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+        if (_input == null || GameStateManager.Instance == null ||
+            GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
         HandleTutorialNavigation();
@@ -37,6 +38,9 @@ public class TutorialPageController : MonoBehaviour
 
     public void RefreshTutorials()
     {
+        if (_tutorialsContainer == null || _tutorialOptionPrefab == null || TutorialManager.Instance == null)
+            return;
+
         foreach (Transform child in _tutorialsContainer)
         {
             Destroy(child.gameObject);
@@ -57,9 +61,10 @@ public class TutorialPageController : MonoBehaviour
             TutorialOptionUI optionUI =
                 optionObj.GetComponent<TutorialOptionUI>();
 
-            optionUI.SetTitle(tutorial.title);
+            optionUI?.SetTitle(tutorial.title);
 
-            _spawnedOptions.Add(option);
+            if (option != null)
+                _spawnedOptions.Add(option);
         }
 
         if (_tutorials.Count > 0)
@@ -80,6 +85,9 @@ public class TutorialPageController : MonoBehaviour
 
     private void SelectTutorial(int index)
     {
+        if (_tutorials == null || index < 0 || index >= _tutorials.Count)
+            return;
+
         _currentTutorialIndex = index;
 
         UpdateVisuals();
@@ -117,21 +125,11 @@ public class TutorialPageController : MonoBehaviour
 
         if (_input.NavigateUpPressed)
         {
-            _currentTutorialIndex--;
-
-            if (_currentTutorialIndex < 0)
-                _currentTutorialIndex = _tutorials.Count - 1;
-
-            SelectTutorial(_currentTutorialIndex);
+            SelectTutorial((_currentTutorialIndex - 1 + _tutorials.Count) % _tutorials.Count);
         }
         else if (_input.NavigateDownPressed)
         {
-            _currentTutorialIndex++;
-
-            if (_currentTutorialIndex >= _tutorials.Count)
-                _currentTutorialIndex = 0;
-
-            SelectTutorial(_currentTutorialIndex);
+            SelectTutorial((_currentTutorialIndex + 1) % _tutorials.Count);
         }
     }
 }

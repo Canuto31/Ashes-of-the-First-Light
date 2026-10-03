@@ -18,7 +18,8 @@ public class SettingsPageController : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
+        if (_input == null || GameStateManager.Instance == null ||
+            GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
         HandleNavigation();
@@ -28,31 +29,27 @@ public class SettingsPageController : MonoBehaviour
     private void HandleNavigation()
     {
         if (_input.NavigateUpPressed)
-        {
             NavigateUp();
-        }
         else if (_input.NavigateDownPressed)
-        {
             NavigateDown();
-        }
     }
 
     private void NavigateUp()
     {
-        _currentOption--;
-        
-        if (_currentOption < 0)
-            _currentOption = _options.Length - 1;
+        if (_options.Length == 0)
+            return;
+
+        _currentOption = (_currentOption - 1 + _options.Length) % _options.Length;
 
         UpdateVisuals();
     }
 
     private void NavigateDown()
     {
-        _currentOption++;
-        
-        if (_currentOption >= _options.Length)
-            _currentOption = 0;
+        if (_options.Length == 0)
+            return;
+
+        _currentOption = (_currentOption + 1) % _options.Length;
 
         UpdateVisuals();
     }
@@ -61,7 +58,7 @@ public class SettingsPageController : MonoBehaviour
     {
         for (int i = 0; i < _options.Length; i++)
         {
-            bool isSelected = (i == _currentOption);
+            bool isSelected = i == _currentOption;
             
             _options[i].SetSelected(isSelected);
         }
@@ -69,7 +66,8 @@ public class SettingsPageController : MonoBehaviour
 
     private void HandleConfirm()
     {
-        if (!_input.ConfirmPressed) return;
+        if (!_input.ConfirmPressed)
+            return;
 
         switch (_currentOption)
         {
@@ -87,16 +85,15 @@ public class SettingsPageController : MonoBehaviour
 
     private void ResumeGame()
     {
-        FindFirstObjectByType<BookMenuManager>().SendMessage("CloseBook");
+        BookMenuManager.Instance?.CloseBook();
     }
 
     private void ReturnToCheckpoint()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         
-        CheckpointManager.Instance.ReturnToCheckpoint(player);
-        
-        FindFirstObjectByType<BookMenuManager>().SendMessage("CloseBook");
+        CheckpointManager.Instance?.ReturnToCheckpoint(player);
+        BookMenuManager.Instance?.CloseBook();
     }
 
     private void ExitGame()

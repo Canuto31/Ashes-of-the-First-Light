@@ -11,28 +11,18 @@ public class QuickSlotUI : MonoBehaviour
 
     public void Setkey(string key)
     {
-        _keyLabel.text = key;
+        if (_keyLabel != null)
+            _keyLabel.text = key;
     }
 
     public void SetState(QuickSlotState state)
     {
-        switch (state)
-        {
-            case QuickSlotState.Locked:
-                _lockIcon.gameObject.SetActive(true);
-                _itemIcon.gameObject.SetActive(false);
+        bool isLocked = state == QuickSlotState.Locked;
 
-                break;
-            case QuickSlotState.Unlocked:
-                _lockIcon.gameObject.SetActive(false);
-                _itemIcon.gameObject.SetActive(true);
+        if (_lockIcon != null)
+            _lockIcon.gameObject.SetActive(isLocked);
 
-                break;
-            case QuickSlotState.Equipped:
-                _lockIcon.gameObject.SetActive(false);
-                _itemIcon.gameObject.SetActive(true);
-
-                break;
-        }
+        if (_itemIcon != null)
+            _itemIcon.gameObject.SetActive(!isLocked);
     }
 }

@@ -5,14 +5,24 @@ public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance;
 
-    private List<InventoryEntry> _items = new();
+    private readonly List<InventoryEntry> _items = new();
 
-    private void Awake() {
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
     }
 
     public void AddItem(InventoryItem item, int quantity = 1)
     {
+        if (item == null || quantity <= 0)
+            return;
+
         InventoryEntry entry = GetEntry(item);
 
         if (entry != null)
@@ -31,6 +41,9 @@ public class PlayerInventory : MonoBehaviour
 
     public bool RemoveItem(InventoryItem item, int quantity = 1)
     {
+        if (item == null || quantity <= 0)
+            return false;
+
         InventoryEntry entry = GetEntry(item);
 
         if (entry == null)
@@ -40,7 +53,7 @@ public class PlayerInventory : MonoBehaviour
             return false;
         
         entry.Quantity -= quantity;
-        
+
         if (entry.Quantity <= 0)
             _items.Remove(entry);
 

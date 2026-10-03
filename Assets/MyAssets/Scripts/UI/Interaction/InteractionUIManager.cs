@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InteractionUIManager : MonoBehaviour
 {
-    public static InteractionUIManager Instance;
+    public static InteractionUIManager Instance { get; private set; }
 
     [Header("References")]
     [SerializeField] private GameObject _panel;
@@ -14,15 +14,24 @@ public class InteractionUIManager : MonoBehaviour
 
     private Transform _currentTarget;
 
-    private void Awake() {
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         Clear();
     }
 
-    private void LateUpdate() {
-        if (_currentTarget == null) return;
+    private void LateUpdate()
+    {
+        if (_currentTarget == null)
+            return;
 
-        if (!GameStateManager.Instance.IsPlaying())
+        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
         {
             _panel.SetActive(false);
             return;
@@ -34,7 +43,11 @@ public class InteractionUIManager : MonoBehaviour
         transform.position = _currentTarget.position + _offset;
     }
 
-    public void Show(Transform target, string message) {
+    public void Show(Transform target, string message)
+    {
+        if (target == null)
+            return;
+
         _currentTarget = target;
         _text.text = message;
         _panel.SetActive(true);

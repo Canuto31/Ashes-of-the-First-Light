@@ -22,9 +22,9 @@ public class DoorController : MonoBehaviour
     [SerializeField] private float _speed = 2f;
 
     [Header("Timing")]
-    [SerializeField] private float _openDelay = 1.5f; // 👈 NUEVO
+    [SerializeField] private float _openDelay = 1.5f;
 
-    private bool _isOpen = false;
+    private bool _isOpen;
 
     private Vector3 _closedPosition;
     private Vector3 _openPosition;
@@ -37,19 +37,21 @@ public class DoorController : MonoBehaviour
         _closedPosition = transform.position;
         _closedRotation = transform.rotation;
 
-        if (_doorType == DoorType.Sliding)
+        switch (_doorType)
         {
-            _openPosition = _closedPosition + Vector3.up * _openHeight;
-        }
-        else if (_doorType == DoorType.Hinged)
-        {
-            _openRotation = _closedRotation * Quaternion.Euler(0f, 0f, _openAngle);
+            case DoorType.Sliding:
+                _openPosition = _closedPosition + Vector3.up * _openHeight;
+                break;
+            case DoorType.Hinged:
+                _openRotation = _closedRotation * Quaternion.Euler(0f, 0f, _openAngle);
+                break;
         }
     }
 
     public void Open()
     {
-        if (_isOpen) return;
+        if (_isOpen)
+            return;
 
         _isOpen = true;
         StartCoroutine(OpenWithDelay());
@@ -57,16 +59,16 @@ public class DoorController : MonoBehaviour
 
     private IEnumerator OpenWithDelay()
     {
-        // ⏳ Espera antes de abrir
         yield return new WaitForSeconds(_openDelay);
 
-        if (_doorType == DoorType.Sliding)
+        switch (_doorType)
         {
-            yield return StartCoroutine(OpenSliding());
-        }
-        else if (_doorType == DoorType.Hinged)
-        {
-            yield return StartCoroutine(OpenHinged());
+            case DoorType.Sliding:
+                yield return OpenSliding();
+                break;
+            case DoorType.Hinged:
+                yield return OpenHinged();
+                break;
         }
     }
 
@@ -77,15 +79,9 @@ public class DoorController : MonoBehaviour
         while (time < 1f)
         {
             time += Time.deltaTime * _speed;
+            float interpolation = Mathf.SmoothStep(0f, 1f, time);
 
-            float t = Mathf.SmoothStep(0f, 1f, time);
-
-            transform.position = Vector3.Lerp(
-                _closedPosition,
-                _openPosition,
-                t
-            );
-
+            transform.position = Vector3.Lerp(_closedPosition, _openPosition, interpolation);
             yield return null;
         }
 
@@ -99,15 +95,9 @@ public class DoorController : MonoBehaviour
         while (time < 1f)
         {
             time += Time.deltaTime * _speed;
+            float interpolation = Mathf.SmoothStep(0f, 1f, time);
 
-            float t = Mathf.SmoothStep(0f, 1f, time);
-
-            transform.rotation = Quaternion.Lerp(
-                _closedRotation,
-                _openRotation,
-                t
-            );
-
+            transform.rotation = Quaternion.Lerp(_closedRotation, _openRotation, interpolation);
             yield return null;
         }
 

@@ -4,9 +4,17 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerInputHandler))]
 public class PlayerController : MonoBehaviour
 {
+    private static readonly int AnimStateHash = Animator.StringToHash("AnimState");
+    private static readonly int RollHash = Animator.StringToHash("Roll");
+    private static readonly int AttackHash = Animator.StringToHash("Attack1");
+    private static readonly int JumpHash = Animator.StringToHash("Jump");
+    private static readonly int GroundedHash = Animator.StringToHash("Grounded");
+    private static readonly int AirSpeedYHash = Animator.StringToHash("AirSpeedY");
+
     private Rigidbody2D _rb;
     private PlayerInputHandler _input;
     private PlayerStateMachine _stateMachine;
+    private PlayerStamina _playerStamina;
 
     [Header("Movement")]
     public float maxSpeed = 6f;
@@ -68,8 +76,6 @@ public class PlayerController : MonoBehaviour
     private bool _wasGrounded;
     private bool _hasJumped;
     
-    private PlayerStamina _playerStamina;
-    
     [Header("Attack")]
     private bool _isAttacking;
 
@@ -86,8 +92,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!GameStateManager.Instance.IsPlaying()) return;
-        
+        if (!IsGameplayActive())
+            return;
+
         CheckGround();
         CheckWall();
         UpdateState();
@@ -104,7 +111,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!GameStateManager.Instance.IsPlaying())
+        if (!IsGameplayActive())
         {
             _rb.linearVelocity = Vector2.zero;
             return;
@@ -113,6 +120,11 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
         ApplyBetterGravity();
         HandleWallSlide();
+    }
+
+    private static bool IsGameplayActive()
+    {
+        return GameStateManager.Instance != null && GameStateManager.Instance.IsPlaying();
     }
 
     // --------------------
@@ -147,12 +159,14 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void HandleMovement()
     {
-        if (_isWallJumping || _isDashing) return;
+        if (_isWallJumping || _isDashing)
+            return;
 
         float currentSpeed = maxSpeed;
 
         if (_input.SprintHeld &&
             _input.MoveInput.x != 0 &&
+            _playerStamina != null &&
             _playerStamina.CanSprint)
         {
             currentSpeed *= sprintMultiplier;
@@ -173,7 +187,7 @@ public class PlayerController : MonoBehaviour
         
         if (_input.MoveInput.x != 0)
         {
-            animator.SetInteger("AnimState", 1);
+            animator.SetInteger(AnimStateHash, 1);
             if (_input.MoveInput.x < 0)
                 transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
             else
@@ -181,7 +195,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            animator.SetInteger("AnimState", 0);
+            animator.SetInteger(AnimStateHash, 0);
         }
     }
 
@@ -190,21 +204,16 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void TryDash()
     {
-        if (_input.DashPressed && CanDash())
-        {
-            StartDash();
-        }
+        if (!_input.DashPressed || !CanDash())
+            return;
+
+        StartDash();
     }
-    
+
     private bool CanDash()
     {
-        if (_playerStamina == null)
-            return false;
-
-        if (_playerStamina.CurrentStamina < dashStaminaCost)
-            return false;
-
-        return true;
+        return _playerStamina != null &&
+               _playerStamina.CurrentStamina >= dashStaminaCost;
     }
 
     private void StartDash()
@@ -213,36 +222,35 @@ public class PlayerController : MonoBehaviour
         _dashTimeCounter = dashDuration;
 
         float direction = Mathf.Sign(_input.MoveInput.x);
-        if (direction == 0) direction = transform.localScale.x;
+        if (Mathf.Approximately(direction, 0f))
+            direction = Mathf.Sign(transform.right.x);
 
         _playerStamina.DrainStamina(dashStaminaCost);
         _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
-        animator.SetTrigger("Roll");
+        animator.SetTrigger(RollHash);
     }
 
     private void HandleDash()
     {
-        if (_isDashing)
-        {
-            _dashTimeCounter -= Time.deltaTime;
+        if (!_isDashing)
+            return;
 
-            if (_dashTimeCounter <= 0f)
-            {
-                _isDashing = false;
-            }
-        }
+        _dashTimeCounter -= Time.deltaTime;
+
+        if (_dashTimeCounter <= 0f)
+            _isDashing = false;
     }
-    
+
     // --------------------
     // ATTACK
     // --------------------
     private void HandleAttack()
     {
-        if (_input.AttackPressed && !_isAttacking)
-        {
-            _isAttacking = true;
-            animator.SetTrigger("Attack1");
-        }
+        if (!_input.AttackPressed || _isAttacking)
+            return;
+
+        _isAttacking = true;
+        animator.SetTrigger(AttackHash);
     }
     
     public void EndAttack()
@@ -255,7 +263,8 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void HandleJump()
     {
-        if (_stateMachine.CurrentState == PlayerState.Dashing) return;
+        if (_stateMachine.CurrentState == PlayerState.Dashing)
+            return;
 
         // WALL JUMP
         if (_jumpBufferCounter > 0f && _isWallSliding)
@@ -294,7 +303,7 @@ public class PlayerController : MonoBehaviour
                 _rb.linearVelocityY * 0.5f
             );
             
-            animator.SetFloat("AirSpeedY", -1f);
+            animator.SetFloat(AirSpeedYHash, -1f);
         }
     }
 
@@ -303,7 +312,7 @@ public class PlayerController : MonoBehaviour
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
         _jumpBufferCounter = 0f;
         
-        animator.SetTrigger("Jump");
+        animator.SetTrigger(JumpHash);
     }
 
     // --------------------
@@ -339,15 +348,13 @@ public class PlayerController : MonoBehaviour
     // --------------------
     private void HandleWallJumpLock()
     {
-        if (_isWallJumping)
-        {
-            _wallJumpLockCounter -= Time.deltaTime;
+        if (!_isWallJumping)
+            return;
 
-            if (_wallJumpLockCounter <= 0f)
-            {
-                _isWallJumping = false;
-            }
-        }
+        _wallJumpLockCounter -= Time.deltaTime;
+
+        if (_wallJumpLockCounter <= 0f)
+            _isWallJumping = false;
     }
 
     // --------------------
@@ -371,9 +378,12 @@ public class PlayerController : MonoBehaviour
 
         bool touchingWallNow = hitRight || hitLeft;
 
-        if (hitRight) _wallDir = 1;
-        else if (hitLeft) _wallDir = -1;
-        else _wallDir = 0;
+        if (hitRight)
+            _wallDir = 1;
+        else if (hitLeft)
+            _wallDir = -1;
+        else
+            _wallDir = 0;
 
         if (touchingWallNow && !_wasTouchingWall && !_isGrounded)
         {
@@ -433,13 +443,13 @@ public class PlayerController : MonoBehaviour
         if (_isGrounded)
         {
             _coyoteTimeCounter = coyoteTime;
-            animator.SetBool("Grounded", true);
-            animator.SetFloat("AirSpeedY", 0f);
+            animator.SetBool(GroundedHash, true);
+            animator.SetFloat(AirSpeedYHash, 0f);
         }
         else
         {
             _coyoteTimeCounter -= Time.deltaTime;
-            animator.SetBool("Grounded", false);
+            animator.SetBool(GroundedHash, false);
         }
 
         _wasGrounded = _isGrounded;

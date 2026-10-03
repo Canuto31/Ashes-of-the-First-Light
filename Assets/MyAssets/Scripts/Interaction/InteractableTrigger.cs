@@ -5,7 +5,7 @@ public class InteractableTrigger : MonoBehaviour
     private IInteractable _interactable;
     private PlayerInputHandler _playerInput;
 
-    private bool _playerInside = false;
+    private bool _playerInside;
 
     private void Awake()
     {
@@ -14,12 +14,13 @@ public class InteractableTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player") || _interactable == null)
+            return;
 
         _playerInside = true;
         _playerInput = other.GetComponent<PlayerInputHandler>();
 
-        InteractionUIManager.Instance.Show(
+        InteractionUIManager.Instance?.Show(
             transform.parent,
             _interactable.GetInteractionText()
         );
@@ -29,25 +30,26 @@ public class InteractableTrigger : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         _playerInside = false;
         _playerInput = null;
 
-        InteractionUIManager.Instance.Clear();
+        InteractionUIManager.Instance?.Clear();
 
         //UI_Interaction.Instance.Hide();
     }
 
     private void Update()
     {
-        if (!GameStateManager.Instance.IsPlaying()) return;
-        
-        if (!_playerInside || _playerInput == null) return;
+        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
+            return;
+
+        if (!_playerInside || _playerInput == null || _interactable == null)
+            return;
 
         if (_playerInput.InteractPressed)
-        {
             _interactable.Interact();
-        }
     }
 }

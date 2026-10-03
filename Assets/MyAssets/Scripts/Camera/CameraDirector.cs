@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CameraDirector : MonoBehaviour
 {
-    public static CameraDirector Instance;
+    public static CameraDirector Instance { get; private set; }
 
     [Header("Main Player Camera")]
     [SerializeField] private CinemachineVirtualCamera _playerCamera;
@@ -13,24 +13,33 @@ public class CameraDirector : MonoBehaviour
     [SerializeField] private int _activePriority = 20;
     [SerializeField] private int _defaultPriority = 10;
 
-    private bool _isPlayingCinematic = false;
+    private bool _isPlayingCinematic;
     private Coroutine _currentRoutine;
+    private CinemachineVirtualCamera _currentTargetCamera;
 
     private void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
+        if (Instance != null && Instance != this)
+        {
             Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
     }
 
     public void FocusOn(CinemachineVirtualCamera targetCamera, float duration)
     {
+        if (targetCamera == null || _playerCamera == null)
+            return;
+
         if (_currentRoutine != null)
         {
             StopCoroutine(_currentRoutine);
+            RestorePlayerCamera();
         }
 
+        _currentTargetCamera = targetCamera;
         _currentRoutine = StartCoroutine(FocusRoutine(targetCamera, duration));
     }
 
@@ -38,27 +47,18 @@ public class CameraDirector : MonoBehaviour
     {
         _isPlayingCinematic = true;
 
-        Debug.Log("Switching to target camera");
-
-        // Activar cámara objetivo
         targetCamera.Priority = _activePriority;
         _playerCamera.Priority = _defaultPriority;
 
         yield return new WaitForSeconds(duration);
 
-        Debug.Log("Returning to player camera");
-
-        // Volver al jugador
-        targetCamera.Priority = _defaultPriority;
-        _playerCamera.Priority = _activePriority;
-
-        _isPlayingCinematic = false;
-        _currentRoutine = null;
+        RestorePlayerCamera();
     }
 
     public void SetCamera(CinemachineVirtualCamera targetCamera)
     {
-        if (_isPlayingCinematic) return;
+        if (_isPlayingCinematic || targetCamera == null || _playerCamera == null)
+            return;
 
         targetCamera.Priority = _activePriority;
         _playerCamera.Priority = _defaultPriority;
@@ -67,5 +67,18 @@ public class CameraDirector : MonoBehaviour
     public bool IsPlayingCinematic()
     {
         return _isPlayingCinematic;
+    }
+
+    private void RestorePlayerCamera()
+    {
+        if (_currentTargetCamera != null)
+            _currentTargetCamera.Priority = _defaultPriority;
+
+        if (_playerCamera != null)
+            _playerCamera.Priority = _activePriority;
+
+        _currentTargetCamera = null;
+        _isPlayingCinematic = false;
+        _currentRoutine = null;
     }
 }

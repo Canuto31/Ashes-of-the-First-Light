@@ -9,7 +9,13 @@ public class InventoryItemOptionUI : MonoBehaviour
 
     public void Setup(InventoryItem item)
     {
-        _icon.sprite = item.icon;
-        _title.text = item.itemName;
+        if (item == null)
+            return;
+
+        if (_icon != null)
+            _icon.sprite = item.icon;
+
+        if (_title != null)
+            _title.text = item.itemName;
     }
 }

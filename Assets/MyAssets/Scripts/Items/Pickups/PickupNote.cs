@@ -11,22 +11,22 @@ public class PickupNote : MonoBehaviour, IInteractable
 
     public string GetInteractionText()
     {
-        return _note.noteTitle;
+        return _note != null ? _note.noteTitle : "Read note";
     }
 
     public void Interact()
     {
-        if (!GameStateManager.Instance.IsPlaying())
+        if (_note == null || GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
             return;
 
-        NotesManager.Instance.AddNote(_note);
+        NotesManager.Instance?.AddNote(_note);
 
-        BookMenuManager.Instance.QueueContextPage(
+        BookMenuManager.Instance?.QueueContextPage(
             BookMenuManager.BookPage.Notes
         );
 
-        if (!TutorialManager.Instance.HasSeen(
-                _readingTutorial.tutorialId))
+        if (_readingTutorial != null && TutorialManager.Instance != null &&
+            !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId))
         {
             StartCoroutine(
                 FirstNoteSequence(_readingTutorial.tutorialId)
@@ -34,7 +34,7 @@ public class PickupNote : MonoBehaviour, IInteractable
         }
         else
         {
-            UI_Interaction.Instance.ShowTextTimed(
+            UI_Interaction.Instance?.ShowTextTimed(
                 _note.noteTitle + " acquired\nPress TAB to read",
                 2f
             );
@@ -45,7 +45,7 @@ public class PickupNote : MonoBehaviour, IInteractable
     
     private IEnumerator FirstNoteSequence(string tutorialId)
     {
-        TutorialUIManager.Instance.ShowTutorial(
+        TutorialUIManager.Instance?.ShowTutorial(
             _readingTutorial
         );
 
@@ -53,7 +53,7 @@ public class PickupNote : MonoBehaviour, IInteractable
             GameStateManager.Instance.IsPlaying()
         );
 
-        UI_Interaction.Instance.ShowTextTimed(
+        UI_Interaction.Instance?.ShowTextTimed(
             _note.noteTitle + " acquired\nPress TAB to read",
             2f
         );
