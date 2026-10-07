@@ -1,6 +1,7 @@
 # Hoja de ruta profesional para los scripts
 
-Fecha de revisión: 2026-10-06  
+Fecha de revisión: 2026-10-06
+
 Proyecto: **Ashes of the First Light**
 
 ## Propósito
@@ -149,8 +150,10 @@ Estados iniciales sugeridos:
 
 Si el número de estados permanece pequeño, conservar el enum y extraer una tabla de transición es válido. No hace falta adoptar State Pattern hasta que existan comportamientos de entrada, salida y actualización realmente distintos.
 
-**Estado:** pendiente.  
-**Impacto:** alto; requiere pruebas de movimiento y animación.  
+**Estado:** pendiente.
+
+**Impacto:** alto; requiere pruebas de movimiento y animación.
+
 **Conocimiento:** interfaces, composición, ciclo de Unity y pruebas PlayMode.
 
 ---
@@ -207,7 +210,8 @@ PlayerController
 5. Mover toda escritura de Animator a `PlayerAnimationDriver`.
 6. Añadir PlayMode tests para coyote time, buffer, doble salto y wall jump.
 
-**Estado:** organización interna implementada; separación por componentes pendiente.  
+**Estado:** organización interna implementada; separación por componentes pendiente.
+
 **Impacto:** alto; modifica el prefab Player y necesita migración controlada.
 
 ---
@@ -271,7 +275,8 @@ public interface IPlayerInput
 
 Los comandos discretos deberían consumirse una vez o publicarse a un responsable, no ser booleanos observables por cualquier sistema.
 
-**Estado:** Input System implementado; separación de contextos pendiente.  
+**Estado:** Input System implementado; separación de contextos pendiente.
+
 **Prioridad:** muy alta porque elimina conflictos reales.
 
 ---
