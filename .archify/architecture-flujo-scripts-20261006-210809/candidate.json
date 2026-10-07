@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Ashes of the First Light — flujo de scripts",
+    "output": ".archify/architecture-flujo-scripts-20261006-210809/flujo-scripts.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Canuto31/Ashes-of-the-First-Light.git",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "5475ab794455389e0157fcff8421f41570c78797"
+    },
+    "views": [
+      {
+        "id": "entrada_juego",
+        "label": "Entrada y gameplay",
+        "focus": ["dispositivos", "input_handler", "player_controller", "player_stats", "hud"],
+        "note": "Sigue una tecla desde Input System hasta movimiento, combate, stamina y HUD."
+      },
+      {
+        "id": "interaccion_e",
+        "label": "Interacción con E",
+        "focus": ["input_handler", "interaction_trigger", "interactables", "world_actions", "data_managers"],
+        "note": "Muestra el despacho por IInteractable hacia pickups, checkpoints y palancas."
+      },
+      {
+        "id": "libro_tutorial",
+        "label": "Libro y tutorial",
+        "focus": ["book_menu", "page_controllers", "data_managers", "tutorial_ui", "game_state"],
+        "note": "Recorre estados, páginas y datos de notas, inventario y tutoriales."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "dispositivos",
+      "type": "external",
+      "label": "Teclado y ratón",
+      "sublabel": "WASD, E, P, TAB, click y teclas debug",
+      "pos": [30, 300],
+      "size": [180, 68],
+      "sources": [{"path": "Assets/InputSystem_Actions.inputactions", "line": 1, "label": "Mapa de acciones"}]
+    },
+    {
+      "id": "input_handler",
+      "type": "backend",
+      "label": "PlayerInputHandler",
+      "sublabel": "Traduce acciones a valores y flags de un frame",
+      "pos": [376, 300],
+      "size": [190, 74],
+      "sources": [{"path": "Assets/MyAssets/Scripts/Player/Input/PlayerInputHandler.cs", "line": 57, "end_line": 126, "label": "Callbacks y reset"}]
+    },
+    {
+      "id": "game_state",
+      "type": "security",
+      "label": "GameStateManager",
+      "sublabel": "Playing · Tutorial · BookMenu",
+      "pos": [720, 300],
+      "size": [180, 68],
+      "sources": [{"path": "Assets/MyAssets/Scripts/Core/GameState/GameStateManager.cs", "line": 7, "end_line": 50, "label": "Estados y compuerta"}]
+    },
+    {
+      "id": "player_controller",
+      "type": "backend",
+      "label": "PlayerController",
+      "sublabel": "Movimiento, salto, dash, ataque y animación",
+      "pos": [350, 620],
+      "size": [200, 76],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Player/Controllers/PlayerController.cs", "line": 93, "end_line": 127, "label": "Bucle de gameplay"},
+        {"path": "Assets/MyAssets/Scripts/Player/Controllers/PlayerController.cs", "line": 165, "end_line": 233, "label": "Dash y ataque"},
+        {"path": "Assets/MyAssets/Scripts/Player/Controllers/PlayerController.cs", "line": 238, "end_line": 281, "label": "Saltos"}
+      ]
+    },
+    {
+      "id": "player_stats",
+      "type": "database",
+      "label": "Vida y stamina",
+      "sublabel": "PlayerHealth · PlayerStamina · eventos",
+      "pos": [720, 620],
+      "size": [190, 72],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Player/Components/PlayerHealth.cs", "line": 16, "end_line": 75, "label": "Vida y eventos"},
+        {"path": "Assets/MyAssets/Scripts/Player/Components/PlayerStamina.cs", "line": 24, "end_line": 94, "label": "Stamina y eventos"}
+      ]
+    },
+    {
+      "id": "hud",
+      "type": "frontend",
+      "label": "HUD",
+      "sublabel": "Vida · stamina · solar · quick slots",
+      "pos": [720, 800],
+      "size": [190, 72],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/UI/HUD/LifeHUD/LifeHUDController.cs", "line": 33, "end_line": 85, "label": "HUD de vida"},
+        {"path": "Assets/MyAssets/Scripts/UI/HUD/StaminaHUD/StaminaHUDController.cs", "line": 21, "end_line": 52, "label": "HUD de stamina"},
+        {"path": "Assets/MyAssets/Scripts/UI/HUD/SolarHUD/SolarHUDController.cs", "line": 21, "end_line": 79, "label": "HUD solar debug"}
+      ]
+    },
+    {
+      "id": "player_lamp",
+      "type": "backend",
+      "label": "PlayerLamp",
+      "sublabel": "Enciende y escala la luz del jugador",
+      "pos": [350, 900],
+      "size": [190, 70],
+      "sources": [{"path": "Assets/MyAssets/Scripts/Player/Controllers/PlayerLamp.cs", "line": 21, "end_line": 64, "label": "Control de lámpara"}]
+    },
+    {
+      "id": "light_reactive",
+      "type": "cloud",
+      "label": "Objetos reactivos a luz",
+      "sublabel": "Activa o desactiva targets por radio",
+      "pos": [720, 900],
+      "size": [200, 70],
+      "sources": [{"path": "Assets/MyAssets/Scripts/Environment/ReactiveObjets/LightReactiveObject.cs", "line": 14, "end_line": 61, "label": "Cálculo de alcance"}]
+    },
+    {
+      "id": "interaction_trigger",
+      "type": "backend",
+      "label": "InteractableTrigger",
+      "sublabel": "Detecta Player, muestra prompt y despacha E",
+      "pos": [350, 1180],
+      "size": [200, 74],
+      "sources": [{"path": "Assets/MyAssets/Scripts/Interaction/InteractableTrigger.cs", "line": 14, "end_line": 53, "label": "Trigger y despacho"}]
+    },
+    {
+      "id": "interactables",
+      "type": "backend",
+      "label": "IInteractable",
+      "sublabel": "Checkpoint · PickupItem · PickupNote · Lever",
+      "pos": [720, 1180],
+      "size": [210, 74],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Core/Interfaces/IInteractable.cs", "line": 1, "end_line": 5, "label": "Contrato"},
+        {"path": "Assets/MyAssets/Scripts/Items/Pickups/PickupNote.cs", "line": 15, "end_line": 62, "label": "Recoger nota"},
+        {"path": "Assets/MyAssets/Scripts/Environment/Levers/Lever.cs", "line": 37, "end_line": 66, "label": "Usar palanca"}
+      ]
+    },
+    {
+      "id": "world_actions",
+      "type": "cloud",
+      "label": "Acciones del mundo",
+      "sublabel": "Checkpoint · cámara Cinemachine · puerta",
+      "pos": [720, 1380],
+      "size": [200, 74],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Core/Managers/CheckpointManager.cs", "line": 20, "end_line": 39, "label": "Checkpoint"},
+        {"path": "Assets/MyAssets/Scripts/Camera/CameraDirector.cs", "line": 31, "end_line": 58, "label": "Foco de cámara"},
+        {"path": "Assets/MyAssets/Scripts/Environment/Doors/DoorController.cs", "line": 51, "end_line": 100, "label": "Apertura de puerta"}
+      ]
+    },
+    {
+      "id": "book_menu",
+      "type": "frontend",
+      "label": "BookMenuManager",
+      "sublabel": "Abre libro, cambia sección y página contextual",
+      "pos": [350, 1580],
+      "size": [210, 76],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/UI/BookMenu/BookMenuManager.cs", "line": 55, "end_line": 123, "label": "Entradas del libro"},
+        {"path": "Assets/MyAssets/Scripts/UI/BookMenu/BookMenuManager.cs", "line": 133, "end_line": 203, "label": "Abrir y navegar"},
+        {"path": "Assets/MyAssets/Scripts/UI/BookMenu/BookMenuManager.cs", "line": 207, "end_line": 223, "label": "Página contextual"}
+      ]
+    },
+    {
+      "id": "data_managers",
+      "type": "database",
+      "label": "Datos en memoria",
+      "sublabel": "PlayerInventory · NotesManager · TutorialManager",
+      "pos": [720, 1580],
+      "size": [210, 76],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Player/Inventory/PlayerInventory.cs", "line": 21, "end_line": 92, "label": "Inventario"},
+        {"path": "Assets/MyAssets/Scripts/Items/Notes/NotesManager.cs", "line": 23, "end_line": 43, "label": "Notas"},
+        {"path": "Assets/MyAssets/Scripts/Core/Managers/TutorialManager.cs", "line": 25, "end_line": 51, "label": "Tutoriales"}
+      ]
+    },
+    {
+      "id": "page_controllers",
+      "type": "frontend",
+      "label": "Controladores de páginas",
+      "sublabel": "Notas · tutoriales · inventario · ajustes",
+      "pos": [720, 1780],
+      "size": [215, 78],
+      "sources": [
+        {"path": "Assets/MyAssets/Scripts/Items/Notes/NotesPageController.cs", "line": 32, "end_line": 163, "label": "Página de notas"},
+        {"path": "Assets/MyAssets/Scripts/Items/Tutorials/TutorialPageController.cs", "line": 30, "end_line": 125, "label": "Página de tutoriales"},
+        {"path": "Assets/MyAssets/Scripts/UI/BookMenu/SettingsPageController.cs", "line": 19, "end_line": 102, "label": "Ajustes"}
+      ]
+    },
+    {
+      "id": "tutorial_ui",
+      "type": "frontend",
+      "label": "TutorialUIManager",
+      "sublabel": "Popup, pausa del gameplay y cierre con E",
+      "pos": [350, 1900],
+      "size": [210, 74],
+      "sources": [{"path": "Assets/MyAssets/Scripts/UI/Tutorials/TutorialUIManager.cs", "line": 33, "end_line": 95, "label": "Ciclo del popup"}]
+    }
+  ],
+  "connections": [
+    {"id": "hardware_input", "from": "dispositivos", "to": "input_handler", "label": "acciones performed / canceled", "variant": "emphasis"},
+    {"id": "input_player", "from": "input_handler", "to": "player_controller", "label": "Move, Jump, Dash, Sprint, Attack", "variant": "emphasis"},
+    {"id": "state_player", "from": "game_state", "to": "player_controller", "label": "solo Playing", "variant": "security"},
+    {"id": "player_stats_edge", "from": "player_controller", "to": "player_stats", "label": "dash consume stamina"},
+    {"id": "stats_hud", "from": "player_stats", "to": "hud", "label": "eventos de cambio"},
+    {"id": "input_debug_hud", "from": "input_handler", "to": "hud", "label": "controles debug", "variant": "dashed"},
+    {"id": "input_lamp", "from": "input_handler", "to": "player_lamp", "label": "I y también E", "variant": "dashed"},
+    {"id": "lamp_reactive", "from": "player_lamp", "to": "light_reactive", "label": "estado, posición y radio"},
+    {"id": "input_interaction", "from": "input_handler", "to": "interaction_trigger", "label": "InteractPressed", "variant": "emphasis"},
+    {"id": "state_interaction", "from": "game_state", "to": "interaction_trigger", "label": "solo Playing", "variant": "security"},
+    {"id": "trigger_dispatch", "from": "interaction_trigger", "to": "interactables", "label": "Interact()", "variant": "emphasis"},
+    {"id": "interactable_world", "from": "interactables", "to": "world_actions", "label": "guarda, enfoca y abre"},
+    {"id": "interactable_data", "from": "interactables", "to": "data_managers", "label": "añade item o nota"},
+    {"id": "note_context", "from": "interactables", "to": "book_menu", "label": "encola Notes por 2 s", "variant": "dashed"},
+    {"id": "note_tutorial", "from": "interactables", "to": "tutorial_ui", "label": "primer tutorial de lectura", "variant": "dashed"},
+    {"id": "input_book", "from": "input_handler", "to": "book_menu", "label": "P, TAB, E/Q y navegación", "variant": "emphasis"},
+    {"id": "state_book", "from": "book_menu", "to": "game_state", "label": "Playing ↔ BookMenu", "variant": "security"},
+    {"id": "book_pages", "from": "book_menu", "to": "page_controllers", "label": "activa y refresca página"},
+    {"id": "data_pages", "from": "data_managers", "to": "page_controllers", "label": "listas en memoria"},
+    {"id": "tutorial_state", "from": "tutorial_ui", "to": "game_state", "label": "Tutorial → Playing", "variant": "security"},
+    {"id": "tutorial_data", "from": "tutorial_ui", "to": "data_managers", "label": "desbloquea y marca visto"}
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Cruces de entrada importantes",
+      "items": [
+        "E interactúa, avanza la sección del libro y aumenta el radio de PlayerLamp.",
+        "W/S/A/D alimentan movimiento y navegación de páginas; el estado frena el movimiento físico.",
+        "P también lo lee GameMenuController, creando una posible carrera con BookMenuManager."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Rutas desconectadas detectadas",
+      "items": [
+        "CameraTrigger.TryActivate y CameraDirector.SetCamera no tienen llamadas activas en este conjunto.",
+        "NotesUIManager.OpenNote no es llamado por los scripts analizados.",
+        "PlayerHealth.OnDeath se emite, pero aquí no existe un suscriptor."
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Cómo explorar",
+      "items": [
+        "Selecciona un nodo para ver fuentes y rastrear Upstream o Downstream.",
+        "Usa PATH para seguir rutas dirigidas y las vistas superiores para aislar cada flujo.",
+        "Las referencias abren el archivo y las líneas verificadas en el commit fijado."
+      ]
+    }
+  ]
+}

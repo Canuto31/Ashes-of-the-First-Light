@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-07T02:12:19.018Z",
+  "specification": {
+    "path": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\candidate.json",
+    "sha256": "6b0d07125b732f44e662628bde6d47ac4f51f36be1af2089fbdc685896a327dc",
+    "bytes": 12652
+  },
+  "artifact": {
+    "path": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.html"
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "architecture",
+        "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\candidate.json",
+        "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "d702646a-6758-4c5b-a2f8-23001024fd8e",
+        "stage": "render",
+        "type": "architecture",
+        "input": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\candidate.json",
+        "output": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.html",
+        "error": "Architecture layout validation failed:\n- [composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[5] id \"input_debug_hud\" \"input_handler\" -> \"hud\" label \"controles debug\" segment 0 [529.1, 374] -> [529.1, 617] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.\n- [composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[19] id \"tutorial_state\" \"tutorial_ui\" -> \"game_state\" label \"Tutorial → Playing\" segment 3 [307.4, 480] -> [824, 480] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+        "diagnostics": [
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[5] id \"input_debug_hud\" \"input_handler\" -> \"hud\" label \"controles debug\" segment 0 [529.1, 374] -> [529.1, 617] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 1,
+              "id": "input_player",
+              "from": "input_handler",
+              "to": "player_controller"
+            },
+            "evidence": {
+              "label": "Move, Jump, Dash, Sprint, Attack",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 5,
+                "id": "input_debug_hud",
+                "from": "input_handler",
+                "to": "hud"
+              },
+              "segmentIndex": 0,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "input_player",
+                  "from": "input_handler",
+                  "to": "player_controller",
+                  "label": "Move, Jump, Dash, Sprint, Attack",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 1,
+                "label": "Move, Jump, Dash, Sprint, Attack",
+                "x": 393.75,
+                "y": 477,
+                "width": 163.6,
+                "height": 14,
+                "lx": 475.55,
+                "ly": 487
+              },
+              "from": [
+                529.0999999999999,
+                374
+              ],
+              "to": [
+                529.0999999999999,
+                617
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          },
+          {
+            "code": "composition/label-route-clearance",
+            "severity": "error",
+            "message": "[composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[19] id \"tutorial_state\" \"tutorial_ui\" -> \"game_state\" label \"Tutorial → Playing\" segment 3 [307.4, 480] -> [824, 480] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 1,
+              "id": "input_player",
+              "from": "input_handler",
+              "to": "player_controller"
+            },
+            "evidence": {
+              "label": "Move, Jump, Dash, Sprint, Attack",
+              "otherRelationship": {
+                "diagramType": "architecture",
+                "collection": "connections",
+                "index": 19,
+                "id": "tutorial_state",
+                "from": "tutorial_ui",
+                "to": "game_state"
+              },
+              "segmentIndex": 3,
+              "clearancePx": 0,
+              "minimumPx": 4,
+              "labelRect": {
+                "relation": {
+                  "id": "input_player",
+                  "from": "input_handler",
+                  "to": "player_controller",
+                  "label": "Move, Jump, Dash, Sprint, Attack",
+                  "variant": "emphasis"
+                },
+                "relationIndex": 1,
+                "label": "Move, Jump, Dash, Sprint, Attack",
+                "x": 393.75,
+                "y": 477,
+                "width": 163.6,
+                "height": 14,
+                "lx": 475.55,
+                "ly": 487
+              },
+              "from": [
+                307.44999999999993,
+                480
+              ],
+              "to": [
+                824,
+                480
+              ]
+            },
+            "supportedFixes": [
+              "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+            ]
+          }
+        ],
+        "provenance": "absent",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "diagnostics": [
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[5] id \"input_debug_hud\" \"input_handler\" -> \"hud\" label \"controles debug\" segment 0 [529.1, 374] -> [529.1, 617] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 1,
+        "id": "input_player",
+        "from": "input_handler",
+        "to": "player_controller"
+      },
+      "evidence": {
+        "label": "Move, Jump, Dash, Sprint, Attack",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 5,
+          "id": "input_debug_hud",
+          "from": "input_handler",
+          "to": "hud"
+        },
+        "segmentIndex": 0,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "input_player",
+            "from": "input_handler",
+            "to": "player_controller",
+            "label": "Move, Jump, Dash, Sprint, Attack",
+            "variant": "emphasis"
+          },
+          "relationIndex": 1,
+          "label": "Move, Jump, Dash, Sprint, Attack",
+          "x": 393.75,
+          "y": 477,
+          "width": 163.6,
+          "height": 14,
+          "lx": 475.55,
+          "ly": 487
+        },
+        "from": [
+          529.0999999999999,
+          374
+        ],
+        "to": [
+          529.0999999999999,
+          617
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    },
+    {
+      "code": "composition/label-route-clearance",
+      "severity": "error",
+      "message": "[composition/label-route-clearance] showcase architecture label \"Move, Jump, Dash, Sprint, Attack\" on connections[1] id \"input_player\" \"input_handler\" -> \"player_controller\" label \"Move, Jump, Dash, Sprint, Attack\" is 0px from connections[19] id \"tutorial_state\" \"tutorial_ui\" -> \"game_state\" label \"Tutorial → Playing\" segment 3 [307.4, 480] -> [824, 480] (label rect [394, 477, 164, 14]; minimum 4px) — adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 1,
+        "id": "input_player",
+        "from": "input_handler",
+        "to": "player_controller"
+      },
+      "evidence": {
+        "label": "Move, Jump, Dash, Sprint, Attack",
+        "otherRelationship": {
+          "diagramType": "architecture",
+          "collection": "connections",
+          "index": 19,
+          "id": "tutorial_state",
+          "from": "tutorial_ui",
+          "to": "game_state"
+        },
+        "segmentIndex": 3,
+        "clearancePx": 0,
+        "minimumPx": 4,
+        "labelRect": {
+          "relation": {
+            "id": "input_player",
+            "from": "input_handler",
+            "to": "player_controller",
+            "label": "Move, Jump, Dash, Sprint, Attack",
+            "variant": "emphasis"
+          },
+          "relationIndex": 1,
+          "label": "Move, Jump, Dash, Sprint, Attack",
+          "x": 393.75,
+          "y": 477,
+          "width": 163.6,
+          "height": 14,
+          "lx": 475.55,
+          "ly": 487
+        },
+        "from": [
+          307.44999999999993,
+          480
+        ],
+        "to": [
+          824,
+          480
+        ]
+      },
+      "supportedFixes": [
+        "adjust labelAt, labelDx, labelDy, or labelSegment; otherwise adjust the other relationship route/via/channel"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.finalize.json",
+    "summaryReceipt": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-10-07T02:12:20.035Z",
+  "durationMs": 1017,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.0.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-07T02:09:43.037Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

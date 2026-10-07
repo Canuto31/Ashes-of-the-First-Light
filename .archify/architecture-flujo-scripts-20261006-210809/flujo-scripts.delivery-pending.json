@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "command": "deliver",
+  "status": "pending",
+  "receiptId": "d702646a-6758-4c5b-a2f8-23001024fd8e",
+  "input": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\candidate.json",
+  "output": "D:\\Projects\\Unity\\Videogames\\ButterGames\\Ashes of the First Light\\.archify\\architecture-flujo-scripts-20261006-210809\\flujo-scripts.html"
+}
