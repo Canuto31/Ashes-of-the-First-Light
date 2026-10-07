@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates inventory page behavior and its Unity lifecycle.
+/// </summary>
 public class InventoryPageController : MonoBehaviour
 {
     [Header("Categories")] 

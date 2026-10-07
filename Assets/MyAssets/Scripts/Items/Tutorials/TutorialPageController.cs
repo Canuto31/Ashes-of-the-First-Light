@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial page behavior and its Unity lifecycle.
+/// </summary>
 public class TutorialPageController : MonoBehaviour
 {
     [Header("List")]

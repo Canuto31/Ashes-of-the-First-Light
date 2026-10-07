@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the base hudmodule component.
+/// </summary>
 public abstract class BaseHUDModule : MonoBehaviour
 {
     [SerializeField] protected CanvasGroup _canvasGroup;

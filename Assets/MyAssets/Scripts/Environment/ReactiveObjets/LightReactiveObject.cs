@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the light reactive object component.
+/// </summary>
 public class LightReactiveObject : MonoBehaviour
 {
     [Header("References")]

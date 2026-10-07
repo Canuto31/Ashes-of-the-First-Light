@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player input handler component.
+/// </summary>
 public class PlayerInputHandler : MonoBehaviour
 {
     private InputSystem_Actions _playerInputActions;

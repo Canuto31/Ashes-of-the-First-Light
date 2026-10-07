@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pause menu actions component.
+/// </summary>
 public class PauseMenuActions : MonoBehaviour
 {
     [SerializeField] private GameObject _player;

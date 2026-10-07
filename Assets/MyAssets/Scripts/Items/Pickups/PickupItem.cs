@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pickup item component.
+/// </summary>
 public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private InventoryItem _item;

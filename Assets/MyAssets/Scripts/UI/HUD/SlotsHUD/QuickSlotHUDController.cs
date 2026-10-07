@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates quick slot hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class QuickSlotHUDController : MonoBehaviour
 {
     [SerializeField] private QuickSlotUI[] _slots;

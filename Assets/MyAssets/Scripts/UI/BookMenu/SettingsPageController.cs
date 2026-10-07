@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates settings page behavior and its Unity lifecycle.
+/// </summary>
 public class SettingsPageController : MonoBehaviour
 {
     [Header("Options")]

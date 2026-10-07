@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player health component.
+/// </summary>
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]

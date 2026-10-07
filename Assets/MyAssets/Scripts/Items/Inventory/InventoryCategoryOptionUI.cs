@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Presents and updates inventory category option user-interface data.
+/// </summary>
 public class InventoryCategoryOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _text;

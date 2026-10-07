@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates game state state and operations for the game.
+/// </summary>
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance { get; private set; }

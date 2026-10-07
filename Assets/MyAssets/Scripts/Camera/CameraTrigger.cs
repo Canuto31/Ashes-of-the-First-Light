@@ -1,6 +1,9 @@
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the camera trigger component.
+/// </summary>
 public class CameraTrigger : MonoBehaviour
 {
     [Header("Camera")]

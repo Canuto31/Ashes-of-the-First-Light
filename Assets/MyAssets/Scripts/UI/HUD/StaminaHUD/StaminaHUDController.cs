@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates stamina hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class StaminaHUDController : BaseHUDModule
 {
     [SerializeField] private Image _staminaFill;

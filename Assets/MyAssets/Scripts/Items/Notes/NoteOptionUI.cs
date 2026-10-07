@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Presents and updates note option user-interface data.
+/// </summary>
 public class NoteOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _optionText;

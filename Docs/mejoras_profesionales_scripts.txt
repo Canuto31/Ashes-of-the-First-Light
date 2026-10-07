@@ -1,0 +1,241 @@
+ASHES OF THE FIRST LIGHT - PROPUESTA DE MEJORA PROFESIONAL
+============================================================
+
+Objetivo
+--------
+Elevar la base de código desde una estructura funcional de prototipo hacia una
+arquitectura mantenible para producción, sin perder la velocidad de iteración
+propia de Unity. Las recomendaciones están ordenadas para que puedan aplicarse
+gradualmente y con pruebas de regresión entre fases.
+
+
+1. ARQUITECTURA DEL PLAYER
+--------------------------
+
+Situación actual:
+PlayerController concentra movimiento, detección de suelo y paredes, salto,
+wall jump, dash, ataque, orientación visual y parámetros del Animator. Aunque
+ahora está organizado en métodos de responsabilidad única, la clase todavía
+tiene demasiadas razones para cambiar.
+
+Mejora recomendada:
+- PlayerMotor2D: movimiento horizontal y escritura sobre Rigidbody2D.
+- PlayerGroundSensor: consultas de suelo y paredes.
+- PlayerJumpAbility: buffer, coyote time, saltos extra y wall jump.
+- PlayerDashAbility: reglas, coste, duración e impulso del dash.
+- PlayerCombatController: solicitud y bloqueo de ataques.
+- PlayerAnimationDriver: única clase autorizada a escribir en Animator.
+- PlayerController: orquestador pequeño que coordina las capacidades.
+
+Para cumplir Dependency Inversion, las capacidades deberían depender de
+interfaces pequeñas (por ejemplo IPlayerInput, IStaminaSource e IMovementMotor)
+y no de singletons o implementaciones concretas. Esta migración requiere una
+fase controlada porque cambia la composición del prefab Player.
+
+
+2. INPUT Y CONTEXTOS DE CONTROL
+-------------------------------
+
+Problemas observados:
+- Una misma acción se consume desde varios Update independientes.
+- E activa interacción, navegación del libro y crecimiento temporal de lámpara.
+- P puede ser procesada por BookMenuManager y GameMenuController.
+- Inputs de depuración permanecen disponibles durante menús y tutoriales.
+
+Mejora recomendada:
+- Separar Action Maps: Gameplay, BookMenu, Tutorial y Debug.
+- Activar solo el mapa correspondiente al GameState actual.
+- Convertir PlayerInputHandler en un adaptador de entrada, no en almacenamiento
+  compartido de flags leído por cualquier sistema.
+- Publicar comandos o eventos con un único consumidor responsable.
+- Eliminar GameMenuController o fusionar su responsabilidad con BookMenuManager.
+- Compilar controles de depuración únicamente con UNITY_EDITOR o
+  DEVELOPMENT_BUILD.
+
+
+3. ESTADO GLOBAL DEL JUEGO
+--------------------------
+
+GameStateManager funciona como compuerta, pero sus consumidores consultan el
+singleton cada frame y no todos respetan el mismo estado.
+
+Mejora recomendada:
+- Publicar un evento OnStateChanged(previousState, newState).
+- Habilitar/deshabilitar sistemas al cambiar de estado en vez de consultar el
+  singleton continuamente.
+- Considerar una pila de estados/modales para evitar conflictos entre libro,
+  tutorial, pausa y futuras cinemáticas.
+- Definir con precisión si BookMenu equivale a Pause; actualmente ambos
+  conceptos están mezclados.
+
+
+4. SINGLETONS, DEPENDENCIAS Y ESCENAS
+-------------------------------------
+
+Existen numerosos Instance estáticos. Son prácticos al prototipar, pero ocultan
+dependencias, dificultan pruebas y vuelven sensible el orden de carga de escenas.
+
+Mejora recomendada:
+- Mantener como globales solo los servicios realmente persistentes.
+- Inyectar referencias de escena mediante componentes instaladores o un
+  composition root explícito.
+- Usar ScriptableObject event channels cuando productores y consumidores no
+  deban conocerse directamente.
+- Añadir validación de referencias en OnValidate y mensajes de error con contexto.
+- Definir una política consistente de DontDestroyOnLoad.
+
+
+5. INVENTARIO, NOTAS Y TUTORIALES
+---------------------------------
+
+Problemas observados:
+- TutorialManager y TutorialCodexManager mantienen responsabilidades duplicadas.
+- NotesUIManager y NotesPageController representan dos flujos de lectura; el
+  primero no tiene una llamada local a OpenNote.
+- InventoryPageController crea categorías, pero todavía no muestra InventoryEntry.
+- Las colecciones internas se devuelven directamente y pueden modificarse desde
+  consumidores externos.
+
+Mejora recomendada:
+- Consolidar cada dominio detrás de un único servicio.
+- Exponer IReadOnlyList<T> en consultas públicas.
+- Publicar eventos ItemAdded, ItemRemoved, NoteCollected y TutorialUnlocked.
+- Separar datos persistentes (IDs y cantidades) de ScriptableObjects de catálogo.
+- Diseñar versionado de guardado antes de agregar persistencia.
+- Completar el presenter de inventario con una vista filtrada por categoría.
+
+
+6. INTERACCIONES DEL MUNDO
+--------------------------
+
+IInteractable es una base correcta, pero GetInteractionText mezcla lógica con
+presentación y el trigger busca componentes en tiempo de ejecución.
+
+Mejora recomendada:
+- Usar un InteractionContext con actor, origen y servicios disponibles.
+- Devolver un InteractionResult tipado en lugar de ejecutar UI directamente.
+- Separar disponibilidad, texto de prompt y ejecución de la interacción.
+- Hacer que un único PlayerInteractionController seleccione el mejor objetivo.
+- Corregir CameraTrigger: TryActivate no forma parte de la ruta activa actual.
+
+
+7. CÁMARA Y SECUENCIAS
+----------------------
+
+CameraDirector resuelve un foco temporal, pero las secuencias de Lever coordinan
+tiempos, cámara, puerta y UI directamente.
+
+Mejora recomendada:
+- Representar secuencias con Timeline o con comandos cancelables.
+- Devolver handles/tokens desde CameraDirector para restauración determinista.
+- Definir qué ocurre si el objeto se destruye, cambia la escena o se inicia una
+  segunda secuencia.
+- Sustituir esperas mágicas por eventos explícitos de animación/estado.
+
+
+8. SALUD, STAMINA Y RECURSOS
+----------------------------
+
+Mejora recomendada:
+- Crear un componente ResourceValue reutilizable con máximo, valor actual y
+  evento de cambio, manteniendo reglas especializadas fuera del contenedor.
+- Usar interfaces de solo lectura para el HUD.
+- Definir la respuesta a OnDeath; actualmente el evento no tiene consumidor
+  dentro de esta base de scripts.
+- Evitar FindFirstObjectByType en HUD y proporcionar la dependencia de forma
+  explícita desde el composition root.
+
+
+9. UI Y PRESENTACIÓN
+--------------------
+
+Mejora recomendada:
+- Separar View (referencias Unity) de Presenter (estado y navegación).
+- Suscribirse a eventos en OnEnable y cancelar suscripciones en OnDisable.
+- Evitar reconstruir listas completas cuando solo cambia una selección.
+- Implementar pooling para opciones si las listas crecen.
+- Centralizar navegación, sonidos y feedback visual.
+- Unificar UI_Interaction e InteractionUIManager con responsabilidades claras:
+  prompt persistente frente a notificación temporal.
+
+
+10. SERIALIZACIÓN Y API PÚBLICA
+-------------------------------
+
+Mejora recomendada:
+- Migrar gradualmente campos public configurables a [SerializeField] private con
+  propiedades de solo lectura. Usar FormerlySerializedAs al renombrar campos.
+- Mantener APIs públicas únicamente cuando otro componente realmente las use.
+- Agregar rangos, Min y Tooltip a valores configurables del Inspector.
+- Agrupar configuraciones grandes en ScriptableObjects o structs serializables.
+- No renombrar campos serializados sin una estrategia de migración comprobada.
+
+
+11. PRUEBAS Y CALIDAD
+---------------------
+
+Prioridad alta:
+- EditMode tests para PlayerInventory, PlayerStateMachine y reglas de recursos.
+- PlayMode tests para salto, coyote time, wall jump, dash y cambio de estados.
+- Pruebas del flujo PickupNote -> Tutorial -> BookMenu.
+- Pruebas de carga de escena para verificar singletons y referencias.
+- Assembly Definitions para separar Runtime, UI y Tests.
+- Analizadores Roslyn, nullable reference types donde sea viable y reglas de
+  estilo compartidas mediante .editorconfig.
+- Pipeline CI que compile, ejecute tests y rechace warnings nuevos.
+
+
+12. RENDIMIENTO Y CICLO DE UNITY
+--------------------------------
+
+Mejora recomendada:
+- Reemplazar polling en Update por eventos cuando el dato cambia de forma discreta.
+- Mantener física exclusivamente en FixedUpdate y entrada/temporizadores en Update.
+- Evitar búsquedas globales en Start cuando las referencias pueden inyectarse.
+- Medir con Profiler antes de optimizar; documentar presupuestos de CPU y GC.
+- Revisar Instantiate/Destroy frecuentes en páginas y sustituirlos por pooling si
+  aparecen picos reales.
+
+
+13. DOCUMENTACIÓN Y CONVENCIONES
+--------------------------------
+
+Estándar sugerido:
+- Comentarios explican intención, restricciones y orden; no repiten el código.
+- XML documentation en contratos públicos y tipos con responsabilidad de dominio.
+- Regiones solo en clases extensas y por responsabilidad, no por cada método.
+- Nombres de métodos expresan comandos o consultas, nunca ambos.
+- Un archivo por tipo principal y carpetas alineadas con namespaces.
+- ADRs (Architecture Decision Records) para decisiones de estado, input,
+  persistencia y composición de escenas.
+
+
+PLAN DE ADOPCIÓN RECOMENDADO
+----------------------------
+
+Fase 1 - Seguridad:
+Tests del Player, input contextual, corrección de rutas duplicadas y OnDeath.
+
+Fase 2 - Dominios:
+Consolidar tutoriales/notas, completar inventario y definir eventos de dominio.
+
+Fase 3 - Player modular:
+Extraer sensores, motor, capacidades y adaptador de animación con migración de
+prefab y pruebas PlayMode.
+
+Fase 4 - Infraestructura:
+Assembly Definitions, CI, persistencia versionada y composition root.
+
+Fase 5 - Pulido:
+Profiling, pooling basado en evidencia, herramientas de diseñador y documentación.
+
+
+ALCANCE DE LA LIMPIEZA ACTUAL
+-----------------------------
+
+La limpieza realizada junto con este documento conserva campos serializados,
+valores iniciales y contratos públicos. Se normalizó la documentación de tipos
+y PlayerController fue reorganizado con callbacks de Unity mínimos, métodos de
+orquestación y responsabilidades internas explícitas. Las transformaciones
+arquitectónicas anteriores se proponen, pero no se ejecutan en esta entrega
+porque modificarían prefabs, referencias de Inspector o comportamiento runtime.

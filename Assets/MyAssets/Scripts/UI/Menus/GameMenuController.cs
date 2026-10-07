@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates game menu behavior and its Unity lifecycle.
+/// </summary>
 public class GameMenuController : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler _input;

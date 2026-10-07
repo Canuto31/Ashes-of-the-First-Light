@@ -1,6 +1,9 @@
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NoteData", menuName = "Game/NoteData")]
+/// <summary>
+/// Stores authored note content used at runtime.
+/// </summary>
 public class NoteData : ScriptableObject
 {
     [Header("Note Info")]

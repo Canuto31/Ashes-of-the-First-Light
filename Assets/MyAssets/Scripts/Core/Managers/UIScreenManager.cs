@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates uiscreen state and operations for the game.
+/// </summary>
 public class UIScreenManager : MonoBehaviour
 {
     [SerializeField] private GameObject _pauseMenu;

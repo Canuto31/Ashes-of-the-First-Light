@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates interaction uimanager state and operations for the game.
+/// </summary>
 public class InteractionUIManager : MonoBehaviour
 {
     public static InteractionUIManager Instance { get; private set; }

@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Presents and updates quick slot user-interface data.
+/// </summary>
 public class QuickSlotUI : MonoBehaviour
 {
     [Header("References")] 

@@ -2,6 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Presents and updates inventory item option user-interface data.
+/// </summary>
 public class InventoryItemOptionUI : MonoBehaviour
 {
     [SerializeField] private Image _icon;

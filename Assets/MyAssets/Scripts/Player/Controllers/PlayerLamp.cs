@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player lamp component.
+/// </summary>
 public class PlayerLamp : MonoBehaviour
 {
     [SerializeField] private Transform _lightTransform;

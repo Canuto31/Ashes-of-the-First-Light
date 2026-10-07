@@ -1,3 +1,6 @@
+/// <summary>
+/// Defines the available player state values used by the game.
+/// </summary>
 public enum PlayerState
 {
     Grounded,
@@ -7,6 +10,9 @@ public enum PlayerState
     Attacking
 }
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player state machine component.
+/// </summary>
 public class PlayerStateMachine
 {
     public PlayerState CurrentState { get; private set; }

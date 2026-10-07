@@ -2,6 +2,9 @@ using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the camera director component.
+/// </summary>
 public class CameraDirector : MonoBehaviour
 {
     public static CameraDirector Instance { get; private set; }

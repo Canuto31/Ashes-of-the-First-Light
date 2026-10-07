@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes state and operations for the game.
+/// </summary>
 public class NotesManager : MonoBehaviour
 {
     public static NotesManager Instance { get; private set; }

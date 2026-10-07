@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes page behavior and its Unity lifecycle.
+/// </summary>
 public class NotesPageController : MonoBehaviour
 {
     [Header("List")] 

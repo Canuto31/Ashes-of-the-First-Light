@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial codex state and operations for the game.
+/// </summary>
 public class TutorialCodexManager : MonoBehaviour
 {
     public static TutorialCodexManager Instance { get; private set; }

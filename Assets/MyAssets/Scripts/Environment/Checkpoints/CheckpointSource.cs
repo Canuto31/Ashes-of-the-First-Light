@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the checkpoint source component.
+/// </summary>
 public class CheckpointSource : MonoBehaviour, IInteractable
 {
     [SerializeField] private Transform _respawnPoint;

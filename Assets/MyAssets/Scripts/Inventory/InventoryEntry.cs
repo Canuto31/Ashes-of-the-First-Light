@@ -1,6 +1,9 @@
 using System;
 
 [Serializable]
+/// <summary>
+/// Provides the runtime behavior and data owned by the inventory entry component.
+/// </summary>
 public class InventoryEntry
 {
     public InventoryItem Item;

@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player stamina component.
+/// </summary>
 public class PlayerStamina : MonoBehaviour
 {
     [Header("Stamina")]

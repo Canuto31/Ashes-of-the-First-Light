@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes uimanager state and operations for the game.
+/// </summary>
 public class NotesUIManager : MonoBehaviour
 {
     public static NotesUIManager Instance { get; private set; }

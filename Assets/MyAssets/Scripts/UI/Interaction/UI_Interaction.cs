@@ -2,6 +2,9 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the ui interaction component.
+/// </summary>
 public class UI_Interaction : MonoBehaviour
 {
     public static UI_Interaction Instance { get; private set; }

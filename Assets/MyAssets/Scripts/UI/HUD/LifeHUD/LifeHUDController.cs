@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates life hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class LifeHUDController : BaseHUDModule
 {
     [Header("References")]

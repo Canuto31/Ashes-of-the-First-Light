@@ -3,6 +3,9 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial uimanager state and operations for the game.
+/// </summary>
 public class TutorialUIManager : MonoBehaviour
 {
     public static TutorialUIManager Instance { get; private set; }

@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the billboard component.
+/// </summary>
 public class Billboard : MonoBehaviour
 {
     private Camera _cam;

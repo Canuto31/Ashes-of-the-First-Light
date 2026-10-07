@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates solar hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class SolarHUDController : MonoBehaviour
 {
     [Header("Solar Fragments")]

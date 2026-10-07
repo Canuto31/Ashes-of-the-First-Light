@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+/// Coordinates book menu state and operations for the game.
+/// </summary>
 public class BookMenuManager : MonoBehaviour
 {
     [Header("References")]

@@ -1,6 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates door behavior and its Unity lifecycle.
+/// </summary>
 public class DoorController : MonoBehaviour
 {
     public enum DoorType

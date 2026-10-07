@@ -2,6 +2,9 @@ using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the lever component.
+/// </summary>
 public class Lever : MonoBehaviour, IInteractable
 {
     [Header("Camera")]

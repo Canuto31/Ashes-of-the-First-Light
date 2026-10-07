@@ -1,6 +1,9 @@
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the uiselectable option component.
+/// </summary>
 public class UISelectableOption : MonoBehaviour
 {
     [Header("References")]

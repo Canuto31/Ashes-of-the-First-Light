@@ -1,6 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pickup note component.
+/// </summary>
 public class PickupNote : MonoBehaviour, IInteractable
 {
     [SerializeField] 
