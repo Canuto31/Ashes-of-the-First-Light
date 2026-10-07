@@ -22,31 +22,41 @@ public class PickupNote : MonoBehaviour, IInteractable
         if (_note == null || GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
             return;
 
-        NotesManager.Instance?.AddNote(_note);
+        CollectNote();
 
-        BookMenuManager.Instance?.QueueContextPage(
-            BookMenuManager.BookPage.Notes
+        if (ShouldShowReadingTutorial())
+        {
+            StartCoroutine(FirstNoteSequence());
+            return;
+        }
+
+        CompletePickup();
+    }
+
+    private void CollectNote()
+    {
+        NotesManager.Instance?.AddNote(_note);
+        BookMenuManager.Instance?.QueueContextPage(BookMenuManager.BookPage.Notes);
+    }
+
+    private bool ShouldShowReadingTutorial()
+    {
+        return _readingTutorial != null &&
+               TutorialManager.Instance != null &&
+               !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId);
+    }
+
+    private void CompletePickup()
+    {
+        UI_Interaction.Instance?.ShowTextTimed(
+            _note.noteTitle + " acquired\nPress TAB to read",
+            2f
         );
 
-        if (_readingTutorial != null && TutorialManager.Instance != null &&
-            !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId))
-        {
-            StartCoroutine(
-                FirstNoteSequence(_readingTutorial.tutorialId)
-            );
-        }
-        else
-        {
-            UI_Interaction.Instance?.ShowTextTimed(
-                _note.noteTitle + " acquired\nPress TAB to read",
-                2f
-            );
-
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
     
-    private IEnumerator FirstNoteSequence(string tutorialId)
+    private IEnumerator FirstNoteSequence()
     {
         TutorialUIManager.Instance?.ShowTutorial(
             _readingTutorial
@@ -56,11 +66,6 @@ public class PickupNote : MonoBehaviour, IInteractable
             GameStateManager.Instance.IsPlaying()
         );
 
-        UI_Interaction.Instance?.ShowTextTimed(
-            _note.noteTitle + " acquired\nPress TAB to read",
-            2f
-        );
-
-        Destroy(gameObject);
+        CompletePickup();
     }
 }

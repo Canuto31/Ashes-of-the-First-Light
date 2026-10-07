@@ -44,13 +44,21 @@ public class TutorialPageController : MonoBehaviour
         if (_tutorialsContainer == null || _tutorialOptionPrefab == null || TutorialManager.Instance == null)
             return;
 
+        ClearSpawnedOptions();
+        PopulateTutorials();
+        SelectInitialTutorial();
+    }
+
+    private void ClearSpawnedOptions()
+    {
         foreach (Transform child in _tutorialsContainer)
-        {
             Destroy(child.gameObject);
-        }
 
         _spawnedOptions.Clear();
+    }
 
+    private void PopulateTutorials()
+    {
         _tutorials = TutorialManager.Instance.GetUnlockedTutorials();
 
         foreach (TutorialData tutorial in _tutorials)
@@ -70,14 +78,14 @@ public class TutorialPageController : MonoBehaviour
                 _spawnedOptions.Add(option);
         }
 
+    }
+
+    private void SelectInitialTutorial()
+    {
         if (_tutorials.Count > 0)
-        {
             SelectTutorial(0);
-        }
         else
-        {
             ClearContent();
-        }
     }
 
     private void ClearContent()

@@ -49,16 +49,25 @@ public class LifeHUDController : BaseHUDModule
 
     private void Update()
     {
+        UpdateHudVisuals();
+    }
+
+    private void UpdateHudVisuals()
+    {
         HandleDamageFlashFade();
-        
-        if (_lifeBarFill != null)
-        {
-            _lifeBarFill.fillAmount = Mathf.Lerp(
-                _lifeBarFill.fillAmount,
-                _targetFill,
-                smoothSpeed * Time.deltaTime
-            );
-        }
+        UpdateLifeBar();
+    }
+
+    private void UpdateLifeBar()
+    {
+        if (_lifeBarFill == null)
+            return;
+
+        _lifeBarFill.fillAmount = Mathf.Lerp(
+            _lifeBarFill.fillAmount,
+            _targetFill,
+            smoothSpeed * Time.deltaTime
+        );
     }
 
     private void OnDestroy()

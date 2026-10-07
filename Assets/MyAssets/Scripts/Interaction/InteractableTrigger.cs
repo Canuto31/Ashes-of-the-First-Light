@@ -46,13 +46,24 @@ public class InteractableTrigger : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
-            return;
+        HandleInteractionInput();
+    }
 
-        if (!_playerInside || _playerInput == null || _interactable == null)
+    private void HandleInteractionInput()
+    {
+        if (!IsInteractionAvailable())
             return;
 
         if (_playerInput.InteractPressed)
             _interactable.Interact();
+    }
+
+    private bool IsInteractionAvailable()
+    {
+        return GameStateManager.Instance != null &&
+               GameStateManager.Instance.IsPlaying() &&
+               _playerInside &&
+               _playerInput != null &&
+               _interactable != null;
     }
 }

@@ -235,7 +235,10 @@ ALCANCE DE LA LIMPIEZA ACTUAL
 
 La limpieza realizada junto con este documento conserva campos serializados,
 valores iniciales y contratos públicos. Se normalizó la documentación de tipos
-y PlayerController fue reorganizado con callbacks de Unity mínimos, métodos de
-orquestación y responsabilidades internas explícitas. Las transformaciones
-arquitectónicas anteriores se proponen, pero no se ejecutan en esta entrega
-porque modificarían prefabs, referencias de Inspector o comportamiento runtime.
+y se reorganizaron los controladores, managers y componentes con lógica
+compuesta: callbacks de Unity mínimos, métodos de orquestación, guard clauses y
+responsabilidades internas explícitas. Los tipos que solo representan datos,
+estados o vistas atómicas se mantuvieron deliberadamente compactos. Las
+transformaciones arquitectónicas anteriores se proponen, pero no se ejecutan
+en esta entrega porque modificarían prefabs, referencias de Inspector o
+comportamiento runtime.

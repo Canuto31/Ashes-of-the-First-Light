@@ -31,6 +31,11 @@ public class InteractionUIManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdatePromptPosition();
+    }
+
+    private void UpdatePromptPosition()
+    {
         if (_currentTarget == null)
             return;
 

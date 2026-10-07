@@ -38,8 +38,12 @@ public class NotesPageController : MonoBehaviour
             GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
-        HandleNoteNavigation();
+        HandleNavigationInput();
+    }
 
+    private void HandleNavigationInput()
+    {
+        HandleNoteNavigation();
         HandlePageNavigation();
     }
 
@@ -48,13 +52,21 @@ public class NotesPageController : MonoBehaviour
         if (_notesContainer == null || _notesOptionPrefab == null || NotesManager.Instance == null)
             return;
 
+        ClearSpawnedOptions();
+        PopulateNotes();
+        SelectInitialNote();
+    }
+
+    private void ClearSpawnedOptions()
+    {
         foreach (Transform child in _notesContainer)
-        {
             Destroy(child.gameObject);
-        }
-        
+
         _spawnOptions.Clear();
-        
+    }
+
+    private void PopulateNotes()
+    {
         _notes = NotesManager.Instance.GetNotes();
 
         foreach (NoteData note in _notes)
@@ -70,14 +82,14 @@ public class NotesPageController : MonoBehaviour
                 _spawnOptions.Add(option);
         }
 
+    }
+
+    private void SelectInitialNote()
+    {
         if (_notes.Count > 0)
-        {
             SelectNote(0);
-        }
         else
-        {
             ClearContent();
-        }
     }
 
     private void ClearContent()

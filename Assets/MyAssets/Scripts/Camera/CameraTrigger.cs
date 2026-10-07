@@ -58,8 +58,18 @@ public class CameraTrigger : MonoBehaviour
 
     private void Update()
     {
-        if (_requireInput && _playerInside && _playerInput != null && _interactable != null &&
-            _playerInput.InteractPressed)
+        HandleInteractionInput();
+    }
+
+    private void HandleInteractionInput()
+    {
+        if (!_requireInput || !_playerInside)
+            return;
+
+        if (_playerInput == null || _interactable == null)
+            return;
+
+        if (_playerInput.InteractPressed)
             _interactable.Interact();
     }
 

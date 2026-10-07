@@ -23,6 +23,11 @@ public class PlayerLamp : MonoBehaviour
 
     private void Update()
     {
+        HandleInput();
+    }
+
+    private void HandleInput()
+    {
         if (_input == null)
             return;
 

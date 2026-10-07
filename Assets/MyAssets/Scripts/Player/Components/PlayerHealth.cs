@@ -31,12 +31,17 @@ public class PlayerHealth : MonoBehaviour
 
     private void Update()
     {
+        HandleDebugInput();
+    }
+
+    private void HandleDebugInput()
+    {
         if (_input == null)
             return;
-        
+
         if (_input.IncreaseHealthPressed)
             Heal(10);
-        
+
         if (_input.DecreaseHealthPressed)
             TakeDamage(10);
     }

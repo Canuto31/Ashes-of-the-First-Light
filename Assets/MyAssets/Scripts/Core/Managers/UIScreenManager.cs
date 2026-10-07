@@ -18,19 +18,35 @@ public class UIScreenManager : MonoBehaviour
         if (GameStateManager.Instance == null || _pauseMenu == null)
             return;
 
-        bool shouldShowPauseMenu =
-            GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
+        UpdatePauseMenuVisibility();
+    }
+
+    private void UpdatePauseMenuVisibility()
+    {
+        bool shouldShowPauseMenu = IsBookMenuOpen();
 
         if (shouldShowPauseMenu)
         {
-            if (!_pauseMenu.activeSelf)
-            {
-                _pauseMenu.SetActive(true);
-                UI_Interaction.Instance?.Hide();
-                InteractionUIManager.Instance?.HideVisual();
-            }
+            ShowPauseMenu();
         }
         else if (_pauseMenu.activeSelf)
+        {
             _pauseMenu.SetActive(false);
+        }
+    }
+
+    private static bool IsBookMenuOpen()
+    {
+        return GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
+    }
+
+    private void ShowPauseMenu()
+    {
+        if (_pauseMenu.activeSelf)
+            return;
+
+        _pauseMenu.SetActive(true);
+        UI_Interaction.Instance?.Hide();
+        InteractionUIManager.Instance?.HideVisual();
     }
 }

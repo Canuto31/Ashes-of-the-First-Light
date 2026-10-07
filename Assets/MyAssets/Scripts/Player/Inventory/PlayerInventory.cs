@@ -29,17 +29,17 @@ public class PlayerInventory : MonoBehaviour
         InventoryEntry entry = GetEntry(item);
 
         if (entry != null)
-        {
             entry.Quantity += quantity;
-        }
         else
-        {
-            bool identified = item.category != InventoryCategory.Consumable;
-            
-            _items.Add(new InventoryEntry(item, quantity, identified));
-        }
+            AddNewEntry(item, quantity);
 
         Debug.Log($"Item collected: {item.itemName} x{quantity}");
+    }
+
+    private void AddNewEntry(InventoryItem item, int quantity)
+    {
+        bool identified = item.category != InventoryCategory.Consumable;
+        _items.Add(new InventoryEntry(item, quantity, identified));
     }
 
     public bool RemoveItem(InventoryItem item, int quantity = 1)
@@ -49,10 +49,7 @@ public class PlayerInventory : MonoBehaviour
 
         InventoryEntry entry = GetEntry(item);
 
-        if (entry == null)
-            return false;
-
-        if (entry.Quantity < quantity)
+        if (entry == null || entry.Quantity < quantity)
             return false;
         
         entry.Quantity -= quantity;

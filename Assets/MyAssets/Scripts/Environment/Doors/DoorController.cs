@@ -37,6 +37,11 @@ public class DoorController : MonoBehaviour
 
     private void Start()
     {
+        CacheDoorTransforms();
+    }
+
+    private void CacheDoorTransforms()
+    {
         _closedPosition = transform.position;
         _closedRotation = transform.rotation;
 

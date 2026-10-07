@@ -25,6 +25,11 @@ public class SettingsPageController : MonoBehaviour
             GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
+        HandleSettingsInput();
+    }
+
+    private void HandleSettingsInput()
+    {
         HandleNavigation();
         HandleConfirm();
     }

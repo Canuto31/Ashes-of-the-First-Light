@@ -46,11 +46,16 @@ public class Lever : MonoBehaviour, IInteractable
 
         if (!HasRequirement())
         {
-            InteractionUIManager.Instance?.Show(transform.parent, _missingMessage);
+            ShowMissingRequirement();
             return;
         }
 
         StartCoroutine(LeverSequence());
+    }
+
+    private void ShowMissingRequirement()
+    {
+        InteractionUIManager.Instance?.Show(transform.parent, _missingMessage);
     }
 
     private IEnumerator LeverSequence()

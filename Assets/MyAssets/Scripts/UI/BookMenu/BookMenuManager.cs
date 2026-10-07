@@ -60,10 +60,13 @@ public class BookMenuManager : MonoBehaviour
         if (_input == null || GameStateManager.Instance == null)
             return;
 
+        ProcessBookInput();
+    }
+
+    private void ProcessBookInput()
+    {
         UpdateContextPageTimer();
-
         HandleBookToggle();
-
         HandleContextPageOpen();
 
         if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)

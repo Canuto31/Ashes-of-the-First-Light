@@ -9,8 +9,15 @@ public class GameMenuController : MonoBehaviour
 
     private void Update()
     {
-        if (_input != null && _input.ToggleMenuPressed)
-            HandleMenu();
+        HandleMenuInput();
+    }
+
+    private void HandleMenuInput()
+    {
+        if (_input == null || !_input.ToggleMenuPressed)
+            return;
+
+        HandleMenu();
     }
 
     private void HandleMenu()

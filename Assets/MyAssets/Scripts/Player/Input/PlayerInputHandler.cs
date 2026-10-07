@@ -96,7 +96,12 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void LateUpdate()
     {
-        // Reset one-frame inputs after every consumer has had a chance to read them.
+        ResetFrameInput();
+    }
+
+    private void ResetFrameInput()
+    {
+        // Reset commands after every Update consumer has had a chance to read them.
         JumpPressed = false;
         DashPressed = false;
         AttackPressed = false;

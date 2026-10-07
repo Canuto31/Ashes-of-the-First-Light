@@ -38,13 +38,21 @@ public class InventoryPageController : MonoBehaviour
         if (_categoryContainer == null || _categoryOptionPrefab == null)
             return;
 
-        foreach (Transform child in _categoryContainer)
-        {
-            Destroy(child.gameObject);
-        }
-        
-        _categoryOptions.Clear();
+        ClearCategoryOptions();
+        PopulateCategoryOptions();
+        SelectCategory(0);
+    }
 
+    private void ClearCategoryOptions()
+    {
+        foreach (Transform child in _categoryContainer)
+            Destroy(child.gameObject);
+
+        _categoryOptions.Clear();
+    }
+
+    private void PopulateCategoryOptions()
+    {
         foreach (InventoryCategory category in _categories)
         {
             GameObject optionObj = Instantiate(_categoryOptionPrefab, _categoryContainer);
@@ -58,8 +66,6 @@ public class InventoryPageController : MonoBehaviour
             if (selectable != null)
                 _categoryOptions.Add(selectable);
         }
-
-        SelectCategory(0);
     }
 
     private void SelectCategory(int index)

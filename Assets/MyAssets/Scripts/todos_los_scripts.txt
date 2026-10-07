@@ -2,6 +2,9 @@ using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the camera director component.
+/// </summary>
 public class CameraDirector : MonoBehaviour
 {
     public static CameraDirector Instance { get; private set; }
@@ -82,14 +85,18 @@ public class CameraDirector : MonoBehaviour
         _currentRoutine = null;
     }
 }
+
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the camera trigger component.
+/// </summary>
 public class CameraTrigger : MonoBehaviour
 {
     [Header("Camera")]
     [SerializeField] private CinemachineVirtualCamera _cameraTarget;
-    
+
     [Header("Settings")]
     [SerializeField] private float _duration = 2f;
     [SerializeField] private bool _triggerOnce = true;
@@ -108,7 +115,7 @@ public class CameraTrigger : MonoBehaviour
         _interactable = GetComponentInParent<IInteractable>();
     }
 
-    private void OnTriggerEnter2D(Collider2D other) 
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
@@ -126,7 +133,7 @@ public class CameraTrigger : MonoBehaviour
         }*/
     }
 
-    private void OnTriggerExit2D(Collider2D other) 
+    private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
             return;
@@ -139,8 +146,18 @@ public class CameraTrigger : MonoBehaviour
 
     private void Update()
     {
-        if (_requireInput && _playerInside && _playerInput != null && _interactable != null &&
-            _playerInput.InteractPressed)
+        HandleInteractionInput();
+    }
+
+    private void HandleInteractionInput()
+    {
+        if (!_requireInput || !_playerInside)
+            return;
+
+        if (_playerInput == null || _interactable == null)
+            return;
+
+        if (_playerInput.InteractPressed)
             _interactable.Interact();
     }
 
@@ -160,8 +177,12 @@ public class CameraTrigger : MonoBehaviour
         _hasTriggered = true;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates game state state and operations for the game.
+/// </summary>
 public class GameStateManager : MonoBehaviour
 {
     public static GameStateManager Instance { get; private set; }
@@ -211,13 +232,21 @@ public class GameStateManager : MonoBehaviour
         return _currentState == GameState.Playing;
     }
 }
+
+/// <summary>
+/// Defines the contract implemented by iinteractable objects.
+/// </summary>
 public interface IInteractable
 {
     void Interact();
     string GetInteractionText();
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates checkpoint state and operations for the game.
+/// </summary>
 public class CheckpointManager : MonoBehaviour
 {
     public static CheckpointManager Instance { get; private set; }
@@ -238,7 +267,7 @@ public class CheckpointManager : MonoBehaviour
     public void SetCheckpoint(Vector3 position)
     {
         _lastCheckpointPosition = position;
-        
+
         Debug.Log("Checkpoint saved at: " + position);
     }
 
@@ -256,9 +285,13 @@ public class CheckpointManager : MonoBehaviour
         Debug.Log("Returned to checkpoint");
     }
 }
+
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial codex state and operations for the game.
+/// </summary>
 public class TutorialCodexManager : MonoBehaviour
 {
     public static TutorialCodexManager Instance { get; private set; }
@@ -272,7 +305,7 @@ public class TutorialCodexManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         Instance = this;
     }
 
@@ -288,15 +321,19 @@ public class TutorialCodexManager : MonoBehaviour
     {
         return _unlockedTutorials;
     }
-    
+
     public bool HasTutorial(TutorialData tutorial)
     {
         return tutorial != null && _unlockedTutorials.Contains(tutorial);
     }
 }
+
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial state and operations for the game.
+/// </summary>
 public class TutorialManager : MonoBehaviour
 {
     public static TutorialManager Instance { get; private set; }
@@ -345,8 +382,12 @@ public class TutorialManager : MonoBehaviour
         return _unlockedTutorials;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates uiscreen state and operations for the game.
+/// </summary>
 public class UIScreenManager : MonoBehaviour
 {
     [SerializeField] private GameObject _pauseMenu;
@@ -362,24 +403,44 @@ public class UIScreenManager : MonoBehaviour
         if (GameStateManager.Instance == null || _pauseMenu == null)
             return;
 
-        bool shouldShowPauseMenu =
-            GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
+        UpdatePauseMenuVisibility();
+    }
+
+    private void UpdatePauseMenuVisibility()
+    {
+        bool shouldShowPauseMenu = IsBookMenuOpen();
 
         if (shouldShowPauseMenu)
         {
-            if (!_pauseMenu.activeSelf)
-            {
-                _pauseMenu.SetActive(true);
-                UI_Interaction.Instance?.Hide();
-                InteractionUIManager.Instance?.HideVisual();
-            }
+            ShowPauseMenu();
         }
         else if (_pauseMenu.activeSelf)
+        {
             _pauseMenu.SetActive(false);
+        }
+    }
+
+    private static bool IsBookMenuOpen()
+    {
+        return GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
+    }
+
+    private void ShowPauseMenu()
+    {
+        if (_pauseMenu.activeSelf)
+            return;
+
+        _pauseMenu.SetActive(true);
+        UI_Interaction.Instance?.Hide();
+        InteractionUIManager.Instance?.HideVisual();
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the billboard component.
+/// </summary>
 public class Billboard : MonoBehaviour
 {
     private Camera _cam;
@@ -397,8 +458,12 @@ public class Billboard : MonoBehaviour
         transform.forward = _cam.transform.forward;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the checkpoint source component.
+/// </summary>
 public class CheckpointSource : MonoBehaviour, IInteractable
 {
     [SerializeField] private Transform _respawnPoint;
@@ -419,9 +484,13 @@ public class CheckpointSource : MonoBehaviour, IInteractable
         UI_Interaction.Instance?.ShowTextTimed("Checkpoint saved", 1.5f);
     }
 }
+
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates door behavior and its Unity lifecycle.
+/// </summary>
 public class DoorController : MonoBehaviour
 {
     public enum DoorType
@@ -454,6 +523,11 @@ public class DoorController : MonoBehaviour
     private Quaternion _openRotation;
 
     private void Start()
+    {
+        CacheDoorTransforms();
+    }
+
+    private void CacheDoorTransforms()
     {
         _closedPosition = transform.position;
         _closedRotation = transform.rotation;
@@ -525,10 +599,14 @@ public class DoorController : MonoBehaviour
         transform.rotation = _openRotation;
     }
 }
+
 using System.Collections;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the lever component.
+/// </summary>
 public class Lever : MonoBehaviour, IInteractable
 {
     [Header("Camera")]
@@ -548,7 +626,7 @@ public class Lever : MonoBehaviour, IInteractable
     {
         if (_requiredItem == null)
             return true;
-        
+
         return PlayerInventory.Instance != null && PlayerInventory.Instance.HasItem(_requiredItem);
     }
 
@@ -570,11 +648,16 @@ public class Lever : MonoBehaviour, IInteractable
 
         if (!HasRequirement())
         {
-            InteractionUIManager.Instance?.Show(transform.parent, _missingMessage);
+            ShowMissingRequirement();
             return;
         }
 
         StartCoroutine(LeverSequence());
+    }
+
+    private void ShowMissingRequirement()
+    {
+        InteractionUIManager.Instance?.Show(transform.parent, _missingMessage);
     }
 
     private IEnumerator LeverSequence()
@@ -592,8 +675,12 @@ public class Lever : MonoBehaviour, IInteractable
         }
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the light reactive object component.
+/// </summary>
 public class LightReactiveObject : MonoBehaviour
 {
     [Header("References")]
@@ -607,10 +694,20 @@ public class LightReactiveObject : MonoBehaviour
 
     private void Update()
     {
-        if (_playerLamp == null || _targets == null || _targets.Length == 0)
+        RefreshTargetStates();
+    }
+
+    private void RefreshTargetStates()
+    {
+        if (!HasValidConfiguration())
             return;
 
         SetTargetsActive(ShouldTargetsBeActive());
+    }
+
+    private bool HasValidConfiguration()
+    {
+        return _playerLamp != null && _targets != null && _targets.Length > 0;
     }
 
     private bool ShouldTargetsBeActive()
@@ -663,8 +760,12 @@ public class LightReactiveObject : MonoBehaviour
         }
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the interactable trigger component.
+/// </summary>
 public class InteractableTrigger : MonoBehaviour
 {
     private IInteractable _interactable;
@@ -708,16 +809,31 @@ public class InteractableTrigger : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
-            return;
+        HandleInteractionInput();
+    }
 
-        if (!_playerInside || _playerInput == null || _interactable == null)
+    private void HandleInteractionInput()
+    {
+        if (!IsInteractionAvailable())
             return;
 
         if (_playerInput.InteractPressed)
             _interactable.Interact();
     }
+
+    private bool IsInteractionAvailable()
+    {
+        return GameStateManager.Instance != null &&
+               GameStateManager.Instance.IsPlaying() &&
+               _playerInside &&
+               _playerInput != null &&
+               _interactable != null;
+    }
 }
+
+/// <summary>
+/// Defines the available inventory category values used by the game.
+/// </summary>
 public enum InventoryCategory
 {
     All,
@@ -726,9 +842,13 @@ public enum InventoryCategory
     KeyItem,
     Material
 }
+
 using System;
 
 [Serializable]
+/// <summary>
+/// Provides the runtime behavior and data owned by the inventory entry component.
+/// </summary>
 public class InventoryEntry
 {
     public InventoryItem Item;
@@ -742,24 +862,32 @@ public class InventoryEntry
         Identified = identified;
     }
 }
+
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Game/Inventory Item")]
+/// <summary>
+/// Provides the runtime behavior and data owned by the inventory item component.
+/// </summary>
 public class InventoryItem : ScriptableObject
 {
     public string itemId;
     public string itemName;
     public Sprite icon;
 
-    [Header("Inventory")] 
+    [Header("Inventory")]
     public InventoryCategory category;
 
-    [TextArea] 
+    [TextArea]
     public string description;
 }
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "NoteData", menuName = "Game/NoteData")]
+/// <summary>
+/// Stores authored note content used at runtime.
+/// </summary>
 public class NoteData : ScriptableObject
 {
     [Header("Note Info")]
@@ -768,9 +896,13 @@ public class NoteData : ScriptableObject
     [TextArea(5, 10)]
     public string[] pages;
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Presents and updates inventory category option user-interface data.
+/// </summary>
 public class InventoryCategoryOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _text;
@@ -781,10 +913,14 @@ public class InventoryCategoryOptionUI : MonoBehaviour
             _text.text = title;
     }
 }
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Presents and updates inventory item option user-interface data.
+/// </summary>
 public class InventoryItemOptionUI : MonoBehaviour
 {
     [SerializeField] private Image _icon;
@@ -802,9 +938,13 @@ public class InventoryItemOptionUI : MonoBehaviour
             _title.text = item.itemName;
     }
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Presents and updates note option user-interface data.
+/// </summary>
 public class NoteOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _optionText;
@@ -815,15 +955,19 @@ public class NoteOptionUI : MonoBehaviour
             _optionText.text = title;
     }
 }
+
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes state and operations for the game.
+/// </summary>
 public class NotesManager : MonoBehaviour
 {
     public static NotesManager Instance { get; private set; }
 
     private readonly List<NoteData> _notes = new();
-    
+
     private NoteData _lastCollectedNote;
 
     private void Awake()
@@ -858,16 +1002,20 @@ public class NotesManager : MonoBehaviour
         return _lastCollectedNote;
     }
 }
+
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes page behavior and its Unity lifecycle.
+/// </summary>
 public class NotesPageController : MonoBehaviour
 {
-    [Header("List")] 
+    [Header("List")]
     [SerializeField] private Transform _notesContainer;
     [SerializeField] private GameObject _notesOptionPrefab;
-    
+
     [Header("Content")]
     [SerializeField] private TextMeshProUGUI _titleText;
     [SerializeField] private TextMeshProUGUI _contentText;
@@ -885,7 +1033,7 @@ public class NotesPageController : MonoBehaviour
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
-        
+
         RefreshNotes();
     }
 
@@ -895,8 +1043,12 @@ public class NotesPageController : MonoBehaviour
             GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
-        HandleNoteNavigation();
+        HandleNavigationInput();
+    }
 
+    private void HandleNavigationInput()
+    {
+        HandleNoteNavigation();
         HandlePageNavigation();
     }
 
@@ -905,19 +1057,27 @@ public class NotesPageController : MonoBehaviour
         if (_notesContainer == null || _notesOptionPrefab == null || NotesManager.Instance == null)
             return;
 
+        ClearSpawnedOptions();
+        PopulateNotes();
+        SelectInitialNote();
+    }
+
+    private void ClearSpawnedOptions()
+    {
         foreach (Transform child in _notesContainer)
-        {
             Destroy(child.gameObject);
-        }
-        
+
         _spawnOptions.Clear();
-        
+    }
+
+    private void PopulateNotes()
+    {
         _notes = NotesManager.Instance.GetNotes();
 
         foreach (NoteData note in _notes)
         {
             GameObject optionObj = Instantiate(_notesOptionPrefab, _notesContainer);
-            
+
             UISelectableOption option = optionObj.GetComponent<UISelectableOption>();
             NoteOptionUI optionUI = optionObj.GetComponent<NoteOptionUI>();
 
@@ -927,14 +1087,14 @@ public class NotesPageController : MonoBehaviour
                 _spawnOptions.Add(option);
         }
 
+    }
+
+    private void SelectInitialNote()
+    {
         if (_notes.Count > 0)
-        {
             SelectNote(0);
-        }
         else
-        {
             ClearContent();
-        }
     }
 
     private void ClearContent()
@@ -950,7 +1110,7 @@ public class NotesPageController : MonoBehaviour
             return;
 
         _currentNoteIndex = index;
-        
+
         _currentPageIndex = 0;
 
         UpdateVisuals();
@@ -963,7 +1123,7 @@ public class NotesPageController : MonoBehaviour
         for (int i = 0; i < _spawnOptions.Count; i++)
         {
             bool selected = i == _currentNoteIndex;
-            
+
             _spawnOptions[i].SetSelected(selected);
         }
     }
@@ -972,7 +1132,7 @@ public class NotesPageController : MonoBehaviour
     {
         if (_notes == null || _notes.Count == 0)
             return;
-        
+
         NoteData note = _notes[_currentNoteIndex];
 
         if (note == null || note.pages == null || note.pages.Length == 0)
@@ -980,11 +1140,11 @@ public class NotesPageController : MonoBehaviour
             ClearContent();
             return;
         }
-        
+
         _titleText.text = note.noteTitle;
-        
+
         _contentText.text = note.pages[_currentPageIndex];
-        
+
         _pageIndicatorText.text = (_currentPageIndex + 1) + " / " + note.pages.Length;
     }
 
@@ -1007,7 +1167,7 @@ public class NotesPageController : MonoBehaviour
     {
         if (_notes == null || _notes.Count == 0)
             return;
-        
+
         NoteData note = _notes[_currentNoteIndex];
 
         if (note == null || note.pages == null || note.pages.Length == 0)
@@ -1018,7 +1178,7 @@ public class NotesPageController : MonoBehaviour
             if (_currentPageIndex < note.pages.Length - 1)
             {
                 _currentPageIndex++;
-            
+
                 UpdateContent();
             }
         }
@@ -1027,7 +1187,7 @@ public class NotesPageController : MonoBehaviour
             if (_currentPageIndex > 0)
             {
                 _currentPageIndex--;
-                
+
                 UpdateContent();
             }
         }
@@ -1039,7 +1199,7 @@ public class NotesPageController : MonoBehaviour
 
         if (lastNote == null || _notes == null)
             return;
-        
+
         int index = _notes.IndexOf(lastNote);
 
         if (index >= 0)
@@ -1048,15 +1208,19 @@ public class NotesPageController : MonoBehaviour
         }
     }
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates notes uimanager state and operations for the game.
+/// </summary>
 public class NotesUIManager : MonoBehaviour
 {
     public static NotesUIManager Instance { get; private set; }
-    
+
     [SerializeField] private PlayerInputHandler _input;
-    
+
     [Header("UI")]
     [SerializeField] private GameObject _panel;
     [SerializeField] private TextMeshProUGUI _titleText;
@@ -1119,13 +1283,13 @@ public class NotesUIManager : MonoBehaviour
         _currentPage = 0;
 
         UpdateUI();
-        
+
         _panel.SetActive(true);
-        
+
         GameStateManager.Instance.SetState(GameStateManager.GameState.BookMenu);
-        
+
         _ignoreInputThisFrame = true;
-        
+
         UI_Interaction.Instance?.Hide();
         InteractionUIManager.Instance?.HideVisual();
     }
@@ -1133,7 +1297,7 @@ public class NotesUIManager : MonoBehaviour
     private void CloseNote()
     {
         _panel.SetActive(false);
-        
+
         GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
     }
 
@@ -1171,8 +1335,12 @@ public class NotesUIManager : MonoBehaviour
         _pageIndicator.text = (_currentPage + 1) + "/" + _currentNote.pages.Length;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pickup item component.
+/// </summary>
 public class PickupItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private InventoryItem _item;
@@ -1194,14 +1362,18 @@ public class PickupItem : MonoBehaviour, IInteractable
         Destroy(gameObject);
     }
 }
+
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pickup note component.
+/// </summary>
 public class PickupNote : MonoBehaviour, IInteractable
 {
-    [SerializeField] 
+    [SerializeField]
     private NoteData _note;
-    
+
     [SerializeField]
     private TutorialData _readingTutorial;
 
@@ -1215,31 +1387,41 @@ public class PickupNote : MonoBehaviour, IInteractable
         if (_note == null || GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
             return;
 
-        NotesManager.Instance?.AddNote(_note);
+        CollectNote();
 
-        BookMenuManager.Instance?.QueueContextPage(
-            BookMenuManager.BookPage.Notes
+        if (ShouldShowReadingTutorial())
+        {
+            StartCoroutine(FirstNoteSequence());
+            return;
+        }
+
+        CompletePickup();
+    }
+
+    private void CollectNote()
+    {
+        NotesManager.Instance?.AddNote(_note);
+        BookMenuManager.Instance?.QueueContextPage(BookMenuManager.BookPage.Notes);
+    }
+
+    private bool ShouldShowReadingTutorial()
+    {
+        return _readingTutorial != null &&
+               TutorialManager.Instance != null &&
+               !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId);
+    }
+
+    private void CompletePickup()
+    {
+        UI_Interaction.Instance?.ShowTextTimed(
+            _note.noteTitle + " acquired\nPress TAB to read",
+            2f
         );
 
-        if (_readingTutorial != null && TutorialManager.Instance != null &&
-            !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId))
-        {
-            StartCoroutine(
-                FirstNoteSequence(_readingTutorial.tutorialId)
-            );
-        }
-        else
-        {
-            UI_Interaction.Instance?.ShowTextTimed(
-                _note.noteTitle + " acquired\nPress TAB to read",
-                2f
-            );
-
-            Destroy(gameObject);
-        }
+        Destroy(gameObject);
     }
-    
-    private IEnumerator FirstNoteSequence(string tutorialId)
+
+    private IEnumerator FirstNoteSequence()
     {
         TutorialUIManager.Instance?.ShowTutorial(
             _readingTutorial
@@ -1249,36 +1431,39 @@ public class PickupNote : MonoBehaviour, IInteractable
             GameStateManager.Instance.IsPlaying()
         );
 
-        UI_Interaction.Instance?.ShowTextTimed(
-            _note.noteTitle + " acquired\nPress TAB to read",
-            2f
-        );
-
-        Destroy(gameObject);
+        CompletePickup();
     }
 }
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "TutorialData", menuName = "Game/TutorialData")]
+/// <summary>
+/// Stores authored tutorial content used at runtime.
+/// </summary>
 public class TutorialData : ScriptableObject
 {
     public string tutorialId;
 
-    [Header("Book")] 
+    [Header("Book")]
     public string title;
 
-    [TextArea(3, 10)] 
+    [TextArea(3, 10)]
     public string description;
-    
+
     [Header("Popup")]
     [TextArea(2, 5)]
     public string popupMessage;
 
     public Sprite icon;
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Presents and updates tutorial option user-interface data.
+/// </summary>
 public class TutorialOptionUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _optionText;
@@ -1289,10 +1474,14 @@ public class TutorialOptionUI : MonoBehaviour
             _optionText.text = title;
     }
 }
+
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial page behavior and its Unity lifecycle.
+/// </summary>
 public class TutorialPageController : MonoBehaviour
 {
     [Header("List")]
@@ -1332,13 +1521,21 @@ public class TutorialPageController : MonoBehaviour
         if (_tutorialsContainer == null || _tutorialOptionPrefab == null || TutorialManager.Instance == null)
             return;
 
+        ClearSpawnedOptions();
+        PopulateTutorials();
+        SelectInitialTutorial();
+    }
+
+    private void ClearSpawnedOptions()
+    {
         foreach (Transform child in _tutorialsContainer)
-        {
             Destroy(child.gameObject);
-        }
 
         _spawnedOptions.Clear();
+    }
 
+    private void PopulateTutorials()
+    {
         _tutorials = TutorialManager.Instance.GetUnlockedTutorials();
 
         foreach (TutorialData tutorial in _tutorials)
@@ -1358,14 +1555,14 @@ public class TutorialPageController : MonoBehaviour
                 _spawnedOptions.Add(option);
         }
 
+    }
+
+    private void SelectInitialTutorial()
+    {
         if (_tutorials.Count > 0)
-        {
             SelectTutorial(0);
-        }
         else
-        {
             ClearContent();
-        }
     }
 
     private void ClearContent()
@@ -1424,8 +1621,12 @@ public class TutorialPageController : MonoBehaviour
         }
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player animation events component.
+/// </summary>
 public class PlayerAnimationEvents : MonoBehaviour
 {
     private PlayerController _playerController;
@@ -1441,21 +1642,25 @@ public class PlayerAnimationEvents : MonoBehaviour
             _playerController.EndAttack();
     }
 }
+
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player health component.
+/// </summary>
 public class PlayerHealth : MonoBehaviour
 {
     [Header("Health")]
     [SerializeField] private float _maxHealth = 100f;
-    
+
     private PlayerInputHandler _input;
-    
+
     private float _currentHealth;
 
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => _maxHealth;
-    
+
     public event Action<float, float> OnHealthChanged;
     public event Action OnDeath;
     public event Action OnDamageTaken;
@@ -1463,7 +1668,7 @@ public class PlayerHealth : MonoBehaviour
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
-        
+
         _currentHealth = _maxHealth;
 
         NotifyHealthChanged();
@@ -1471,12 +1676,17 @@ public class PlayerHealth : MonoBehaviour
 
     private void Update()
     {
+        HandleDebugInput();
+    }
+
+    private void HandleDebugInput()
+    {
         if (_input == null)
             return;
-        
+
         if (_input.IncreaseHealthPressed)
             Heal(10);
-        
+
         if (_input.DecreaseHealthPressed)
             TakeDamage(10);
     }
@@ -1517,9 +1727,13 @@ public class PlayerHealth : MonoBehaviour
         OnDeath?.Invoke();
     }
 }
+
 using System;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player stamina component.
+/// </summary>
 public class PlayerStamina : MonoBehaviour
 {
     [Header("Stamina")]
@@ -1537,7 +1751,7 @@ public class PlayerStamina : MonoBehaviour
     public float CurrentStamina => _currentStamina;
     public float MaxStamina => _maxstamina;
     public bool IsExhausted => _isExhausted;
-    
+
     public bool CanSprint => !_isExhausted;
 
     public event Action<float, float> OnStaminaChanged;
@@ -1545,7 +1759,7 @@ public class PlayerStamina : MonoBehaviour
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
-        
+
         _currentStamina = _maxstamina;
 
         NotifyStaminaChanged();
@@ -1613,12 +1827,17 @@ public class PlayerStamina : MonoBehaviour
         OnStaminaChanged?.Invoke(_currentStamina, _maxstamina);
     }
 }
+
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PlayerInputHandler))]
+/// <summary>
+/// Coordinates player behavior and its Unity lifecycle.
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
+    // Animator hashes are cached once to avoid repeated string lookups at runtime.
     private static readonly int AnimStateHash = Animator.StringToHash("AnimState");
     private static readonly int RollHash = Animator.StringToHash("Roll");
     private static readonly int AttackHash = Animator.StringToHash("Attack1");
@@ -1626,6 +1845,7 @@ public class PlayerController : MonoBehaviour
     private static readonly int GroundedHash = Animator.StringToHash("Grounded");
     private static readonly int AirSpeedYHash = Animator.StringToHash("AirSpeedY");
 
+    // Runtime dependencies cached during initialization.
     private Rigidbody2D _rb;
     private PlayerInputHandler _input;
     private PlayerStateMachine _stateMachine;
@@ -1690,12 +1910,14 @@ public class PlayerController : MonoBehaviour
     private bool _isGrounded;
     private bool _wasGrounded;
     private bool _hasJumped;
-    
+
     [Header("Attack")]
     private bool _isAttacking;
 
     [SerializeField]
     private Animator animator;
+
+    #region Unity Lifecycle
 
     private void Awake()
     {
@@ -1710,70 +1932,104 @@ public class PlayerController : MonoBehaviour
         if (!IsGameplayActive())
             return;
 
-        CheckGround();
-        CheckWall();
-        UpdateState();
-
-        UpdateJumpBuffer();
-        HandleWallJumpLock();
-        HandleDash();
-        HandleJump();
-
-        TryDash();
-
-        HandleAttack();
+        ProcessGameplayFrame();
     }
 
     private void FixedUpdate()
     {
         if (!IsGameplayActive())
         {
-            _rb.linearVelocity = Vector2.zero;
+            StopPhysicsMovement();
             return;
         }
-        
+
+        ProcessPhysicsFrame();
+    }
+
+    #endregion
+
+    #region Frame Orchestration
+
+    /// <summary>
+    /// Coordinates frame-based gameplay systems. Keeping orchestration here makes
+    /// Unity's Update callback easy to scan while each subsystem owns one concern.
+    /// </summary>
+    private void ProcessGameplayFrame()
+    {
+        RefreshEnvironmentState();
+        UpdateAbilityTimers();
+        ProcessActionInput();
+    }
+
+    /// <summary>
+    /// Coordinates all Rigidbody changes from Unity's fixed-timestep loop.
+    /// </summary>
+    private void ProcessPhysicsFrame()
+    {
         HandleMovement();
         ApplyBetterGravity();
         HandleWallSlide();
     }
+
+    private void RefreshEnvironmentState()
+    {
+        // State selection depends on the latest ground and wall observations.
+        CheckGround();
+        CheckWall();
+        UpdateState();
+    }
+
+    private void UpdateAbilityTimers()
+    {
+        UpdateJumpBuffer();
+        HandleWallJumpLock();
+        HandleDash();
+    }
+
+    private void ProcessActionInput()
+    {
+        // Preserve the original action order because abilities share velocity and state.
+        HandleJump();
+        TryDash();
+        HandleAttack();
+    }
+
+    private void StopPhysicsMovement()
+    {
+        _rb.linearVelocity = Vector2.zero;
+    }
+
+    #endregion
+
+    #region Game State
 
     private static bool IsGameplayActive()
     {
         return GameStateManager.Instance != null && GameStateManager.Instance.IsPlaying();
     }
 
-    // --------------------
-    // STATE MACHINE
-    // --------------------
     private void UpdateState()
     {
+        // Transient abilities have priority over general locomotion states.
         if (_isDashing)
-        {
             _stateMachine.ChangeState(PlayerState.Dashing);
-        }
         else if (_isWallSliding)
-        {
             _stateMachine.ChangeState(PlayerState.WallSliding);
-        }
         else if (!_isGrounded)
-        {
             _stateMachine.ChangeState(PlayerState.Airborne);
-        }
         else if (_isAttacking)
-        {
             _stateMachine.ChangeState(PlayerState.Attacking);
-        }
         else
-        {
             _stateMachine.ChangeState(PlayerState.Grounded);
-        }
     }
 
-    // --------------------
-    // MOVEMENT
-    // --------------------
+    #endregion
+
+    #region Movement
+
     private void HandleMovement()
     {
+        // Dash and wall-jump impulses temporarily own horizontal velocity.
         if (_isWallJumping || _isDashing)
             return;
 
@@ -1788,25 +2044,24 @@ public class PlayerController : MonoBehaviour
         }
 
         float targetSpeed = _input.MoveInput.x * currentSpeed;
-        
         float speedDiff = targetSpeed - _rb.linearVelocityX;
-
         float accelRate = Mathf.Abs(targetSpeed) > 0.01f ? acceleration : deceleration;
-
         float movement = speedDiff * accelRate;
 
         _rb.linearVelocity = new Vector2(
             _rb.linearVelocityX + movement * Time.fixedDeltaTime,
             _rb.linearVelocityY
         );
-        
+
+        UpdateMovementVisuals();
+    }
+
+    private void UpdateMovementVisuals()
+    {
         if (_input.MoveInput.x != 0)
         {
             animator.SetInteger(AnimStateHash, 1);
-            if (_input.MoveInput.x < 0)
-                transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-            else
-                transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            FaceMovementDirection();
         }
         else
         {
@@ -1814,167 +2069,51 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // --------------------
-    // DASH
-    // --------------------
-    private void TryDash()
+    private void FaceMovementDirection()
     {
-        if (!_input.DashPressed || !CanDash())
-            return;
-
-        StartDash();
+        if (_input.MoveInput.x < 0)
+            transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+        else
+            transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
     }
 
-    private bool CanDash()
+    #endregion
+
+    #region Environment Detection
+
+    private void CheckGround()
     {
-        return _playerStamina != null &&
-               _playerStamina.CurrentStamina >= dashStaminaCost;
-    }
+        bool groundedNow = Physics2D.OverlapCircle(
+            groundCheck.position,
+            groundCheckRadius,
+            groundLayer
+        );
 
-    private void StartDash()
-    {
-        _isDashing = true;
-        _dashTimeCounter = dashDuration;
-
-        float direction = Mathf.Sign(_input.MoveInput.x);
-        if (Mathf.Approximately(direction, 0f))
-            direction = Mathf.Sign(transform.right.x);
-
-        _playerStamina.DrainStamina(dashStaminaCost);
-        _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
-        animator.SetTrigger(RollHash);
-    }
-
-    private void HandleDash()
-    {
-        if (!_isDashing)
-            return;
-
-        _dashTimeCounter -= Time.deltaTime;
-
-        if (_dashTimeCounter <= 0f)
-            _isDashing = false;
-    }
-
-    // --------------------
-    // ATTACK
-    // --------------------
-    private void HandleAttack()
-    {
-        if (!_input.AttackPressed || _isAttacking)
-            return;
-
-        _isAttacking = true;
-        animator.SetTrigger(AttackHash);
-    }
-    
-    public void EndAttack()
-    {
-        _isAttacking = false;
-    }
-
-    // --------------------
-    // JUMP
-    // --------------------
-    private void HandleJump()
-    {
-        if (_stateMachine.CurrentState == PlayerState.Dashing)
-            return;
-
-        // WALL JUMP
-        if (_jumpBufferCounter > 0f && _isWallSliding)
+        // Landing restores the base jump and all configured extra jumps.
+        if (groundedNow && !_wasGrounded)
         {
-            _rb.linearVelocity = new Vector2(
-                -_wallDir * wallJumpForceX,
-                wallJumpForceY
-            );
-
-            _isWallJumping = true;
-            _wallJumpLockCounter = wallJumpLockTime;
-
-            _jumpBufferCounter = 0f;
-            return;
+            _extraJumpsRemaining = maxExtraJumps;
+            _hasJumped = false;
         }
 
-        // SALTO BASE
-        if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f && !_hasJumped)
+        _isGrounded = groundedNow;
+
+        if (_isGrounded)
         {
-            Jump();
-            _hasJumped = true;
-            _coyoteTimeCounter = 0f;
-        }
-        // DOUBLE JUMP
-        else if (_jumpBufferCounter > 0f && _extraJumpsRemaining > 0 && !_isGrounded)
-        {
-            Jump();
-            _extraJumpsRemaining--;
-        }
-
-        // CORTE
-        if (!_input.JumpHeld && _rb.linearVelocityY > 0)
-        {
-            _rb.linearVelocity = new Vector2(
-                _rb.linearVelocityX,
-                _rb.linearVelocityY * 0.5f
-            );
-            
-            animator.SetFloat(AirSpeedYHash, -1f);
-        }
-    }
-
-    private void Jump()
-    {
-        _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
-        _jumpBufferCounter = 0f;
-        
-        animator.SetTrigger(JumpHash);
-    }
-
-    // --------------------
-    // WALL SLIDE
-    // --------------------
-    private void HandleWallSlide()
-    {
-        float inputDir = _input.MoveInput.x;
-
-        bool pushingToWall = _isTouchingWall && inputDir == _wallDir;
-
-        if (pushingToWall && !_isGrounded && _rb.linearVelocityY < 0)
-        {
-            _isWallSliding = true;
-
-            _rb.linearVelocity = new Vector2(
-                _rb.linearVelocityX,
-                -wallSlideSpeed
-            );
-            
-            /*animator.SetBool("WallSlide", true);
-            animator.SetFloat("AirSpeedY", -1f);*/
+            // Refresh coyote time continuously while the player is grounded.
+            _coyoteTimeCounter = coyoteTime;
+            animator.SetBool(GroundedHash, true);
+            animator.SetFloat(AirSpeedYHash, 0f);
         }
         else
         {
-            _isWallSliding = false;
-            //animator.SetBool("WallSlide", false);
+            _coyoteTimeCounter -= Time.deltaTime;
+            animator.SetBool(GroundedHash, false);
         }
+
+        _wasGrounded = _isGrounded;
     }
 
-    // --------------------
-    // WALL LOCK
-    // --------------------
-    private void HandleWallJumpLock()
-    {
-        if (!_isWallJumping)
-            return;
-
-        _wallJumpLockCounter -= Time.deltaTime;
-
-        if (_wallJumpLockCounter <= 0f)
-            _isWallJumping = false;
-    }
-
-    // --------------------
-    // WALL CHECK
-    // --------------------
     private void CheckWall()
     {
         bool hitRight = Physics2D.Raycast(
@@ -2000,35 +2139,95 @@ public class PlayerController : MonoBehaviour
         else
             _wallDir = 0;
 
+        // First contact with a wall refreshes aerial jump resources.
         if (touchingWallNow && !_wasTouchingWall && !_isGrounded)
-        {
             _extraJumpsRemaining = maxExtraJumps;
-        }
 
         _isTouchingWall = touchingWallNow;
         _wasTouchingWall = touchingWallNow;
     }
 
-    // --------------------
-    // BUFFER
-    // --------------------
+    #endregion
+
+    #region Jump
+
     private void UpdateJumpBuffer()
     {
+        // Buffering accepts a jump pressed shortly before a valid jump opportunity.
         if (_input.JumpPressed)
-        {
             _jumpBufferCounter = jumpBufferTime;
-        }
         else
-        {
             _jumpBufferCounter -= Time.deltaTime;
+    }
+
+    private void HandleJump()
+    {
+        if (_stateMachine.CurrentState == PlayerState.Dashing)
+            return;
+
+        if (TryWallJump())
+            return;
+
+        TryStandardJump();
+        ApplyVariableJumpHeight();
+    }
+
+    private bool TryWallJump()
+    {
+        if (_jumpBufferCounter <= 0f || !_isWallSliding)
+            return false;
+
+        _rb.linearVelocity = new Vector2(
+            -_wallDir * wallJumpForceX,
+            wallJumpForceY
+        );
+
+        _isWallJumping = true;
+        _wallJumpLockCounter = wallJumpLockTime;
+        _jumpBufferCounter = 0f;
+        return true;
+    }
+
+    private void TryStandardJump()
+    {
+        // Coyote time allows the base jump shortly after leaving a platform.
+        if (_jumpBufferCounter > 0f && _coyoteTimeCounter > 0f && !_hasJumped)
+        {
+            Jump();
+            _hasJumped = true;
+            _coyoteTimeCounter = 0f;
+        }
+        else if (_jumpBufferCounter > 0f && _extraJumpsRemaining > 0 && !_isGrounded)
+        {
+            Jump();
+            _extraJumpsRemaining--;
         }
     }
 
-    // --------------------
-    // GRAVITY
-    // --------------------
+    private void ApplyVariableJumpHeight()
+    {
+        // Releasing jump during ascent produces a shorter, more responsive jump.
+        if (_input.JumpHeld || _rb.linearVelocityY <= 0)
+            return;
+
+        _rb.linearVelocity = new Vector2(
+            _rb.linearVelocityX,
+            _rb.linearVelocityY * 0.5f
+        );
+
+        animator.SetFloat(AirSpeedYHash, -1f);
+    }
+
+    private void Jump()
+    {
+        _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
+        _jumpBufferCounter = 0f;
+        animator.SetTrigger(JumpHash);
+    }
+
     private void ApplyBetterGravity()
     {
+        // Additional downward gravity sharpens the fall without changing the ascent.
         if (_rb.linearVelocityY < 0 && !_isDashing)
         {
             _rb.linearVelocity += Vector2.up * Physics2D.gravity.y *
@@ -2036,42 +2235,116 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // --------------------
-    // GROUND
-    // --------------------
-    private void CheckGround()
+    #endregion
+
+    #region Wall Movement
+
+    private void HandleWallSlide()
     {
-        bool groundedNow = Physics2D.OverlapCircle(
-            groundCheck.position,
-            groundCheckRadius,
-            groundLayer
-        );
+        float inputDir = _input.MoveInput.x;
+        bool pushingToWall = _isTouchingWall && inputDir == _wallDir;
 
-        if (groundedNow && !_wasGrounded)
+        if (pushingToWall && !_isGrounded && _rb.linearVelocityY < 0)
         {
-            _extraJumpsRemaining = maxExtraJumps;
-            _hasJumped = false;
-        }
+            _isWallSliding = true;
+            _rb.linearVelocity = new Vector2(_rb.linearVelocityX, -wallSlideSpeed);
 
-        _isGrounded = groundedNow;
-
-        if (_isGrounded)
-        {
-            _coyoteTimeCounter = coyoteTime;
-            animator.SetBool(GroundedHash, true);
-            animator.SetFloat(AirSpeedYHash, 0f);
+            // Reserved for a future dedicated wall-slide animation state.
+            /*animator.SetBool("WallSlide", true);
+            animator.SetFloat("AirSpeedY", -1f);*/
         }
         else
         {
-            _coyoteTimeCounter -= Time.deltaTime;
-            animator.SetBool(GroundedHash, false);
+            _isWallSliding = false;
+            //animator.SetBool("WallSlide", false);
         }
-
-        _wasGrounded = _isGrounded;
     }
+
+    private void HandleWallJumpLock()
+    {
+        if (!_isWallJumping)
+            return;
+
+        // Prevent standard movement from immediately cancelling the wall-jump impulse.
+        _wallJumpLockCounter -= Time.deltaTime;
+
+        if (_wallJumpLockCounter <= 0f)
+            _isWallJumping = false;
+    }
+
+    #endregion
+
+    #region Dash
+
+    private void TryDash()
+    {
+        if (!_input.DashPressed || !CanDash())
+            return;
+
+        StartDash();
+    }
+
+    private bool CanDash()
+    {
+        return _playerStamina != null &&
+               _playerStamina.CurrentStamina >= dashStaminaCost;
+    }
+
+    private void StartDash()
+    {
+        _isDashing = true;
+        _dashTimeCounter = dashDuration;
+
+        // Use movement input first; otherwise dash in the facing direction.
+        float direction = Mathf.Sign(_input.MoveInput.x);
+        if (Mathf.Approximately(direction, 0f))
+            direction = Mathf.Sign(transform.right.x);
+
+        _playerStamina.DrainStamina(dashStaminaCost);
+        _rb.linearVelocity = new Vector2(direction * dashForce, 0f);
+        animator.SetTrigger(RollHash);
+    }
+
+    private void HandleDash()
+    {
+        if (!_isDashing)
+            return;
+
+        _dashTimeCounter -= Time.deltaTime;
+
+        if (_dashTimeCounter <= 0f)
+            _isDashing = false;
+    }
+
+    #endregion
+
+    #region Combat
+
+    private void HandleAttack()
+    {
+        if (!_input.AttackPressed || _isAttacking)
+            return;
+
+        _isAttacking = true;
+        animator.SetTrigger(AttackHash);
+    }
+
+    /// <summary>
+    /// Releases the attack lock. Intended to be called by an animation event.
+    /// </summary>
+    public void EndAttack()
+    {
+        _isAttacking = false;
+    }
+
+    #endregion
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player lamp component.
+/// </summary>
 public class PlayerLamp : MonoBehaviour
 {
     [SerializeField] private Transform _lightTransform;
@@ -2091,6 +2364,11 @@ public class PlayerLamp : MonoBehaviour
     }
 
     private void Update()
+    {
+        HandleInput();
+    }
+
+    private void HandleInput()
     {
         if (_input == null)
             return;
@@ -2149,9 +2427,13 @@ public class PlayerLamp : MonoBehaviour
         Gizmos.DrawWireSphere(_lightTransform.position, radius);
     }
 }
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player input handler component.
+/// </summary>
 public class PlayerInputHandler : MonoBehaviour
 {
     private InputSystem_Actions _playerInputActions;
@@ -2244,7 +2526,12 @@ public class PlayerInputHandler : MonoBehaviour
 
     private void LateUpdate()
     {
-        // Reset one-frame inputs after every consumer has had a chance to read them.
+        ResetFrameInput();
+    }
+
+    private void ResetFrameInput()
+    {
+        // Reset commands after every Update consumer has had a chance to read them.
         JumpPressed = false;
         DashPressed = false;
         AttackPressed = false;
@@ -2261,13 +2548,13 @@ public class PlayerInputHandler : MonoBehaviour
         ConfirmPressed = false;
 
         OpenItemPressed = false;
-        
+
         IncreaseHealthPressed = false;
         DecreaseHealthPressed = false;
-        
+
         RestoreSolarEnergyPressed = false;
         ConsumeSolarEnergyPressed = false;
-        
+
         LockSlotPressed = false;
         UnlockSlotPressed = false;
     }
@@ -2281,9 +2568,13 @@ public class PlayerInputHandler : MonoBehaviour
         return true;
     }
 }
+
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player inventory component.
+/// </summary>
 public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance;
@@ -2309,17 +2600,17 @@ public class PlayerInventory : MonoBehaviour
         InventoryEntry entry = GetEntry(item);
 
         if (entry != null)
-        {
             entry.Quantity += quantity;
-        }
         else
-        {
-            bool identified = item.category != InventoryCategory.Consumable;
-            
-            _items.Add(new InventoryEntry(item, quantity, identified));
-        }
+            AddNewEntry(item, quantity);
 
         Debug.Log($"Item collected: {item.itemName} x{quantity}");
+    }
+
+    private void AddNewEntry(InventoryItem item, int quantity)
+    {
+        bool identified = item.category != InventoryCategory.Consumable;
+        _items.Add(new InventoryEntry(item, quantity, identified));
     }
 
     public bool RemoveItem(InventoryItem item, int quantity = 1)
@@ -2329,12 +2620,9 @@ public class PlayerInventory : MonoBehaviour
 
         InventoryEntry entry = GetEntry(item);
 
-        if (entry == null)
+        if (entry == null || entry.Quantity < quantity)
             return false;
 
-        if (entry.Quantity < quantity)
-            return false;
-        
         entry.Quantity -= quantity;
 
         if (entry.Quantity <= 0)
@@ -2362,18 +2650,22 @@ public class PlayerInventory : MonoBehaviour
     {
         if (category == InventoryCategory.All)
             return new List<InventoryEntry>(_items);
-        
+
         return _items.FindAll(entry => entry.Item.category == category);
     }
 
     public void IdentifyItem(InventoryItem item)
     {
         InventoryEntry entry = GetEntry(item);
-        
+
         if (entry != null)
             entry.Identified = true;
     }
 }
+
+/// <summary>
+/// Defines the available player state values used by the game.
+/// </summary>
 public enum PlayerState
 {
     Grounded,
@@ -2383,6 +2675,9 @@ public enum PlayerState
     Attacking
 }
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the player state machine component.
+/// </summary>
 public class PlayerStateMachine
 {
     public PlayerState CurrentState { get; private set; }
@@ -2395,8 +2690,12 @@ public class PlayerStateMachine
         CurrentState = newState;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates book menu state and operations for the game.
+/// </summary>
 public class BookMenuManager : MonoBehaviour
 {
     [Header("References")]
@@ -2454,10 +2753,13 @@ public class BookMenuManager : MonoBehaviour
         if (_input == null || GameStateManager.Instance == null)
             return;
 
+        ProcessBookInput();
+    }
+
+    private void ProcessBookInput()
+    {
         UpdateContextPageTimer();
-
         HandleBookToggle();
-
         HandleContextPageOpen();
 
         if (GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
@@ -2590,7 +2892,7 @@ public class BookMenuManager : MonoBehaviour
             case BookPage.Notes:
                 _notesPageController?.RefreshNotes();
                 break;
-            
+
             case BookPage.Inventory:
                 _inventoryPageController?.RefreshInventory();
                 break;
@@ -2619,8 +2921,113 @@ public class BookMenuManager : MonoBehaviour
         _contextPageTimer = 2f;
     }
 }
+
+using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates inventory page behavior and its Unity lifecycle.
+/// </summary>
+public class InventoryPageController : MonoBehaviour
+{
+    [Header("Categories")]
+    [SerializeField] private Transform _categoryContainer;
+    [SerializeField] private GameObject _categoryOptionPrefab;
+
+    private readonly List<UISelectableOption> _categoryOptions = new();
+
+    private readonly InventoryCategory[] _categories =
+    {
+        InventoryCategory.All,
+        InventoryCategory.Consumable,
+        InventoryCategory.Equipment,
+        InventoryCategory.KeyItem,
+        InventoryCategory.Material
+    };
+
+    private int _currentCategoryIndex;
+
+    private void Start()
+    {
+        RefreshInventory();
+    }
+
+    public void RefreshInventory()
+    {
+        CreateCategories();
+    }
+
+    private void CreateCategories()
+    {
+        if (_categoryContainer == null || _categoryOptionPrefab == null)
+            return;
+
+        ClearCategoryOptions();
+        PopulateCategoryOptions();
+        SelectCategory(0);
+    }
+
+    private void ClearCategoryOptions()
+    {
+        foreach (Transform child in _categoryContainer)
+            Destroy(child.gameObject);
+
+        _categoryOptions.Clear();
+    }
+
+    private void PopulateCategoryOptions()
+    {
+        foreach (InventoryCategory category in _categories)
+        {
+            GameObject optionObj = Instantiate(_categoryOptionPrefab, _categoryContainer);
+
+            InventoryCategoryOptionUI optionUI = optionObj.GetComponent<InventoryCategoryOptionUI>();
+
+            UISelectableOption selectable = optionObj.GetComponent<UISelectableOption>();
+
+            optionUI?.SetTitle(GetCategoryName(category));
+
+            if (selectable != null)
+                _categoryOptions.Add(selectable);
+        }
+    }
+
+    private void SelectCategory(int index)
+    {
+        _currentCategoryIndex = index;
+
+        UpdateCategoryVisuals();
+    }
+
+    private void UpdateCategoryVisuals()
+    {
+        for (int i = 0; i < _categoryOptions.Count; i++)
+        {
+            bool selected = i == _currentCategoryIndex;
+
+            _categoryOptions[i].SetSelected(selected);
+        }
+    }
+
+    private static string GetCategoryName(InventoryCategory category)
+    {
+        return category switch
+        {
+            InventoryCategory.All => "All",
+            InventoryCategory.Consumable => "Consumables",
+            InventoryCategory.Equipment => "Equipment",
+            InventoryCategory.KeyItem => "Key Items",
+            InventoryCategory.Material => "Materials",
+            _ => string.Empty
+        };
+    }
+}
+
+using UnityEngine;
+
+/// <summary>
+/// Coordinates settings page behavior and its Unity lifecycle.
+/// </summary>
 public class SettingsPageController : MonoBehaviour
 {
     [Header("Options")]
@@ -2643,6 +3050,11 @@ public class SettingsPageController : MonoBehaviour
             GameStateManager.Instance.GetState() != GameStateManager.GameState.BookMenu)
             return;
 
+        HandleSettingsInput();
+    }
+
+    private void HandleSettingsInput()
+    {
         HandleNavigation();
         HandleConfirm();
     }
@@ -2680,7 +3092,7 @@ public class SettingsPageController : MonoBehaviour
         for (int i = 0; i < _options.Length; i++)
         {
             bool isSelected = i == _currentOption;
-            
+
             _options[i].SetSelected(isSelected);
         }
     }
@@ -2712,7 +3124,7 @@ public class SettingsPageController : MonoBehaviour
     private void ReturnToCheckpoint()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-        
+
         CheckpointManager.Instance?.ReturnToCheckpoint(player);
         BookMenuManager.Instance?.CloseBook();
     }
@@ -2722,99 +3134,12 @@ public class SettingsPageController : MonoBehaviour
         Debug.Log("Exit Game");
     }
 }
-using System.Collections.Generic;
+
 using UnityEngine;
 
-public class InventoryPageController : MonoBehaviour
-{
-    [Header("Categories")] 
-    [SerializeField] private Transform _categoryContainer;
-    [SerializeField] private GameObject _categoryOptionPrefab;
-
-    private readonly List<UISelectableOption> _categoryOptions = new();
-
-    private readonly InventoryCategory[] _categories =
-    {
-        InventoryCategory.All,
-        InventoryCategory.Consumable,
-        InventoryCategory.Equipment,
-        InventoryCategory.KeyItem,
-        InventoryCategory.Material
-    };
-
-    private int _currentCategoryIndex;
-
-    private void Start()
-    {
-        RefreshInventory();
-    }
-
-    public void RefreshInventory()
-    {
-        CreateCategories();
-    }
-
-    private void CreateCategories()
-    {
-        if (_categoryContainer == null || _categoryOptionPrefab == null)
-            return;
-
-        foreach (Transform child in _categoryContainer)
-        {
-            Destroy(child.gameObject);
-        }
-        
-        _categoryOptions.Clear();
-
-        foreach (InventoryCategory category in _categories)
-        {
-            GameObject optionObj = Instantiate(_categoryOptionPrefab, _categoryContainer);
-
-            InventoryCategoryOptionUI optionUI = optionObj.GetComponent<InventoryCategoryOptionUI>();
-            
-            UISelectableOption selectable = optionObj.GetComponent<UISelectableOption>();
-            
-            optionUI?.SetTitle(GetCategoryName(category));
-
-            if (selectable != null)
-                _categoryOptions.Add(selectable);
-        }
-
-        SelectCategory(0);
-    }
-
-    private void SelectCategory(int index)
-    {
-        _currentCategoryIndex = index;
-
-        UpdateCategoryVisuals();
-    }
-
-    private void UpdateCategoryVisuals()
-    {
-        for (int i = 0; i < _categoryOptions.Count; i++)
-        {
-            bool selected = i == _currentCategoryIndex;
-            
-            _categoryOptions[i].SetSelected(selected);
-        }
-    }
-
-    private static string GetCategoryName(InventoryCategory category)
-    {
-        return category switch
-        {
-            InventoryCategory.All => "All",
-            InventoryCategory.Consumable => "Consumables",
-            InventoryCategory.Equipment => "Equipment",
-            InventoryCategory.KeyItem => "Key Items",
-            InventoryCategory.Material => "Materials",
-            _ => string.Empty
-        };
-    }
-}
-using UnityEngine;
-
+/// <summary>
+/// Provides the runtime behavior and data owned by the base hudmodule component.
+/// </summary>
 public abstract class BaseHUDModule : MonoBehaviour
 {
     [SerializeField] protected CanvasGroup _canvasGroup;
@@ -2855,8 +3180,12 @@ public abstract class BaseHUDModule : MonoBehaviour
             _canvasGroup.alpha = Mathf.Clamp01(opacity);
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates uimanager state and operations for the game.
+/// </summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
@@ -2871,40 +3200,44 @@ public class UIManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         Instance = this;
     }
-    
+
     public LifeHUDController LifeHUD => _lifeHUD;
 }
+
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates life hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class LifeHUDController : BaseHUDModule
 {
     [Header("References")]
     [SerializeField] private Image _lifeBarFill;
     [SerializeField] private Image _damageFlash;
-    
+
     [SerializeField] private float smoothSpeed = 10f;
 
     private float _targetFill;
 
-    [Header("Damage Flash")] 
+    [Header("Damage Flash")]
     [SerializeField] private float _flashFadeSpeed = 5f;
     [SerializeField] private float _flashAlpha = 0.7f;
-    
+
     private PlayerHealth _playerHealth;
-    
+
     private bool _isFlashing;
 
     protected override void Awake()
     {
         base.Awake();
-        
+
         _playerHealth = FindFirstObjectByType<PlayerHealth>();
     }
-    
+
     private void Start()
     {
         if (_damageFlash != null)
@@ -2913,28 +3246,37 @@ public class LifeHUDController : BaseHUDModule
             color.a = 0;
             _damageFlash.color = color;
         }
-        
+
         if (_playerHealth != null)
         {
             _playerHealth.OnHealthChanged += UpdateLife;
             _playerHealth.OnDamageTaken += ShowDamageFlash;
-            
+
             UpdateLife(_playerHealth.CurrentHealth, _playerHealth.MaxHealth);
         }
     }
 
     private void Update()
     {
+        UpdateHudVisuals();
+    }
+
+    private void UpdateHudVisuals()
+    {
         HandleDamageFlashFade();
-        
-        if (_lifeBarFill != null)
-        {
-            _lifeBarFill.fillAmount = Mathf.Lerp(
-                _lifeBarFill.fillAmount,
-                _targetFill,
-                smoothSpeed * Time.deltaTime
-            );
-        }
+        UpdateLifeBar();
+    }
+
+    private void UpdateLifeBar()
+    {
+        if (_lifeBarFill == null)
+            return;
+
+        _lifeBarFill.fillAmount = Mathf.Lerp(
+            _lifeBarFill.fillAmount,
+            _targetFill,
+            smoothSpeed * Time.deltaTime
+        );
     }
 
     private void OnDestroy()
@@ -2955,12 +3297,12 @@ public class LifeHUDController : BaseHUDModule
     {
         if (_damageFlash == null)
             return;
-        
+
         Color color = _damageFlash.color;
         color.a = _flashAlpha;
-        
+
         _damageFlash.color = color;
-        
+
         _isFlashing = true;
     }
 
@@ -2968,24 +3310,28 @@ public class LifeHUDController : BaseHUDModule
     {
         if (!_isFlashing || _damageFlash == null)
             return;
-        
+
         Color color = _damageFlash.color;
 
         color.a = Mathf.Lerp(color.a, 0f, _flashFadeSpeed * Time.deltaTime);
-        
+
         _damageFlash.color = color;
 
         if (color.a <= 0.01f)
         {
             color.a = 0f;
             _damageFlash.color = color;
-            
+
             _isFlashing = false;
         }
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates quick slot hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class QuickSlotHUDController : MonoBehaviour
 {
     [SerializeField] private QuickSlotUI[] _slots;
@@ -3016,7 +3362,7 @@ public class QuickSlotHUDController : MonoBehaviour
 
             RefreshSlots();
         }
-        
+
         if (_input.LockSlotPressed)
         {
             _unlockedSlots = Mathf.Clamp(_unlockedSlots - 1, 1, _slots.Length);
@@ -3040,19 +3386,27 @@ public class QuickSlotHUDController : MonoBehaviour
         }
     }
 }
+
+/// <summary>
+/// Defines the available quick slot state values used by the game.
+/// </summary>
 public enum QuickSlotState
 {
     Locked,
     Unlocked,
     Equipped
 }
+
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Presents and updates quick slot user-interface data.
+/// </summary>
 public class QuickSlotUI : MonoBehaviour
 {
-    [Header("References")] 
+    [Header("References")]
     [SerializeField] private Image _itemIcon;
     [SerializeField] private Image _lockIcon;
     [SerializeField] private TextMeshProUGUI _keyLabel;
@@ -3074,9 +3428,13 @@ public class QuickSlotUI : MonoBehaviour
             _itemIcon.gameObject.SetActive(!isLocked);
     }
 }
+
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates solar hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class SolarHUDController : MonoBehaviour
 {
     [Header("Solar Fragments")]
@@ -3156,9 +3514,13 @@ public class SolarHUDController : MonoBehaviour
         }
     }
 }
+
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Coordinates stamina hudcontroller behavior and its Unity lifecycle.
+/// </summary>
 public class StaminaHUDController : BaseHUDModule
 {
     [SerializeField] private Image _staminaFill;
@@ -3209,9 +3571,13 @@ public class StaminaHUDController : BaseHUDModule
         _targetFill = max > 0f ? Mathf.Clamp01(current / max) : 0f;
     }
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates interaction uimanager state and operations for the game.
+/// </summary>
 public class InteractionUIManager : MonoBehaviour
 {
     public static InteractionUIManager Instance { get; private set; }
@@ -3239,6 +3605,11 @@ public class InteractionUIManager : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdatePromptPosition();
+    }
+
+    private void UpdatePromptPosition()
+    {
         if (_currentTarget == null)
             return;
 
@@ -3247,7 +3618,7 @@ public class InteractionUIManager : MonoBehaviour
             _panel.SetActive(false);
             return;
         }
-        
+
         if (!_panel.activeSelf)
             _panel.SetActive(true);
 
@@ -3275,10 +3646,14 @@ public class InteractionUIManager : MonoBehaviour
         _panel.SetActive(false);
     }
 }
+
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the ui interaction component.
+/// </summary>
 public class UI_Interaction : MonoBehaviour
 {
     public static UI_Interaction Instance { get; private set; }
@@ -3379,16 +3754,27 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = null;
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Coordinates game menu behavior and its Unity lifecycle.
+/// </summary>
 public class GameMenuController : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler _input;
 
     private void Update()
     {
-        if (_input != null && _input.ToggleMenuPressed)
-            HandleMenu();
+        HandleMenuInput();
+    }
+
+    private void HandleMenuInput()
+    {
+        if (_input == null || !_input.ToggleMenuPressed)
+            return;
+
+        HandleMenu();
     }
 
     private void HandleMenu()
@@ -3408,8 +3794,12 @@ public class GameMenuController : MonoBehaviour
         }
     }
 }
+
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the pause menu actions component.
+/// </summary>
 public class PauseMenuActions : MonoBehaviour
 {
     [SerializeField] private GameObject _player;
@@ -3420,11 +3810,15 @@ public class PauseMenuActions : MonoBehaviour
         GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
     }
 }
+
 using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Coordinates tutorial uimanager state and operations for the game.
+/// </summary>
 public class TutorialUIManager : MonoBehaviour
 {
     public static TutorialUIManager Instance { get; private set; }
@@ -3454,12 +3848,24 @@ public class TutorialUIManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance == null ||
-            GameStateManager.Instance.GetState() != GameStateManager.GameState.Tutorial)
+        HandleCloseInput();
+    }
+
+    private void HandleCloseInput()
+    {
+        if (!CanProcessCloseInput())
             return;
 
-        if (_canClose && _input != null && _input.InteractPressed)
+        if (_input.InteractPressed)
             CloseTutorial();
+    }
+
+    private bool CanProcessCloseInput()
+    {
+        return GameStateManager.Instance != null &&
+               GameStateManager.Instance.GetState() == GameStateManager.GameState.Tutorial &&
+               _canClose &&
+               _input != null;
     }
 
     public void ShowTutorial(string tutorialId, string message, Action onClose = null)
@@ -3517,9 +3923,13 @@ public class TutorialUIManager : MonoBehaviour
         _canClose = true;
     }
 }
+
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Provides the runtime behavior and data owned by the uiselectable option component.
+/// </summary>
 public class UISelectableOption : MonoBehaviour
 {
     [Header("References")]
@@ -3528,7 +3938,7 @@ public class UISelectableOption : MonoBehaviour
     [SerializeField] private Color _normalColor = Color.gray;
     [SerializeField] private Color _selectedColor = Color.white;
 
-    [Header("Settings")] 
+    [Header("Settings")]
     [SerializeField] private float _normalSize = 28f;
     [SerializeField] private float _selectedSize = 34f;
 

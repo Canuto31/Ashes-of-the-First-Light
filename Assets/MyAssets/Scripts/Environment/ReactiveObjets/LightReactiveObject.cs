@@ -16,10 +16,20 @@ public class LightReactiveObject : MonoBehaviour
 
     private void Update()
     {
-        if (_playerLamp == null || _targets == null || _targets.Length == 0)
+        RefreshTargetStates();
+    }
+
+    private void RefreshTargetStates()
+    {
+        if (!HasValidConfiguration())
             return;
 
         SetTargetsActive(ShouldTargetsBeActive());
+    }
+
+    private bool HasValidConfiguration()
+    {
+        return _playerLamp != null && _targets != null && _targets.Length > 0;
     }
 
     private bool ShouldTargetsBeActive()

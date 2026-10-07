@@ -35,12 +35,24 @@ public class TutorialUIManager : MonoBehaviour
 
     private void Update()
     {
-        if (GameStateManager.Instance == null ||
-            GameStateManager.Instance.GetState() != GameStateManager.GameState.Tutorial)
+        HandleCloseInput();
+    }
+
+    private void HandleCloseInput()
+    {
+        if (!CanProcessCloseInput())
             return;
 
-        if (_canClose && _input != null && _input.InteractPressed)
+        if (_input.InteractPressed)
             CloseTutorial();
+    }
+
+    private bool CanProcessCloseInput()
+    {
+        return GameStateManager.Instance != null &&
+               GameStateManager.Instance.GetState() == GameStateManager.GameState.Tutorial &&
+               _canClose &&
+               _input != null;
     }
 
     public void ShowTutorial(string tutorialId, string message, Action onClose = null)
