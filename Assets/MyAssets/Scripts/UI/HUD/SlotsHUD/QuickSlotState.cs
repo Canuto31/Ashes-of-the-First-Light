@@ -3,7 +3,12 @@
 /// </summary>
 public enum QuickSlotState
 {
+
+    #region Values
+
     Locked,
     Unlocked,
     Equipped
+
+    #endregion
 }

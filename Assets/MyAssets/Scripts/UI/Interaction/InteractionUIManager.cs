@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class InteractionUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static InteractionUIManager Instance { get; private set; }
 
     [Header("References")]
@@ -17,6 +20,14 @@ public class InteractionUIManager : MonoBehaviour
 
     private Transform _currentTarget;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -29,11 +40,22 @@ public class InteractionUIManager : MonoBehaviour
         Clear();
     }
 
+    /// <summary>
+    /// Applies frame-dependent presentation updates after regular Update callbacks complete.
+    /// </summary>
     private void LateUpdate()
     {
         UpdatePromptPosition();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes prompt position for this component.
+    /// </summary>
     private void UpdatePromptPosition()
     {
         if (_currentTarget == null)
@@ -51,6 +73,9 @@ public class InteractionUIManager : MonoBehaviour
         transform.position = _currentTarget.position + _offset;
     }
 
+    /// <summary>
+    /// Displays  for this component.
+    /// </summary>
     public void Show(Transform target, string message)
     {
         if (target == null)
@@ -61,14 +86,22 @@ public class InteractionUIManager : MonoBehaviour
         _panel.SetActive(true);
     }
 
+    /// <summary>
+    /// Hides visual for this component.
+    /// </summary>
     public void HideVisual()
     {
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Clears  for this component.
+    /// </summary>
     public void Clear()
     {
         _currentTarget = null;
         _panel.SetActive(false);
     }
+
+    #endregion
 }

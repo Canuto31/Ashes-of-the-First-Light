@@ -6,6 +6,9 @@ using UnityEngine.UI;
 /// </summary>
 public class SolarHUDController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Solar Fragments")]
     [SerializeField] private Image[] _solarFragments;
 
@@ -21,17 +24,36 @@ public class SolarHUDController : MonoBehaviour
 
     private const int MaxFragments = 6;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleDebugControls();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes debug controls for this component.
+    /// </summary>
     private void HandleDebugControls()
     {
         if (_input == null)
@@ -48,6 +70,9 @@ public class SolarHUDController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the consume solar energy operation for this component.
+    /// </summary>
     private void ConsumeSolarEnergy(float amount)
     {
         _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy - amount, 0f, MaxFragments);
@@ -55,6 +80,9 @@ public class SolarHUDController : MonoBehaviour
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Executes the restore solar energy operation for this component.
+    /// </summary>
     private void RestoreSolarEnergy(float amount)
     {
         _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy + amount, 0f, MaxFragments);
@@ -62,6 +90,9 @@ public class SolarHUDController : MonoBehaviour
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Refreshes solar hud for this component.
+    /// </summary>
     private void UpdateSolarHUD()
     {
         for (int i = 0; i < _solarFragments.Length; i++)
@@ -82,4 +113,6 @@ public class SolarHUDController : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }

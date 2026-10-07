@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class CameraDirector : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static CameraDirector Instance { get; private set; }
 
     [Header("Main Player Camera")]
@@ -20,6 +23,14 @@ public class CameraDirector : MonoBehaviour
     private Coroutine _currentRoutine;
     private CinemachineVirtualCamera _currentTargetCamera;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,6 +42,14 @@ public class CameraDirector : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Focuses on for this component.
+    /// </summary>
     public void FocusOn(CinemachineVirtualCamera targetCamera, float duration)
     {
         if (targetCamera == null || _playerCamera == null)
@@ -46,6 +65,9 @@ public class CameraDirector : MonoBehaviour
         _currentRoutine = StartCoroutine(FocusRoutine(targetCamera, duration));
     }
 
+    /// <summary>
+    /// Focuses routine for this component.
+    /// </summary>
     private IEnumerator FocusRoutine(CinemachineVirtualCamera targetCamera, float duration)
     {
         _isPlayingCinematic = true;
@@ -58,6 +80,9 @@ public class CameraDirector : MonoBehaviour
         RestorePlayerCamera();
     }
 
+    /// <summary>
+    /// Updates camera for this component.
+    /// </summary>
     public void SetCamera(CinemachineVirtualCamera targetCamera)
     {
         if (_isPlayingCinematic || targetCamera == null || _playerCamera == null)
@@ -67,11 +92,17 @@ public class CameraDirector : MonoBehaviour
         _playerCamera.Priority = _defaultPriority;
     }
 
+    /// <summary>
+    /// Returns whether playing cinematic is currently true.
+    /// </summary>
     public bool IsPlayingCinematic()
     {
         return _isPlayingCinematic;
     }
 
+    /// <summary>
+    /// Executes the restore player camera operation for this component.
+    /// </summary>
     private void RestorePlayerCamera()
     {
         if (_currentTargetCamera != null)
@@ -84,6 +115,8 @@ public class CameraDirector : MonoBehaviour
         _isPlayingCinematic = false;
         _currentRoutine = null;
     }
+
+    #endregion
 }
 
 using Cinemachine;
@@ -94,6 +127,9 @@ using UnityEngine;
 /// </summary>
 public class CameraTrigger : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Camera")]
     [SerializeField] private CinemachineVirtualCamera _cameraTarget;
 
@@ -110,11 +146,22 @@ public class CameraTrigger : MonoBehaviour
 
     private PlayerInputHandler _playerInput;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _interactable = GetComponentInParent<IInteractable>();
     }
 
+    /// <summary>
+    /// Registers an eligible collider when it enters this component's trigger.
+    /// </summary>
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
@@ -133,6 +180,9 @@ public class CameraTrigger : MonoBehaviour
         }*/
     }
 
+    /// <summary>
+    /// Clears the registered collider when it leaves this component's trigger.
+    /// </summary>
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
@@ -144,11 +194,22 @@ public class CameraTrigger : MonoBehaviour
         UI_Interaction.Instance?.Hide();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleInteractionInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes interaction input for this component.
+    /// </summary>
     private void HandleInteractionInput()
     {
         if (!_requireInput || !_playerInside)
@@ -161,6 +222,9 @@ public class CameraTrigger : MonoBehaviour
             _interactable.Interact();
     }
 
+    /// <summary>
+    /// Attempts to activate for this component.
+    /// </summary>
     private void TryActivate()
     {
         if (_hasTriggered && _triggerOnce)
@@ -176,6 +240,8 @@ public class CameraTrigger : MonoBehaviour
 
         _hasTriggered = true;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -185,6 +251,9 @@ using UnityEngine;
 /// </summary>
 public class GameStateManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static GameStateManager Instance { get; private set; }
 
     public enum GameState
@@ -196,6 +265,14 @@ public class GameStateManager : MonoBehaviour
 
     private GameState _currentState;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -208,11 +285,22 @@ public class GameStateManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _currentState = GameState.Playing;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates state for this component.
+    /// </summary>
     public void SetState(GameState newState)
     {
         if (_currentState == newState)
@@ -222,15 +310,23 @@ public class GameStateManager : MonoBehaviour
         Debug.Log("Game state changed to: " + _currentState);
     }
 
+    /// <summary>
+    /// Returns the current state for this component.
+    /// </summary>
     public GameState GetState()
     {
         return _currentState;
     }
 
+    /// <summary>
+    /// Returns whether playing is currently true.
+    /// </summary>
     public bool IsPlaying()
     {
         return _currentState == GameState.Playing;
     }
+
+    #endregion
 }
 
 /// <summary>
@@ -238,8 +334,13 @@ public class GameStateManager : MonoBehaviour
 /// </summary>
 public interface IInteractable
 {
+
+    #region Contract
+
     void Interact();
     string GetInteractionText();
+
+    #endregion
 }
 
 using UnityEngine;
@@ -249,10 +350,21 @@ using UnityEngine;
 /// </summary>
 public class CheckpointManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static CheckpointManager Instance { get; private set; }
 
     private Vector3 _lastCheckpointPosition;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -264,6 +376,14 @@ public class CheckpointManager : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates checkpoint for this component.
+    /// </summary>
     public void SetCheckpoint(Vector3 position)
     {
         _lastCheckpointPosition = position;
@@ -271,6 +391,9 @@ public class CheckpointManager : MonoBehaviour
         Debug.Log("Checkpoint saved at: " + position);
     }
 
+    /// <summary>
+    /// Returns to checkpoint for this component.
+    /// </summary>
     public void ReturnToCheckpoint(GameObject player)
     {
         if (player == null)
@@ -284,6 +407,8 @@ public class CheckpointManager : MonoBehaviour
 
         Debug.Log("Returned to checkpoint");
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -294,10 +419,21 @@ using UnityEngine;
 /// </summary>
 public class TutorialCodexManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static TutorialCodexManager Instance { get; private set; }
 
     private readonly List<TutorialData> _unlockedTutorials = new();
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -309,6 +445,14 @@ public class TutorialCodexManager : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the unlock tutorial operation for this component.
+    /// </summary>
     public void UnlockTutorial(TutorialData tutorial)
     {
         if (tutorial == null || HasTutorial(tutorial))
@@ -317,15 +461,23 @@ public class TutorialCodexManager : MonoBehaviour
         _unlockedTutorials.Add(tutorial);
     }
 
+    /// <summary>
+    /// Returns the current unlocked tutorials for this component.
+    /// </summary>
     public List<TutorialData> GetUnlockedTutorials()
     {
         return _unlockedTutorials;
     }
 
+    /// <summary>
+    /// Returns whether tutorial is currently true.
+    /// </summary>
     public bool HasTutorial(TutorialData tutorial)
     {
         return tutorial != null && _unlockedTutorials.Contains(tutorial);
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -336,12 +488,23 @@ using UnityEngine;
 /// </summary>
 public class TutorialManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static TutorialManager Instance { get; private set; }
 
     private readonly HashSet<string> _shownTutorials = new();
 
     private readonly List<TutorialData> _unlockedTutorials = new();
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -353,17 +516,31 @@ public class TutorialManager : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns whether seen is currently true.
+    /// </summary>
     public bool HasSeen(string tutorialId)
     {
         return !string.IsNullOrWhiteSpace(tutorialId) && _shownTutorials.Contains(tutorialId);
     }
 
+    /// <summary>
+    /// Updates seen for this component.
+    /// </summary>
     public void SetSeen(string tutorialId)
     {
         if (!string.IsNullOrWhiteSpace(tutorialId))
             _shownTutorials.Add(tutorialId);
     }
 
+    /// <summary>
+    /// Executes the unlock tutorial operation for this component.
+    /// </summary>
     public void UnlockTutorial(TutorialData tutorial)
     {
         if (tutorial == null || _unlockedTutorials.Contains(tutorial))
@@ -372,15 +549,23 @@ public class TutorialManager : MonoBehaviour
         _unlockedTutorials.Add(tutorial);
     }
 
+    /// <summary>
+    /// Returns whether unlocked tutorial is currently true.
+    /// </summary>
     public bool HasUnlockedTutorial(TutorialData tutorial)
     {
         return _unlockedTutorials.Contains(tutorial);
     }
 
+    /// <summary>
+    /// Returns the current unlocked tutorials for this component.
+    /// </summary>
     public List<TutorialData> GetUnlockedTutorials()
     {
         return _unlockedTutorials;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -390,14 +575,28 @@ using UnityEngine;
 /// </summary>
 public class UIScreenManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private GameObject _pauseMenu;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         if (_pauseMenu != null)
             _pauseMenu.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (GameStateManager.Instance == null || _pauseMenu == null)
@@ -406,6 +605,14 @@ public class UIScreenManager : MonoBehaviour
         UpdatePauseMenuVisibility();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes pause menu visibility for this component.
+    /// </summary>
     private void UpdatePauseMenuVisibility()
     {
         bool shouldShowPauseMenu = IsBookMenuOpen();
@@ -420,11 +627,17 @@ public class UIScreenManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns whether book menu open is currently true.
+    /// </summary>
     private static bool IsBookMenuOpen()
     {
         return GameStateManager.Instance.GetState() == GameStateManager.GameState.BookMenu;
     }
 
+    /// <summary>
+    /// Displays pause menu for this component.
+    /// </summary>
     private void ShowPauseMenu()
     {
         if (_pauseMenu.activeSelf)
@@ -434,6 +647,8 @@ public class UIScreenManager : MonoBehaviour
         UI_Interaction.Instance?.Hide();
         InteractionUIManager.Instance?.HideVisual();
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -443,13 +658,27 @@ using UnityEngine;
 /// </summary>
 public class Billboard : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     private Camera _cam;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _cam = Camera.main;
     }
 
+    /// <summary>
+    /// Applies frame-dependent presentation updates after regular Update callbacks complete.
+    /// </summary>
     private void LateUpdate()
     {
         if (_cam == null)
@@ -457,6 +686,8 @@ public class Billboard : MonoBehaviour
 
         transform.forward = _cam.transform.forward;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -466,13 +697,27 @@ using UnityEngine;
 /// </summary>
 public class CheckpointSource : MonoBehaviour, IInteractable
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private Transform _respawnPoint;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns the prompt text presented for this interaction.
+    /// </summary>
     public string GetInteractionText()
     {
         return "Rest at the fountain";
     }
 
+    /// <summary>
+    /// Executes this object's response to a valid player interaction.
+    /// </summary>
     public void Interact()
     {
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
@@ -483,6 +728,8 @@ public class CheckpointSource : MonoBehaviour, IInteractable
         CheckpointManager.Instance?.SetCheckpoint(point);
         UI_Interaction.Instance?.ShowTextTimed("Checkpoint saved", 1.5f);
     }
+
+    #endregion
 }
 
 using System.Collections;
@@ -493,6 +740,9 @@ using UnityEngine;
 /// </summary>
 public class DoorController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public enum DoorType
     {
         Sliding,
@@ -522,11 +772,27 @@ public class DoorController : MonoBehaviour
     private Quaternion _closedRotation;
     private Quaternion _openRotation;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         CacheDoorTransforms();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the cache door transforms operation for this component.
+    /// </summary>
     private void CacheDoorTransforms()
     {
         _closedPosition = transform.position;
@@ -543,6 +809,9 @@ public class DoorController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens  for this component.
+    /// </summary>
     public void Open()
     {
         if (_isOpen)
@@ -552,6 +821,9 @@ public class DoorController : MonoBehaviour
         StartCoroutine(OpenWithDelay());
     }
 
+    /// <summary>
+    /// Opens with delay for this component.
+    /// </summary>
     private IEnumerator OpenWithDelay()
     {
         yield return new WaitForSeconds(_openDelay);
@@ -567,6 +839,9 @@ public class DoorController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens sliding for this component.
+    /// </summary>
     private IEnumerator OpenSliding()
     {
         float time = 0f;
@@ -583,6 +858,9 @@ public class DoorController : MonoBehaviour
         transform.position = _openPosition;
     }
 
+    /// <summary>
+    /// Opens hinged for this component.
+    /// </summary>
     private IEnumerator OpenHinged()
     {
         float time = 0f;
@@ -598,6 +876,8 @@ public class DoorController : MonoBehaviour
 
         transform.rotation = _openRotation;
     }
+
+    #endregion
 }
 
 using System.Collections;
@@ -609,6 +889,9 @@ using UnityEngine;
 /// </summary>
 public class Lever : MonoBehaviour, IInteractable
 {
+
+    #region Fields and Configuration
+
     [Header("Camera")]
     [SerializeField] private CinemachineVirtualCamera _targetCamera;
     [SerializeField] private float _cameraDuration = 2f;
@@ -622,6 +905,14 @@ public class Lever : MonoBehaviour, IInteractable
 
     private bool _hasBeenUsed;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns whether requirement is currently true.
+    /// </summary>
     private bool HasRequirement()
     {
         if (_requiredItem == null)
@@ -630,6 +921,9 @@ public class Lever : MonoBehaviour, IInteractable
         return PlayerInventory.Instance != null && PlayerInventory.Instance.HasItem(_requiredItem);
     }
 
+    /// <summary>
+    /// Returns the prompt text presented for this interaction.
+    /// </summary>
     public string GetInteractionText()
     {
         if (_hasBeenUsed)
@@ -641,6 +935,9 @@ public class Lever : MonoBehaviour, IInteractable
         return "Press E to interact";
     }
 
+    /// <summary>
+    /// Executes this object's response to a valid player interaction.
+    /// </summary>
     public void Interact()
     {
         if (_hasBeenUsed)
@@ -655,11 +952,17 @@ public class Lever : MonoBehaviour, IInteractable
         StartCoroutine(LeverSequence());
     }
 
+    /// <summary>
+    /// Displays missing requirement for this component.
+    /// </summary>
     private void ShowMissingRequirement()
     {
         InteractionUIManager.Instance?.Show(transform.parent, _missingMessage);
     }
 
+    /// <summary>
+    /// Executes the lever sequence operation for this component.
+    /// </summary>
     private IEnumerator LeverSequence()
     {
         _hasBeenUsed = true;
@@ -674,6 +977,8 @@ public class Lever : MonoBehaviour, IInteractable
             InteractionUIManager.Instance?.Clear();
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -683,6 +988,9 @@ using UnityEngine;
 /// </summary>
 public class LightReactiveObject : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private PlayerLamp _playerLamp;
 
@@ -692,11 +1000,27 @@ public class LightReactiveObject : MonoBehaviour
     [Header("Behavior")]
     [SerializeField] private bool _activeInLight = true;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         RefreshTargetStates();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds target states for this component.
+    /// </summary>
     private void RefreshTargetStates()
     {
         if (!HasValidConfiguration())
@@ -705,11 +1029,17 @@ public class LightReactiveObject : MonoBehaviour
         SetTargetsActive(ShouldTargetsBeActive());
     }
 
+    /// <summary>
+    /// Returns whether valid configuration is currently true.
+    /// </summary>
     private bool HasValidConfiguration()
     {
         return _playerLamp != null && _targets != null && _targets.Length > 0;
     }
 
+    /// <summary>
+    /// Executes the should targets be active operation for this component.
+    /// </summary>
     private bool ShouldTargetsBeActive()
     {
         if (!_playerLamp.IsLightOn())
@@ -719,6 +1049,9 @@ public class LightReactiveObject : MonoBehaviour
         return _activeInLight ? anyTargetInLight : !anyTargetInLight;
     }
 
+    /// <summary>
+    /// Returns whether any target in light is currently true.
+    /// </summary>
     private bool IsAnyTargetInLight()
     {
         Vector3 lightPosition = _playerLamp.GetLightPosition();
@@ -737,6 +1070,9 @@ public class LightReactiveObject : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Updates targets active for this component.
+    /// </summary>
     private void SetTargetsActive(bool state)
     {
         foreach (GameObject target in _targets)
@@ -746,6 +1082,14 @@ public class LightReactiveObject : MonoBehaviour
         }
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Draws editor-only gizmos that visualize this component's configured range.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (_targets == null)
@@ -759,6 +1103,8 @@ public class LightReactiveObject : MonoBehaviour
                 Gizmos.DrawWireSphere(target.transform.position, 0.3f);
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -768,16 +1114,30 @@ using UnityEngine;
 /// </summary>
 public class InteractableTrigger : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     private IInteractable _interactable;
     private PlayerInputHandler _playerInput;
 
     private bool _playerInside;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _interactable = GetComponentInParent<IInteractable>();
     }
 
+    /// <summary>
+    /// Registers an eligible collider when it enters this component's trigger.
+    /// </summary>
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player") || _interactable == null)
@@ -794,6 +1154,9 @@ public class InteractableTrigger : MonoBehaviour
         //UI_Interaction.Instance.ShowText(_interactable.GetInteractionText());
     }
 
+    /// <summary>
+    /// Clears the registered collider when it leaves this component's trigger.
+    /// </summary>
     private void OnTriggerExit2D(Collider2D other)
     {
         if (!other.CompareTag("Player"))
@@ -807,11 +1170,22 @@ public class InteractableTrigger : MonoBehaviour
         //UI_Interaction.Instance.Hide();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleInteractionInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes interaction input for this component.
+    /// </summary>
     private void HandleInteractionInput()
     {
         if (!IsInteractionAvailable())
@@ -821,6 +1195,9 @@ public class InteractableTrigger : MonoBehaviour
             _interactable.Interact();
     }
 
+    /// <summary>
+    /// Returns whether interaction available is currently true.
+    /// </summary>
     private bool IsInteractionAvailable()
     {
         return GameStateManager.Instance != null &&
@@ -829,6 +1206,8 @@ public class InteractableTrigger : MonoBehaviour
                _playerInput != null &&
                _interactable != null;
     }
+
+    #endregion
 }
 
 /// <summary>
@@ -836,11 +1215,16 @@ public class InteractableTrigger : MonoBehaviour
 /// </summary>
 public enum InventoryCategory
 {
+
+    #region Values
+
     All,
     Consumable,
     Equipment,
     KeyItem,
     Material
+
+    #endregion
 }
 
 using System;
@@ -851,16 +1235,29 @@ using System;
 /// </summary>
 public class InventoryEntry
 {
+
+    #region Fields and Configuration
+
     public InventoryItem Item;
     public int Quantity;
     public bool Identified;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the inventory entry operation for this component.
+    /// </summary>
     public InventoryEntry(InventoryItem item, int quantity = 1, bool identified = false)
     {
         Item = item;
         Quantity = quantity;
         Identified = identified;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -871,6 +1268,9 @@ using UnityEngine;
 /// </summary>
 public class InventoryItem : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     public string itemId;
     public string itemName;
     public Sprite icon;
@@ -880,6 +1280,8 @@ public class InventoryItem : ScriptableObject
 
     [TextArea]
     public string description;
+
+    #endregion
 }
 
 using UnityEngine;
@@ -890,11 +1292,16 @@ using UnityEngine;
 /// </summary>
 public class NoteData : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     [Header("Note Info")]
     public string noteTitle;
 
     [TextArea(5, 10)]
     public string[] pages;
+
+    #endregion
 }
 
 using TMPro;
@@ -905,13 +1312,26 @@ using UnityEngine;
 /// </summary>
 public class InventoryCategoryOptionUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private TextMeshProUGUI _text;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates title for this component.
+    /// </summary>
     public void SetTitle(string title)
     {
         if (_text != null)
             _text.text = title;
     }
+
+    #endregion
 }
 
 using TMPro;
@@ -923,9 +1343,20 @@ using UnityEngine.UI;
 /// </summary>
 public class InventoryItemOptionUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private Image _icon;
     [SerializeField] private TextMeshProUGUI _title;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates p for this component.
+    /// </summary>
     public void Setup(InventoryItem item)
     {
         if (item == null)
@@ -937,6 +1368,8 @@ public class InventoryItemOptionUI : MonoBehaviour
         if (_title != null)
             _title.text = item.itemName;
     }
+
+    #endregion
 }
 
 using TMPro;
@@ -947,13 +1380,26 @@ using UnityEngine;
 /// </summary>
 public class NoteOptionUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private TextMeshProUGUI _optionText;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates title for this component.
+    /// </summary>
     public void SetTitle(string title)
     {
         if (_optionText != null)
             _optionText.text = title;
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -964,12 +1410,23 @@ using UnityEngine;
 /// </summary>
 public class NotesManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static NotesManager Instance { get; private set; }
 
     private readonly List<NoteData> _notes = new();
 
     private NoteData _lastCollectedNote;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -981,6 +1438,14 @@ public class NotesManager : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Adds note for this component.
+    /// </summary>
     public void AddNote(NoteData note)
     {
         if (note == null || _notes.Contains(note))
@@ -992,15 +1457,23 @@ public class NotesManager : MonoBehaviour
         Debug.Log("Note added: " + note.noteTitle);
     }
 
+    /// <summary>
+    /// Returns the current notes for this component.
+    /// </summary>
     public List<NoteData> GetNotes()
     {
         return _notes;
     }
 
+    /// <summary>
+    /// Returns the current last collected note for this component.
+    /// </summary>
     public NoteData GetLastCollectedNote()
     {
         return _lastCollectedNote;
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -1012,6 +1485,9 @@ using UnityEngine;
 /// </summary>
 public class NotesPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("List")]
     [SerializeField] private Transform _notesContainer;
     [SerializeField] private GameObject _notesOptionPrefab;
@@ -1030,6 +1506,14 @@ public class NotesPageController : MonoBehaviour
     private int _currentNoteIndex;
     private int _currentPageIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -1037,6 +1521,9 @@ public class NotesPageController : MonoBehaviour
         RefreshNotes();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -1046,12 +1533,23 @@ public class NotesPageController : MonoBehaviour
         HandleNavigationInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes navigation input for this component.
+    /// </summary>
     private void HandleNavigationInput()
     {
         HandleNoteNavigation();
         HandlePageNavigation();
     }
 
+    /// <summary>
+    /// Rebuilds notes for this component.
+    /// </summary>
     public void RefreshNotes()
     {
         if (_notesContainer == null || _notesOptionPrefab == null || NotesManager.Instance == null)
@@ -1062,6 +1560,9 @@ public class NotesPageController : MonoBehaviour
         SelectInitialNote();
     }
 
+    /// <summary>
+    /// Clears spawned options for this component.
+    /// </summary>
     private void ClearSpawnedOptions()
     {
         foreach (Transform child in _notesContainer)
@@ -1070,6 +1571,9 @@ public class NotesPageController : MonoBehaviour
         _spawnOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate notes operation for this component.
+    /// </summary>
     private void PopulateNotes()
     {
         _notes = NotesManager.Instance.GetNotes();
@@ -1089,6 +1593,9 @@ public class NotesPageController : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Selects initial note for this component.
+    /// </summary>
     private void SelectInitialNote()
     {
         if (_notes.Count > 0)
@@ -1097,6 +1604,9 @@ public class NotesPageController : MonoBehaviour
             ClearContent();
     }
 
+    /// <summary>
+    /// Clears content for this component.
+    /// </summary>
     private void ClearContent()
     {
         _titleText.text = "";
@@ -1104,6 +1614,9 @@ public class NotesPageController : MonoBehaviour
         _pageIndicatorText.text = "";
     }
 
+    /// <summary>
+    /// Selects note for this component.
+    /// </summary>
     private void SelectNote(int index)
     {
         if (_notes == null || index < 0 || index >= _notes.Count)
@@ -1118,6 +1631,9 @@ public class NotesPageController : MonoBehaviour
         UpdateContent();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _spawnOptions.Count; i++)
@@ -1128,6 +1644,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes content for this component.
+    /// </summary>
     private void UpdateContent()
     {
         if (_notes == null || _notes.Count == 0)
@@ -1148,6 +1667,9 @@ public class NotesPageController : MonoBehaviour
         _pageIndicatorText.text = (_currentPageIndex + 1) + " / " + note.pages.Length;
     }
 
+    /// <summary>
+    /// Processes note navigation for this component.
+    /// </summary>
     private void HandleNoteNavigation()
     {
         if (_notes == null || _notes.Count == 0)
@@ -1163,6 +1685,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes page navigation for this component.
+    /// </summary>
     private void HandlePageNavigation()
     {
         if (_notes == null || _notes.Count == 0)
@@ -1193,6 +1718,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Focuses last collected note for this component.
+    /// </summary>
     public void FocusLastCollectedNote()
     {
         NoteData lastNote = NotesManager.Instance?.GetLastCollectedNote();
@@ -1207,6 +1735,8 @@ public class NotesPageController : MonoBehaviour
             SelectNote(index);
         }
     }
+
+    #endregion
 }
 
 using TMPro;
@@ -1217,6 +1747,9 @@ using UnityEngine;
 /// </summary>
 public class NotesUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static NotesUIManager Instance { get; private set; }
 
     [SerializeField] private PlayerInputHandler _input;
@@ -1232,6 +1765,14 @@ public class NotesUIManager : MonoBehaviour
 
     private bool _ignoreInputThisFrame;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -1244,6 +1785,9 @@ public class NotesUIManager : MonoBehaviour
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (GameStateManager.Instance == null ||
@@ -1259,6 +1803,14 @@ public class NotesUIManager : MonoBehaviour
         HandleInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes input for this component.
+    /// </summary>
     private void HandleInput()
     {
         if (_input == null)
@@ -1274,6 +1826,9 @@ public class NotesUIManager : MonoBehaviour
             CloseNote();
     }
 
+    /// <summary>
+    /// Opens note for this component.
+    /// </summary>
     public void OpenNote(NoteData note)
     {
         if (note == null || note.pages == null || note.pages.Length == 0)
@@ -1294,6 +1849,9 @@ public class NotesUIManager : MonoBehaviour
         InteractionUIManager.Instance?.HideVisual();
     }
 
+    /// <summary>
+    /// Closes note for this component.
+    /// </summary>
     private void CloseNote()
     {
         _panel.SetActive(false);
@@ -1301,6 +1859,9 @@ public class NotesUIManager : MonoBehaviour
         GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
     }
 
+    /// <summary>
+    /// Executes the next page operation for this component.
+    /// </summary>
     private void NextPage()
     {
         if (_currentNote == null || _currentNote.pages == null)
@@ -1313,6 +1874,9 @@ public class NotesUIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the previous page operation for this component.
+    /// </summary>
     private void PreviousPage()
     {
         if (_currentNote == null)
@@ -1325,6 +1889,9 @@ public class NotesUIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes ui for this component.
+    /// </summary>
     private void UpdateUI()
     {
         if (_currentNote == null || _currentNote.pages == null || _currentNote.pages.Length == 0)
@@ -1334,6 +1901,8 @@ public class NotesUIManager : MonoBehaviour
         _contentText.text = _currentNote.pages[_currentPage];
         _pageIndicator.text = (_currentPage + 1) + "/" + _currentNote.pages.Length;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -1343,14 +1912,28 @@ using UnityEngine;
 /// </summary>
 public class PickupItem : MonoBehaviour, IInteractable
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private InventoryItem _item;
     [SerializeField] private int _quantity = 1;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns the prompt text presented for this interaction.
+    /// </summary>
     public string GetInteractionText()
     {
         return _item != null ? "Pick up " + _item.itemName : "Pick up item";
     }
 
+    /// <summary>
+    /// Executes this object's response to a valid player interaction.
+    /// </summary>
     public void Interact()
     {
         if (_item == null || PlayerInventory.Instance == null)
@@ -1361,6 +1944,8 @@ public class PickupItem : MonoBehaviour, IInteractable
 
         Destroy(gameObject);
     }
+
+    #endregion
 }
 
 using System.Collections;
@@ -1371,17 +1956,31 @@ using UnityEngine;
 /// </summary>
 public class PickupNote : MonoBehaviour, IInteractable
 {
+
+    #region Fields and Configuration
+
     [SerializeField]
     private NoteData _note;
 
     [SerializeField]
     private TutorialData _readingTutorial;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns the prompt text presented for this interaction.
+    /// </summary>
     public string GetInteractionText()
     {
         return _note != null ? _note.noteTitle : "Read note";
     }
 
+    /// <summary>
+    /// Executes this object's response to a valid player interaction.
+    /// </summary>
     public void Interact()
     {
         if (_note == null || GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
@@ -1398,12 +1997,18 @@ public class PickupNote : MonoBehaviour, IInteractable
         CompletePickup();
     }
 
+    /// <summary>
+    /// Executes the collect note operation for this component.
+    /// </summary>
     private void CollectNote()
     {
         NotesManager.Instance?.AddNote(_note);
         BookMenuManager.Instance?.QueueContextPage(BookMenuManager.BookPage.Notes);
     }
 
+    /// <summary>
+    /// Executes the should show reading tutorial operation for this component.
+    /// </summary>
     private bool ShouldShowReadingTutorial()
     {
         return _readingTutorial != null &&
@@ -1411,6 +2016,9 @@ public class PickupNote : MonoBehaviour, IInteractable
                !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId);
     }
 
+    /// <summary>
+    /// Executes the complete pickup operation for this component.
+    /// </summary>
     private void CompletePickup()
     {
         UI_Interaction.Instance?.ShowTextTimed(
@@ -1421,6 +2029,9 @@ public class PickupNote : MonoBehaviour, IInteractable
         Destroy(gameObject);
     }
 
+    /// <summary>
+    /// Executes the first note sequence operation for this component.
+    /// </summary>
     private IEnumerator FirstNoteSequence()
     {
         TutorialUIManager.Instance?.ShowTutorial(
@@ -1433,6 +2044,8 @@ public class PickupNote : MonoBehaviour, IInteractable
 
         CompletePickup();
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -1443,6 +2056,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialData : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     public string tutorialId;
 
     [Header("Book")]
@@ -1456,6 +2072,8 @@ public class TutorialData : ScriptableObject
     public string popupMessage;
 
     public Sprite icon;
+
+    #endregion
 }
 
 using TMPro;
@@ -1466,13 +2084,26 @@ using UnityEngine;
 /// </summary>
 public class TutorialOptionUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private TextMeshProUGUI _optionText;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates title for this component.
+    /// </summary>
     public void SetTitle(string title)
     {
         if (_optionText != null)
             _optionText.text = title;
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -1484,6 +2115,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("List")]
     [SerializeField] private Transform _tutorialsContainer;
     [SerializeField] private GameObject _tutorialOptionPrefab;
@@ -1500,6 +2134,14 @@ public class TutorialPageController : MonoBehaviour
 
     private int _currentTutorialIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -1507,6 +2149,9 @@ public class TutorialPageController : MonoBehaviour
         RefreshTutorials();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -1516,6 +2161,14 @@ public class TutorialPageController : MonoBehaviour
         HandleTutorialNavigation();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds tutorials for this component.
+    /// </summary>
     public void RefreshTutorials()
     {
         if (_tutorialsContainer == null || _tutorialOptionPrefab == null || TutorialManager.Instance == null)
@@ -1526,6 +2179,9 @@ public class TutorialPageController : MonoBehaviour
         SelectInitialTutorial();
     }
 
+    /// <summary>
+    /// Clears spawned options for this component.
+    /// </summary>
     private void ClearSpawnedOptions()
     {
         foreach (Transform child in _tutorialsContainer)
@@ -1534,6 +2190,9 @@ public class TutorialPageController : MonoBehaviour
         _spawnedOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate tutorials operation for this component.
+    /// </summary>
     private void PopulateTutorials()
     {
         _tutorials = TutorialManager.Instance.GetUnlockedTutorials();
@@ -1557,6 +2216,9 @@ public class TutorialPageController : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Selects initial tutorial for this component.
+    /// </summary>
     private void SelectInitialTutorial()
     {
         if (_tutorials.Count > 0)
@@ -1565,12 +2227,18 @@ public class TutorialPageController : MonoBehaviour
             ClearContent();
     }
 
+    /// <summary>
+    /// Clears content for this component.
+    /// </summary>
     private void ClearContent()
     {
         _titleText.text = "";
         _contentText.text = "";
     }
 
+    /// <summary>
+    /// Selects tutorial for this component.
+    /// </summary>
     private void SelectTutorial(int index)
     {
         if (_tutorials == null || index < 0 || index >= _tutorials.Count)
@@ -1583,6 +2251,9 @@ public class TutorialPageController : MonoBehaviour
         UpdateContent();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _spawnedOptions.Count; i++)
@@ -1593,6 +2264,9 @@ public class TutorialPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes content for this component.
+    /// </summary>
     private void UpdateContent()
     {
         if (_tutorials.Count == 0)
@@ -1606,6 +2280,9 @@ public class TutorialPageController : MonoBehaviour
         _contentText.text = tutorial.description;
     }
 
+    /// <summary>
+    /// Processes tutorial navigation for this component.
+    /// </summary>
     private void HandleTutorialNavigation()
     {
         if (_tutorials == null || _tutorials.Count == 0)
@@ -1620,6 +2297,8 @@ public class TutorialPageController : MonoBehaviour
             SelectTutorial((_currentTutorialIndex + 1) % _tutorials.Count);
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -1629,18 +2308,39 @@ using UnityEngine;
 /// </summary>
 public class PlayerAnimationEvents : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     private PlayerController _playerController;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _playerController = GetComponentInParent<PlayerController>();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Releases the active attack lock when the animation event completes.
+    /// </summary>
     public void EndAttack()
     {
         if (_playerController != null)
             _playerController.EndAttack();
     }
+
+    #endregion
 }
 
 using System;
@@ -1651,6 +2351,9 @@ using UnityEngine;
 /// </summary>
 public class PlayerHealth : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Health")]
     [SerializeField] private float _maxHealth = 100f;
 
@@ -1665,6 +2368,14 @@ public class PlayerHealth : MonoBehaviour
     public event Action OnDeath;
     public event Action OnDamageTaken;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -1674,11 +2385,22 @@ public class PlayerHealth : MonoBehaviour
         NotifyHealthChanged();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleDebugInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes debug input for this component.
+    /// </summary>
     private void HandleDebugInput()
     {
         if (_input == null)
@@ -1691,6 +2413,9 @@ public class PlayerHealth : MonoBehaviour
             TakeDamage(10);
     }
 
+    /// <summary>
+    /// Executes the take damage operation for this component.
+    /// </summary>
     public void TakeDamage(float amount)
     {
         if (amount <= 0f || Mathf.Approximately(_currentHealth, 0f))
@@ -1705,6 +2430,9 @@ public class PlayerHealth : MonoBehaviour
             Die();
     }
 
+    /// <summary>
+    /// Executes the heal operation for this component.
+    /// </summary>
     public void Heal(float amount)
     {
         if (amount <= 0f)
@@ -1715,17 +2443,25 @@ public class PlayerHealth : MonoBehaviour
         NotifyHealthChanged();
     }
 
+    /// <summary>
+    /// Notifies subscribers about health changed for this component.
+    /// </summary>
     private void NotifyHealthChanged()
     {
         OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
     }
 
+    /// <summary>
+    /// Executes the die operation for this component.
+    /// </summary>
     private void Die()
     {
         Debug.Log("Player Dead");
 
         OnDeath?.Invoke();
     }
+
+    #endregion
 }
 
 using System;
@@ -1736,6 +2472,9 @@ using UnityEngine;
 /// </summary>
 public class PlayerStamina : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Stamina")]
     [SerializeField] private float _maxstamina = 100f;
 
@@ -1756,6 +2495,14 @@ public class PlayerStamina : MonoBehaviour
 
     public event Action<float, float> OnStaminaChanged;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -1765,11 +2512,22 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleStamina();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes stamina for this component.
+    /// </summary>
     private void HandleStamina()
     {
         if (_input == null)
@@ -1790,6 +2548,9 @@ public class PlayerStamina : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Consumes stamina for this component.
+    /// </summary>
     public void DrainStamina(float amount)
     {
         if (amount <= 0f)
@@ -1803,6 +2564,9 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Regenerates stamina for this component.
+    /// </summary>
     public void RegenerateStamina(float amount)
     {
         if (amount <= 0f || Mathf.Approximately(_currentStamina, _maxstamina))
@@ -1822,10 +2586,15 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Notifies subscribers about stamina changed for this component.
+    /// </summary>
     private void NotifyStaminaChanged()
     {
         OnStaminaChanged?.Invoke(_currentStamina, _maxstamina);
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -1919,6 +2688,9 @@ public class PlayerController : MonoBehaviour
 
     #region Unity Lifecycle
 
+    /// <summary>
+    /// Caches the Rigidbody, input adapter, state machine, and stamina dependency required by the controller.
+    /// </summary>
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -1927,6 +2699,9 @@ public class PlayerController : MonoBehaviour
         _playerStamina = GetComponent<PlayerStamina>();
     }
 
+    /// <summary>
+    /// Coordinates frame-based gameplay logic while the global game state allows player control.
+    /// </summary>
     private void Update()
     {
         if (!IsGameplayActive())
@@ -1935,6 +2710,9 @@ public class PlayerController : MonoBehaviour
         ProcessGameplayFrame();
     }
 
+    /// <summary>
+    /// Coordinates Rigidbody movement and traversal physics on Unity's fixed timestep.
+    /// </summary>
     private void FixedUpdate()
     {
         if (!IsGameplayActive())
@@ -1971,6 +2749,9 @@ public class PlayerController : MonoBehaviour
         HandleWallSlide();
     }
 
+    /// <summary>
+    /// Refreshes ground and wall contacts before deriving the current player state.
+    /// </summary>
     private void RefreshEnvironmentState()
     {
         // State selection depends on the latest ground and wall observations.
@@ -1979,6 +2760,9 @@ public class PlayerController : MonoBehaviour
         UpdateState();
     }
 
+    /// <summary>
+    /// Advances buffered input and active traversal ability timers.
+    /// </summary>
     private void UpdateAbilityTimers()
     {
         UpdateJumpBuffer();
@@ -1986,6 +2770,9 @@ public class PlayerController : MonoBehaviour
         HandleDash();
     }
 
+    /// <summary>
+    /// Processes jump, dash, and attack requests in their intentional priority order.
+    /// </summary>
     private void ProcessActionInput()
     {
         // Preserve the original action order because abilities share velocity and state.
@@ -1994,6 +2781,9 @@ public class PlayerController : MonoBehaviour
         HandleAttack();
     }
 
+    /// <summary>
+    /// Clears residual Rigidbody velocity while gameplay is suspended.
+    /// </summary>
     private void StopPhysicsMovement()
     {
         _rb.linearVelocity = Vector2.zero;
@@ -2003,11 +2793,17 @@ public class PlayerController : MonoBehaviour
 
     #region Game State
 
+    /// <summary>
+    /// Returns whether the global game state currently permits player gameplay.
+    /// </summary>
     private static bool IsGameplayActive()
     {
         return GameStateManager.Instance != null && GameStateManager.Instance.IsPlaying();
     }
 
+    /// <summary>
+    /// Selects the highest-priority locomotion state from the current runtime flags.
+    /// </summary>
     private void UpdateState()
     {
         // Transient abilities have priority over general locomotion states.
@@ -2027,6 +2823,9 @@ public class PlayerController : MonoBehaviour
 
     #region Movement
 
+    /// <summary>
+    /// Calculates accelerated horizontal velocity and refreshes movement presentation.
+    /// </summary>
     private void HandleMovement()
     {
         // Dash and wall-jump impulses temporarily own horizontal velocity.
@@ -2056,6 +2855,9 @@ public class PlayerController : MonoBehaviour
         UpdateMovementVisuals();
     }
 
+    /// <summary>
+    /// Updates locomotion animation and facing direction from horizontal input.
+    /// </summary>
     private void UpdateMovementVisuals()
     {
         if (_input.MoveInput.x != 0)
@@ -2069,6 +2871,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rotates the character to face the current horizontal movement direction.
+    /// </summary>
     private void FaceMovementDirection()
     {
         if (_input.MoveInput.x < 0)
@@ -2081,6 +2886,9 @@ public class PlayerController : MonoBehaviour
 
     #region Environment Detection
 
+    /// <summary>
+    /// Detects ground contact and manages landing, coyote time, and grounded animation state.
+    /// </summary>
     private void CheckGround()
     {
         bool groundedNow = Physics2D.OverlapCircle(
@@ -2114,6 +2922,9 @@ public class PlayerController : MonoBehaviour
         _wasGrounded = _isGrounded;
     }
 
+    /// <summary>
+    /// Detects adjacent walls and refreshes wall direction and aerial jump resources.
+    /// </summary>
     private void CheckWall()
     {
         bool hitRight = Physics2D.Raycast(
@@ -2151,6 +2962,9 @@ public class PlayerController : MonoBehaviour
 
     #region Jump
 
+    /// <summary>
+    /// Maintains the short input window used to accept an early jump request.
+    /// </summary>
     private void UpdateJumpBuffer()
     {
         // Buffering accepts a jump pressed shortly before a valid jump opportunity.
@@ -2160,6 +2974,9 @@ public class PlayerController : MonoBehaviour
             _jumpBufferCounter -= Time.deltaTime;
     }
 
+    /// <summary>
+    /// Coordinates wall jump, standard jump, and variable jump-height behavior.
+    /// </summary>
     private void HandleJump()
     {
         if (_stateMachine.CurrentState == PlayerState.Dashing)
@@ -2172,6 +2989,9 @@ public class PlayerController : MonoBehaviour
         ApplyVariableJumpHeight();
     }
 
+    /// <summary>
+    /// Attempts a wall jump and locks regular movement while its impulse is active.
+    /// </summary>
     private bool TryWallJump()
     {
         if (_jumpBufferCounter <= 0f || !_isWallSliding)
@@ -2188,6 +3008,9 @@ public class PlayerController : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts a coyote-time jump or consumes an available extra jump.
+    /// </summary>
     private void TryStandardJump()
     {
         // Coyote time allows the base jump shortly after leaving a platform.
@@ -2204,6 +3027,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shortens upward velocity when the jump input is released early.
+    /// </summary>
     private void ApplyVariableJumpHeight()
     {
         // Releasing jump during ascent produces a shorter, more responsive jump.
@@ -2218,6 +3044,9 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat(AirSpeedYHash, -1f);
     }
 
+    /// <summary>
+    /// Applies the configured vertical jump impulse and animation trigger.
+    /// </summary>
     private void Jump()
     {
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
@@ -2225,6 +3054,9 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(JumpHash);
     }
 
+    /// <summary>
+    /// Applies additional gravity while falling to sharpen the descent.
+    /// </summary>
     private void ApplyBetterGravity()
     {
         // Additional downward gravity sharpens the fall without changing the ascent.
@@ -2239,6 +3071,9 @@ public class PlayerController : MonoBehaviour
 
     #region Wall Movement
 
+    /// <summary>
+    /// Limits downward velocity while the player pushes toward a contacted wall.
+    /// </summary>
     private void HandleWallSlide()
     {
         float inputDir = _input.MoveInput.x;
@@ -2260,6 +3095,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Releases the temporary movement lock after a wall jump.
+    /// </summary>
     private void HandleWallJumpLock()
     {
         if (!_isWallJumping)
@@ -2276,6 +3114,9 @@ public class PlayerController : MonoBehaviour
 
     #region Dash
 
+    /// <summary>
+    /// Starts a dash when input and stamina requirements are satisfied.
+    /// </summary>
     private void TryDash()
     {
         if (!_input.DashPressed || !CanDash())
@@ -2284,12 +3125,18 @@ public class PlayerController : MonoBehaviour
         StartDash();
     }
 
+    /// <summary>
+    /// Returns whether the player has enough stamina to start a dash.
+    /// </summary>
     private bool CanDash()
     {
         return _playerStamina != null &&
                _playerStamina.CurrentStamina >= dashStaminaCost;
     }
 
+    /// <summary>
+    /// Consumes stamina and applies the configured dash impulse and animation.
+    /// </summary>
     private void StartDash()
     {
         _isDashing = true;
@@ -2305,6 +3152,9 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(RollHash);
     }
 
+    /// <summary>
+    /// Advances the active dash timer and ends the dash when its duration expires.
+    /// </summary>
     private void HandleDash()
     {
         if (!_isDashing)
@@ -2320,6 +3170,9 @@ public class PlayerController : MonoBehaviour
 
     #region Combat
 
+    /// <summary>
+    /// Starts an attack when input is received and no attack is already active.
+    /// </summary>
     private void HandleAttack()
     {
         if (!_input.AttackPressed || _isAttacking)
@@ -2347,6 +3200,9 @@ using UnityEngine;
 /// </summary>
 public class PlayerLamp : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private Transform _lightTransform;
     [SerializeField] private PlayerInputHandler _input;
 
@@ -2357,17 +3213,36 @@ public class PlayerLamp : MonoBehaviour
     private float _currentScale;
     private bool _isLightOn = true;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _currentScale = _minScale;
         UpdateLight();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes input for this component.
+    /// </summary>
     private void HandleInput()
     {
         if (_input == null)
@@ -2381,6 +3256,9 @@ public class PlayerLamp : MonoBehaviour
             IncreaseLight(1f);
     }
 
+    /// <summary>
+    /// Executes the toggle light operation for this component.
+    /// </summary>
     private void ToggleLight()
     {
         _isLightOn = !_isLightOn;
@@ -2389,33 +3267,56 @@ public class PlayerLamp : MonoBehaviour
             _lightTransform.gameObject.SetActive(_isLightOn);
     }
 
+    /// <summary>
+    /// Executes the increase light operation for this component.
+    /// </summary>
     public void IncreaseLight(float amount)
     {
         _currentScale = Mathf.Clamp(_currentScale + amount, _minScale, _maxScale);
         UpdateLight();
     }
 
+    /// <summary>
+    /// Refreshes light for this component.
+    /// </summary>
     private void UpdateLight()
     {
         if (_lightTransform != null)
             _lightTransform.localScale = new Vector3(_currentScale, _currentScale, 1f);
     }
 
+    /// <summary>
+    /// Returns whether light on is currently true.
+    /// </summary>
     public bool IsLightOn()
     {
         return _isLightOn;
     }
 
+    /// <summary>
+    /// Returns the current light radius for this component.
+    /// </summary>
     public float GetLightRadius()
     {
         return _currentScale;
     }
 
+    /// <summary>
+    /// Returns the current light position for this component.
+    /// </summary>
     public Vector3 GetLightPosition()
     {
         return _lightTransform != null ? _lightTransform.position : transform.position;
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Draws editor-only gizmos that visualize this component's configured range.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (_lightTransform == null)
@@ -2426,6 +3327,8 @@ public class PlayerLamp : MonoBehaviour
         float radius = Application.isPlaying ? _currentScale : _minScale;
         Gizmos.DrawWireSphere(_lightTransform.position, radius);
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -2436,6 +3339,9 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class PlayerInputHandler : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     private InputSystem_Actions _playerInputActions;
 
     public Vector2 MoveInput { get; private set; }
@@ -2466,27 +3372,52 @@ public class PlayerInputHandler : MonoBehaviour
     public bool LockSlotPressed { get; private set; }
     public bool UnlockSlotPressed { get; private set; }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _playerInputActions = new InputSystem_Actions();
         RegisterInputCallbacks();
     }
 
+    /// <summary>
+    /// Enables runtime subscriptions or input required while this component is active.
+    /// </summary>
     private void OnEnable()
     {
         _playerInputActions.Player.Enable();
     }
 
+    /// <summary>
+    /// Disables runtime subscriptions or input when this component becomes inactive.
+    /// </summary>
     private void OnDisable()
     {
         _playerInputActions.Player.Disable();
     }
 
+    /// <summary>
+    /// Releases owned resources and event subscriptions before this component is destroyed.
+    /// </summary>
     private void OnDestroy()
     {
         _playerInputActions?.Dispose();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Registers input callbacks for this component.
+    /// </summary>
     private void RegisterInputCallbacks()
     {
         var playerActions = _playerInputActions.Player;
@@ -2524,11 +3455,27 @@ public class PlayerInputHandler : MonoBehaviour
         playerActions.UnlockSlot.performed += _ => UnlockSlotPressed = true;
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Applies frame-dependent presentation updates after regular Update callbacks complete.
+    /// </summary>
     private void LateUpdate()
     {
         ResetFrameInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Resets frame input for this component.
+    /// </summary>
     private void ResetFrameInput()
     {
         // Reset commands after every Update consumer has had a chance to read them.
@@ -2559,6 +3506,9 @@ public class PlayerInputHandler : MonoBehaviour
         UnlockSlotPressed = false;
     }
 
+    /// <summary>
+    /// Executes the consume toggle menu operation for this component.
+    /// </summary>
     public bool ConsumeToggleMenu()
     {
         if (!ToggleMenuPressed)
@@ -2567,6 +3517,8 @@ public class PlayerInputHandler : MonoBehaviour
         ToggleMenuPressed = false;
         return true;
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -2577,10 +3529,21 @@ using UnityEngine;
 /// </summary>
 public class PlayerInventory : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static PlayerInventory Instance;
 
     private readonly List<InventoryEntry> _items = new();
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -2592,6 +3555,14 @@ public class PlayerInventory : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Adds item for this component.
+    /// </summary>
     public void AddItem(InventoryItem item, int quantity = 1)
     {
         if (item == null || quantity <= 0)
@@ -2607,12 +3578,18 @@ public class PlayerInventory : MonoBehaviour
         Debug.Log($"Item collected: {item.itemName} x{quantity}");
     }
 
+    /// <summary>
+    /// Adds new entry for this component.
+    /// </summary>
     private void AddNewEntry(InventoryItem item, int quantity)
     {
         bool identified = item.category != InventoryCategory.Consumable;
         _items.Add(new InventoryEntry(item, quantity, identified));
     }
 
+    /// <summary>
+    /// Removes item for this component.
+    /// </summary>
     public bool RemoveItem(InventoryItem item, int quantity = 1)
     {
         if (item == null || quantity <= 0)
@@ -2631,21 +3608,33 @@ public class PlayerInventory : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Returns whether item is currently true.
+    /// </summary>
     public bool HasItem(InventoryItem item)
     {
         return GetEntry(item) != null;
     }
 
+    /// <summary>
+    /// Returns the current entry for this component.
+    /// </summary>
     public InventoryEntry GetEntry(InventoryItem item)
     {
         return _items.Find(entry => entry.Item == item);
     }
 
+    /// <summary>
+    /// Returns the current items for this component.
+    /// </summary>
     public List<InventoryEntry> GetItems()
     {
         return _items;
     }
 
+    /// <summary>
+    /// Returns the current items by category for this component.
+    /// </summary>
     public List<InventoryEntry> GetItemsByCategory(InventoryCategory category)
     {
         if (category == InventoryCategory.All)
@@ -2654,6 +3643,9 @@ public class PlayerInventory : MonoBehaviour
         return _items.FindAll(entry => entry.Item.category == category);
     }
 
+    /// <summary>
+    /// Executes the identify item operation for this component.
+    /// </summary>
     public void IdentifyItem(InventoryItem item)
     {
         InventoryEntry entry = GetEntry(item);
@@ -2661,6 +3653,8 @@ public class PlayerInventory : MonoBehaviour
         if (entry != null)
             entry.Identified = true;
     }
+
+    #endregion
 }
 
 /// <summary>
@@ -2668,11 +3662,16 @@ public class PlayerInventory : MonoBehaviour
 /// </summary>
 public enum PlayerState
 {
+
+    #region Values
+
     Grounded,
     Airborne,
     WallSliding,
     Dashing,
     Attacking
+
+    #endregion
 }
 
 /// <summary>
@@ -2680,8 +3679,17 @@ public enum PlayerState
 /// </summary>
 public class PlayerStateMachine
 {
+    #region State
+
     public PlayerState CurrentState { get; private set; }
 
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the change state operation for this component.
+    /// </summary>
     public void ChangeState(PlayerState newState)
     {
         if (CurrentState == newState)
@@ -2689,6 +3697,8 @@ public class PlayerStateMachine
 
         CurrentState = newState;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -2698,6 +3708,9 @@ using UnityEngine;
 /// </summary>
 public class BookMenuManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private GameObject _bookRoot;
     [SerializeField] private GameObject[] _pages;
@@ -2725,6 +3738,14 @@ public class BookMenuManager : MonoBehaviour
         Settings
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -2736,6 +3757,9 @@ public class BookMenuManager : MonoBehaviour
         Instance = this;
     }
 
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -2748,6 +3772,9 @@ public class BookMenuManager : MonoBehaviour
             _bookRoot.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null)
@@ -2756,6 +3783,14 @@ public class BookMenuManager : MonoBehaviour
         ProcessBookInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the process book input operation for this component.
+    /// </summary>
     private void ProcessBookInput()
     {
         UpdateContextPageTimer();
@@ -2768,6 +3803,9 @@ public class BookMenuManager : MonoBehaviour
         HandlePageNavigation();
     }
 
+    /// <summary>
+    /// Processes book toggle for this component.
+    /// </summary>
     private void HandleBookToggle()
     {
         if (!_input.ConsumeToggleMenu())
@@ -2783,6 +3821,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes context page open for this component.
+    /// </summary>
     private void HandleContextPageOpen()
     {
         if (!_input.OpenItemPressed)
@@ -2798,6 +3839,9 @@ public class BookMenuManager : MonoBehaviour
         _hasPendingContextPage = false;
     }
 
+    /// <summary>
+    /// Refreshes context page timer for this component.
+    /// </summary>
     private void UpdateContextPageTimer()
     {
         if (!_hasPendingContextPage)
@@ -2811,6 +3855,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes page navigation for this component.
+    /// </summary>
     private void HandlePageNavigation()
     {
         if (_justOpenedBook)
@@ -2829,6 +3876,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens book for this component.
+    /// </summary>
     private void OpenBook()
     {
         if (_bookRoot == null || GameStateManager.Instance == null)
@@ -2848,6 +3898,9 @@ public class BookMenuManager : MonoBehaviour
         InteractionUIManager.Instance?.HideVisual();
     }
 
+    /// <summary>
+    /// Closes book for this component.
+    /// </summary>
     public void CloseBook()
     {
         GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
@@ -2856,6 +3909,9 @@ public class BookMenuManager : MonoBehaviour
             _bookRoot.SetActive(false);
     }
 
+    /// <summary>
+    /// Executes the next page operation for this component.
+    /// </summary>
     private void NextPage()
     {
         if (_pages.Length == 0)
@@ -2866,6 +3922,9 @@ public class BookMenuManager : MonoBehaviour
         ShowPage(_currentPage);
     }
 
+    /// <summary>
+    /// Executes the previous page operation for this component.
+    /// </summary>
     private void PreviousPage()
     {
         if (_pages.Length == 0)
@@ -2876,6 +3935,9 @@ public class BookMenuManager : MonoBehaviour
         ShowPage(_currentPage);
     }
 
+    /// <summary>
+    /// Displays page for this component.
+    /// </summary>
     private void ShowPage(int index)
     {
         if (index < 0 || index >= _pages.Length)
@@ -2903,6 +3965,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens book at page for this component.
+    /// </summary>
     public void OpenBookAtPage(BookPage page)
     {
         _currentPage = GetPageIndex(page);
@@ -2910,8 +3975,14 @@ public class BookMenuManager : MonoBehaviour
         OpenBook();
     }
 
+    /// <summary>
+    /// Returns the current page index for this component.
+    /// </summary>
     private int GetPageIndex(BookPage page) => (int)page;
 
+    /// <summary>
+    /// Queues context page for this component.
+    /// </summary>
     public void QueueContextPage(BookPage page)
     {
         _hasPendingContextPage = true;
@@ -2920,6 +3991,8 @@ public class BookMenuManager : MonoBehaviour
 
         _contextPageTimer = 2f;
     }
+
+    #endregion
 }
 
 using System.Collections.Generic;
@@ -2930,6 +4003,9 @@ using UnityEngine;
 /// </summary>
 public class InventoryPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Categories")]
     [SerializeField] private Transform _categoryContainer;
     [SerializeField] private GameObject _categoryOptionPrefab;
@@ -2947,16 +4023,35 @@ public class InventoryPageController : MonoBehaviour
 
     private int _currentCategoryIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         RefreshInventory();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds inventory for this component.
+    /// </summary>
     public void RefreshInventory()
     {
         CreateCategories();
     }
 
+    /// <summary>
+    /// Creates categories for this component.
+    /// </summary>
     private void CreateCategories()
     {
         if (_categoryContainer == null || _categoryOptionPrefab == null)
@@ -2967,6 +4062,9 @@ public class InventoryPageController : MonoBehaviour
         SelectCategory(0);
     }
 
+    /// <summary>
+    /// Clears category options for this component.
+    /// </summary>
     private void ClearCategoryOptions()
     {
         foreach (Transform child in _categoryContainer)
@@ -2975,6 +4073,9 @@ public class InventoryPageController : MonoBehaviour
         _categoryOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate category options operation for this component.
+    /// </summary>
     private void PopulateCategoryOptions()
     {
         foreach (InventoryCategory category in _categories)
@@ -2992,6 +4093,9 @@ public class InventoryPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Selects category for this component.
+    /// </summary>
     private void SelectCategory(int index)
     {
         _currentCategoryIndex = index;
@@ -2999,6 +4103,9 @@ public class InventoryPageController : MonoBehaviour
         UpdateCategoryVisuals();
     }
 
+    /// <summary>
+    /// Refreshes category visuals for this component.
+    /// </summary>
     private void UpdateCategoryVisuals()
     {
         for (int i = 0; i < _categoryOptions.Count; i++)
@@ -3009,6 +4116,9 @@ public class InventoryPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current category name for this component.
+    /// </summary>
     private static string GetCategoryName(InventoryCategory category)
     {
         return category switch
@@ -3021,6 +4131,8 @@ public class InventoryPageController : MonoBehaviour
             _ => string.Empty
         };
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3030,6 +4142,9 @@ using UnityEngine;
 /// </summary>
 public class SettingsPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Options")]
     [SerializeField] private UISelectableOption[] _options;
 
@@ -3037,6 +4152,14 @@ public class SettingsPageController : MonoBehaviour
 
     private int _currentOption;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -3044,6 +4167,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -3053,12 +4179,23 @@ public class SettingsPageController : MonoBehaviour
         HandleSettingsInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes settings input for this component.
+    /// </summary>
     private void HandleSettingsInput()
     {
         HandleNavigation();
         HandleConfirm();
     }
 
+    /// <summary>
+    /// Processes navigation for this component.
+    /// </summary>
     private void HandleNavigation()
     {
         if (_input.NavigateUpPressed)
@@ -3067,6 +4204,9 @@ public class SettingsPageController : MonoBehaviour
             NavigateDown();
     }
 
+    /// <summary>
+    /// Executes the navigate up operation for this component.
+    /// </summary>
     private void NavigateUp()
     {
         if (_options.Length == 0)
@@ -3077,6 +4217,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Executes the navigate down operation for this component.
+    /// </summary>
     private void NavigateDown()
     {
         if (_options.Length == 0)
@@ -3087,6 +4230,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _options.Length; i++)
@@ -3097,6 +4243,9 @@ public class SettingsPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes confirm for this component.
+    /// </summary>
     private void HandleConfirm()
     {
         if (!_input.ConfirmPressed)
@@ -3116,11 +4265,17 @@ public class SettingsPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the resume game operation for this component.
+    /// </summary>
     private void ResumeGame()
     {
         BookMenuManager.Instance?.CloseBook();
     }
 
+    /// <summary>
+    /// Returns to checkpoint for this component.
+    /// </summary>
     private void ReturnToCheckpoint()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -3129,10 +4284,15 @@ public class SettingsPageController : MonoBehaviour
         BookMenuManager.Instance?.CloseBook();
     }
 
+    /// <summary>
+    /// Executes the exit game operation for this component.
+    /// </summary>
     private void ExitGame()
     {
         Debug.Log("Exit Game");
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3142,14 +4302,33 @@ using UnityEngine;
 /// </summary>
 public abstract class BaseHUDModule : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] protected CanvasGroup _canvasGroup;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     protected virtual void Awake()
     {
         if (_canvasGroup == null)
             _canvasGroup = GetComponent<CanvasGroup>();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Displays  for this component.
+    /// </summary>
     public virtual void Show()
     {
         gameObject.SetActive(true);
@@ -3162,6 +4341,9 @@ public abstract class BaseHUDModule : MonoBehaviour
         _canvasGroup.blocksRaycasts = true;
     }
 
+    /// <summary>
+    /// Hides  for this component.
+    /// </summary>
     public virtual void Hide()
     {
         gameObject.SetActive(false);
@@ -3174,11 +4356,16 @@ public abstract class BaseHUDModule : MonoBehaviour
         _canvasGroup.blocksRaycasts = false;
     }
 
+    /// <summary>
+    /// Updates opacity for this component.
+    /// </summary>
     public virtual void SetOpacity(float opacity)
     {
         if (_canvasGroup != null)
             _canvasGroup.alpha = Mathf.Clamp01(opacity);
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3188,11 +4375,22 @@ using UnityEngine;
 /// </summary>
 public class UIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static UIManager Instance { get; private set; }
 
     [Header("HUD")]
     [SerializeField] private LifeHUDController _lifeHUD;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -3205,6 +4403,8 @@ public class UIManager : MonoBehaviour
     }
 
     public LifeHUDController LifeHUD => _lifeHUD;
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3215,6 +4415,9 @@ using UnityEngine.UI;
 /// </summary>
 public class LifeHUDController : BaseHUDModule
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private Image _lifeBarFill;
     [SerializeField] private Image _damageFlash;
@@ -3231,6 +4434,14 @@ public class LifeHUDController : BaseHUDModule
 
     private bool _isFlashing;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -3238,6 +4449,9 @@ public class LifeHUDController : BaseHUDModule
         _playerHealth = FindFirstObjectByType<PlayerHealth>();
     }
 
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         if (_damageFlash != null)
@@ -3256,17 +4470,31 @@ public class LifeHUDController : BaseHUDModule
         }
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         UpdateHudVisuals();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes hud visuals for this component.
+    /// </summary>
     private void UpdateHudVisuals()
     {
         HandleDamageFlashFade();
         UpdateLifeBar();
     }
 
+    /// <summary>
+    /// Refreshes life bar for this component.
+    /// </summary>
     private void UpdateLifeBar()
     {
         if (_lifeBarFill == null)
@@ -3279,6 +4507,14 @@ public class LifeHUDController : BaseHUDModule
         );
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Releases owned resources and event subscriptions before this component is destroyed.
+    /// </summary>
     private void OnDestroy()
     {
         if (_playerHealth != null)
@@ -3288,11 +4524,22 @@ public class LifeHUDController : BaseHUDModule
         }
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes life for this component.
+    /// </summary>
     public void UpdateLife(float currentLife, float maxLife)
     {
         _targetFill = maxLife > 0f ? Mathf.Clamp01(currentLife / maxLife) : 0f;
     }
 
+    /// <summary>
+    /// Displays damage flash for this component.
+    /// </summary>
     private void ShowDamageFlash()
     {
         if (_damageFlash == null)
@@ -3306,6 +4553,9 @@ public class LifeHUDController : BaseHUDModule
         _isFlashing = true;
     }
 
+    /// <summary>
+    /// Processes damage flash fade for this component.
+    /// </summary>
     private void HandleDamageFlashFade()
     {
         if (!_isFlashing || _damageFlash == null)
@@ -3325,6 +4575,8 @@ public class LifeHUDController : BaseHUDModule
             _isFlashing = false;
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3334,23 +4586,45 @@ using UnityEngine;
 /// </summary>
 public class QuickSlotHUDController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private QuickSlotUI[] _slots;
 
     [SerializeField] private int _unlockedSlots = 1;
 
     private PlayerInputHandler _input;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
         RefreshSlots();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleDebugInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes debug input for this component.
+    /// </summary>
     private void HandleDebugInput()
     {
         if (_input == null || _slots == null || _slots.Length == 0)
@@ -3371,6 +4645,9 @@ public class QuickSlotHUDController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rebuilds slots for this component.
+    /// </summary>
     private void RefreshSlots()
     {
         for (int i = 0; i < _slots.Length; i++)
@@ -3385,6 +4662,8 @@ public class QuickSlotHUDController : MonoBehaviour
             _slots[i].SetState(state);
         }
     }
+
+    #endregion
 }
 
 /// <summary>
@@ -3392,9 +4671,14 @@ public class QuickSlotHUDController : MonoBehaviour
 /// </summary>
 public enum QuickSlotState
 {
+
+    #region Values
+
     Locked,
     Unlocked,
     Equipped
+
+    #endregion
 }
 
 using TMPro;
@@ -3406,17 +4690,31 @@ using UnityEngine.UI;
 /// </summary>
 public class QuickSlotUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private Image _itemIcon;
     [SerializeField] private Image _lockIcon;
     [SerializeField] private TextMeshProUGUI _keyLabel;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates ey for this component.
+    /// </summary>
     public void Setkey(string key)
     {
         if (_keyLabel != null)
             _keyLabel.text = key;
     }
 
+    /// <summary>
+    /// Updates state for this component.
+    /// </summary>
     public void SetState(QuickSlotState state)
     {
         bool isLocked = state == QuickSlotState.Locked;
@@ -3427,6 +4725,8 @@ public class QuickSlotUI : MonoBehaviour
         if (_itemIcon != null)
             _itemIcon.gameObject.SetActive(!isLocked);
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3437,6 +4737,9 @@ using UnityEngine.UI;
 /// </summary>
 public class SolarHUDController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Solar Fragments")]
     [SerializeField] private Image[] _solarFragments;
 
@@ -3452,17 +4755,36 @@ public class SolarHUDController : MonoBehaviour
 
     private const int MaxFragments = 6;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleDebugControls();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes debug controls for this component.
+    /// </summary>
     private void HandleDebugControls()
     {
         if (_input == null)
@@ -3479,6 +4801,9 @@ public class SolarHUDController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the consume solar energy operation for this component.
+    /// </summary>
     private void ConsumeSolarEnergy(float amount)
     {
         _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy - amount, 0f, MaxFragments);
@@ -3486,6 +4811,9 @@ public class SolarHUDController : MonoBehaviour
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Executes the restore solar energy operation for this component.
+    /// </summary>
     private void RestoreSolarEnergy(float amount)
     {
         _currentSolarEnergy = Mathf.Clamp(_currentSolarEnergy + amount, 0f, MaxFragments);
@@ -3493,6 +4821,9 @@ public class SolarHUDController : MonoBehaviour
         UpdateSolarHUD();
     }
 
+    /// <summary>
+    /// Refreshes solar hud for this component.
+    /// </summary>
     private void UpdateSolarHUD()
     {
         for (int i = 0; i < _solarFragments.Length; i++)
@@ -3513,6 +4844,8 @@ public class SolarHUDController : MonoBehaviour
             }
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3523,6 +4856,9 @@ using UnityEngine.UI;
 /// </summary>
 public class StaminaHUDController : BaseHUDModule
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private Image _staminaFill;
 
     [SerializeField] private float smoothSpeed = 10f;
@@ -3531,6 +4867,14 @@ public class StaminaHUDController : BaseHUDModule
 
     private PlayerStamina _playerStamina;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -3538,6 +4882,9 @@ public class StaminaHUDController : BaseHUDModule
         _playerStamina = FindFirstObjectByType<PlayerStamina>();
     }
 
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         if (_playerStamina != null)
@@ -3548,6 +4895,9 @@ public class StaminaHUDController : BaseHUDModule
         }
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_staminaFill == null)
@@ -3560,16 +4910,29 @@ public class StaminaHUDController : BaseHUDModule
         );
     }
 
+    /// <summary>
+    /// Releases owned resources and event subscriptions before this component is destroyed.
+    /// </summary>
     private void OnDestroy()
     {
         if (_playerStamina != null)
             _playerStamina.OnStaminaChanged -= UpdateStamina;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes stamina for this component.
+    /// </summary>
     private void UpdateStamina(float current, float max)
     {
         _targetFill = max > 0f ? Mathf.Clamp01(current / max) : 0f;
     }
+
+    #endregion
 }
 
 using TMPro;
@@ -3580,6 +4943,9 @@ using UnityEngine;
 /// </summary>
 public class InteractionUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static InteractionUIManager Instance { get; private set; }
 
     [Header("References")]
@@ -3591,6 +4957,14 @@ public class InteractionUIManager : MonoBehaviour
 
     private Transform _currentTarget;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -3603,11 +4977,22 @@ public class InteractionUIManager : MonoBehaviour
         Clear();
     }
 
+    /// <summary>
+    /// Applies frame-dependent presentation updates after regular Update callbacks complete.
+    /// </summary>
     private void LateUpdate()
     {
         UpdatePromptPosition();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes prompt position for this component.
+    /// </summary>
     private void UpdatePromptPosition()
     {
         if (_currentTarget == null)
@@ -3625,6 +5010,9 @@ public class InteractionUIManager : MonoBehaviour
         transform.position = _currentTarget.position + _offset;
     }
 
+    /// <summary>
+    /// Displays  for this component.
+    /// </summary>
     public void Show(Transform target, string message)
     {
         if (target == null)
@@ -3635,16 +5023,24 @@ public class InteractionUIManager : MonoBehaviour
         _panel.SetActive(true);
     }
 
+    /// <summary>
+    /// Hides visual for this component.
+    /// </summary>
     public void HideVisual()
     {
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Clears  for this component.
+    /// </summary>
     public void Clear()
     {
         _currentTarget = null;
         _panel.SetActive(false);
     }
+
+    #endregion
 }
 
 using System.Collections;
@@ -3656,6 +5052,9 @@ using UnityEngine;
 /// </summary>
 public class UI_Interaction : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static UI_Interaction Instance { get; private set; }
 
     [Header("References")]
@@ -3667,6 +5066,14 @@ public class UI_Interaction : MonoBehaviour
 
     private Coroutine _currentRoutine;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -3680,6 +5087,14 @@ public class UI_Interaction : MonoBehaviour
         HideImmediate();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Displays text for this component.
+    /// </summary>
     public void ShowText(string message)
     {
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
@@ -3693,6 +5108,9 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(FadeCanvas(1f));
     }
 
+    /// <summary>
+    /// Displays text timed for this component.
+    /// </summary>
     public void ShowTextTimed(string message, float duration)
     {
         if (_currentRoutine != null)
@@ -3701,6 +5119,9 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(ShowRoutine(message, duration));
     }
 
+    /// <summary>
+    /// Displays routine for this component.
+    /// </summary>
     private IEnumerator ShowRoutine(string message, float duration)
     {
         _text.text = message;
@@ -3712,6 +5133,9 @@ public class UI_Interaction : MonoBehaviour
         yield return FadeCanvas(0f);
     }
 
+    /// <summary>
+    /// Executes the fade canvas operation for this component.
+    /// </summary>
     private IEnumerator FadeCanvas(float targetAlpha)
     {
         if (_fadeDuration <= 0f)
@@ -3740,6 +5164,9 @@ public class UI_Interaction : MonoBehaviour
         _canvasGroup.alpha = targetAlpha;
     }
 
+    /// <summary>
+    /// Hides  for this component.
+    /// </summary>
     public void Hide()
     {
         if (_currentRoutine != null)
@@ -3748,11 +5175,16 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(FadeCanvas(0f));
     }
 
+    /// <summary>
+    /// Hides immediate for this component.
+    /// </summary>
     private void HideImmediate()
     {
         _canvasGroup.alpha = 0f;
         _currentRoutine = null;
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3762,13 +5194,32 @@ using UnityEngine;
 /// </summary>
 public class GameMenuController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private PlayerInputHandler _input;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleMenuInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes menu input for this component.
+    /// </summary>
     private void HandleMenuInput()
     {
         if (_input == null || !_input.ToggleMenuPressed)
@@ -3777,6 +5228,9 @@ public class GameMenuController : MonoBehaviour
         HandleMenu();
     }
 
+    /// <summary>
+    /// Processes menu for this component.
+    /// </summary>
     private void HandleMenu()
     {
         if (GameStateManager.Instance == null)
@@ -3793,6 +5247,8 @@ public class GameMenuController : MonoBehaviour
             GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
         }
     }
+
+    #endregion
 }
 
 using UnityEngine;
@@ -3802,13 +5258,26 @@ using UnityEngine;
 /// </summary>
 public class PauseMenuActions : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private GameObject _player;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns to checkpoint for this component.
+    /// </summary>
     public void ReturnToCheckpoint()
     {
         CheckpointManager.Instance?.ReturnToCheckpoint(_player);
         GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
     }
+
+    #endregion
 }
 
 using System;
@@ -3821,6 +5290,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static TutorialUIManager Instance { get; private set; }
 
     [SerializeField] private PlayerInputHandler _input;
@@ -3834,6 +5306,14 @@ public class TutorialUIManager : MonoBehaviour
 
     private bool _canClose;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -3846,11 +5326,22 @@ public class TutorialUIManager : MonoBehaviour
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleCloseInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes close input for this component.
+    /// </summary>
     private void HandleCloseInput()
     {
         if (!CanProcessCloseInput())
@@ -3860,6 +5351,9 @@ public class TutorialUIManager : MonoBehaviour
             CloseTutorial();
     }
 
+    /// <summary>
+    /// Determines whether this component can process close input for this component.
+    /// </summary>
     private bool CanProcessCloseInput()
     {
         return GameStateManager.Instance != null &&
@@ -3868,6 +5362,9 @@ public class TutorialUIManager : MonoBehaviour
                _input != null;
     }
 
+    /// <summary>
+    /// Displays tutorial for this component.
+    /// </summary>
     public void ShowTutorial(string tutorialId, string message, Action onClose = null)
     {
         if (_panel == null || _text == null || GameStateManager.Instance == null)
@@ -3889,6 +5386,9 @@ public class TutorialUIManager : MonoBehaviour
         StartCoroutine(EnableCloseDelay());
     }
 
+    /// <summary>
+    /// Displays tutorial for this component.
+    /// </summary>
     public void ShowTutorial(
         TutorialData tutorial,
         Action onClose = null)
@@ -3905,6 +5405,9 @@ public class TutorialUIManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Closes tutorial for this component.
+    /// </summary>
     private void CloseTutorial()
     {
         _panel.SetActive(false);
@@ -3916,12 +5419,17 @@ public class TutorialUIManager : MonoBehaviour
         _onCloseCallback?.Invoke();
     }
 
+    /// <summary>
+    /// Executes the enable close delay operation for this component.
+    /// </summary>
     private IEnumerator EnableCloseDelay()
     {
         yield return null;
 
         _canClose = true;
     }
+
+    #endregion
 }
 
 using TMPro;
@@ -3932,6 +5440,9 @@ using UnityEngine;
 /// </summary>
 public class UISelectableOption : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private TextMeshProUGUI _optionText;
 
@@ -3942,6 +5453,14 @@ public class UISelectableOption : MonoBehaviour
     [SerializeField] private float _normalSize = 28f;
     [SerializeField] private float _selectedSize = 34f;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates selected for this component.
+    /// </summary>
     public void SetSelected(bool selected)
     {
         if (_optionText == null)
@@ -3950,4 +5469,6 @@ public class UISelectableOption : MonoBehaviour
         _optionText.color = selected ? _selectedColor : _normalColor;
         _optionText.fontSize = selected ? _selectedSize : _normalSize;
     }
+
+    #endregion
 }

@@ -8,6 +8,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static TutorialUIManager Instance { get; private set; }
 
     [SerializeField] private PlayerInputHandler _input;
@@ -21,6 +24,14 @@ public class TutorialUIManager : MonoBehaviour
 
     private bool _canClose;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,11 +44,22 @@ public class TutorialUIManager : MonoBehaviour
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleCloseInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes close input for this component.
+    /// </summary>
     private void HandleCloseInput()
     {
         if (!CanProcessCloseInput())
@@ -47,6 +69,9 @@ public class TutorialUIManager : MonoBehaviour
             CloseTutorial();
     }
 
+    /// <summary>
+    /// Determines whether this component can process close input for this component.
+    /// </summary>
     private bool CanProcessCloseInput()
     {
         return GameStateManager.Instance != null &&
@@ -55,6 +80,9 @@ public class TutorialUIManager : MonoBehaviour
                _input != null;
     }
 
+    /// <summary>
+    /// Displays tutorial for this component.
+    /// </summary>
     public void ShowTutorial(string tutorialId, string message, Action onClose = null)
     {
         if (_panel == null || _text == null || GameStateManager.Instance == null)
@@ -76,6 +104,9 @@ public class TutorialUIManager : MonoBehaviour
         StartCoroutine(EnableCloseDelay());
     }
 
+    /// <summary>
+    /// Displays tutorial for this component.
+    /// </summary>
     public void ShowTutorial(
         TutorialData tutorial,
         Action onClose = null)
@@ -92,6 +123,9 @@ public class TutorialUIManager : MonoBehaviour
         );
     }
 
+    /// <summary>
+    /// Closes tutorial for this component.
+    /// </summary>
     private void CloseTutorial()
     {
         _panel.SetActive(false);
@@ -103,10 +137,15 @@ public class TutorialUIManager : MonoBehaviour
         _onCloseCallback?.Invoke();
     }
 
+    /// <summary>
+    /// Executes the enable close delay operation for this component.
+    /// </summary>
     private IEnumerator EnableCloseDelay()
     {
         yield return null;
 
         _canClose = true;
     }
+
+    #endregion
 }

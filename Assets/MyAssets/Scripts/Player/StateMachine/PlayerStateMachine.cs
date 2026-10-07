@@ -3,11 +3,16 @@
 /// </summary>
 public enum PlayerState
 {
+
+    #region Values
+
     Grounded,
     Airborne,
     WallSliding,
     Dashing,
     Attacking
+
+    #endregion
 }
 
 /// <summary>
@@ -15,8 +20,17 @@ public enum PlayerState
 /// </summary>
 public class PlayerStateMachine
 {
+    #region State
+
     public PlayerState CurrentState { get; private set; }
 
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the change state operation for this component.
+    /// </summary>
     public void ChangeState(PlayerState newState)
     {
         if (CurrentState == newState)
@@ -24,4 +38,6 @@ public class PlayerStateMachine
 
         CurrentState = newState;
     }
+
+    #endregion
 }

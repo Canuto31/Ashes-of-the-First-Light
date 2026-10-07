@@ -6,17 +6,31 @@ using UnityEngine;
 /// </summary>
 public class PickupNote : MonoBehaviour, IInteractable
 {
+
+    #region Fields and Configuration
+
     [SerializeField] 
     private NoteData _note;
     
     [SerializeField]
     private TutorialData _readingTutorial;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Returns the prompt text presented for this interaction.
+    /// </summary>
     public string GetInteractionText()
     {
         return _note != null ? _note.noteTitle : "Read note";
     }
 
+    /// <summary>
+    /// Executes this object's response to a valid player interaction.
+    /// </summary>
     public void Interact()
     {
         if (_note == null || GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
@@ -33,12 +47,18 @@ public class PickupNote : MonoBehaviour, IInteractable
         CompletePickup();
     }
 
+    /// <summary>
+    /// Executes the collect note operation for this component.
+    /// </summary>
     private void CollectNote()
     {
         NotesManager.Instance?.AddNote(_note);
         BookMenuManager.Instance?.QueueContextPage(BookMenuManager.BookPage.Notes);
     }
 
+    /// <summary>
+    /// Executes the should show reading tutorial operation for this component.
+    /// </summary>
     private bool ShouldShowReadingTutorial()
     {
         return _readingTutorial != null &&
@@ -46,6 +66,9 @@ public class PickupNote : MonoBehaviour, IInteractable
                !TutorialManager.Instance.HasSeen(_readingTutorial.tutorialId);
     }
 
+    /// <summary>
+    /// Executes the complete pickup operation for this component.
+    /// </summary>
     private void CompletePickup()
     {
         UI_Interaction.Instance?.ShowTextTimed(
@@ -56,6 +79,9 @@ public class PickupNote : MonoBehaviour, IInteractable
         Destroy(gameObject);
     }
     
+    /// <summary>
+    /// Executes the first note sequence operation for this component.
+    /// </summary>
     private IEnumerator FirstNoteSequence()
     {
         TutorialUIManager.Instance?.ShowTutorial(
@@ -68,4 +94,6 @@ public class PickupNote : MonoBehaviour, IInteractable
 
         CompletePickup();
     }
+
+    #endregion
 }

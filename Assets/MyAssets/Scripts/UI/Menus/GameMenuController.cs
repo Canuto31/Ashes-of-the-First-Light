@@ -5,13 +5,32 @@ using UnityEngine;
 /// </summary>
 public class GameMenuController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private PlayerInputHandler _input;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleMenuInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes menu input for this component.
+    /// </summary>
     private void HandleMenuInput()
     {
         if (_input == null || !_input.ToggleMenuPressed)
@@ -20,6 +39,9 @@ public class GameMenuController : MonoBehaviour
         HandleMenu();
     }
 
+    /// <summary>
+    /// Processes menu for this component.
+    /// </summary>
     private void HandleMenu()
     {
         if (GameStateManager.Instance == null)
@@ -36,4 +58,6 @@ public class GameMenuController : MonoBehaviour
             GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
         }
     }
+
+    #endregion
 }

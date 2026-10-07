@@ -7,9 +7,20 @@ using UnityEngine.UI;
 /// </summary>
 public class InventoryItemOptionUI : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [SerializeField] private Image _icon;
     [SerializeField] private TextMeshProUGUI _title;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates p for this component.
+    /// </summary>
     public void Setup(InventoryItem item)
     {
         if (item == null)
@@ -21,4 +32,6 @@ public class InventoryItemOptionUI : MonoBehaviour
         if (_title != null)
             _title.text = item.itemName;
     }
+
+    #endregion
 }

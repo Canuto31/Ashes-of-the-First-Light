@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class PlayerStamina : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Stamina")]
     [SerializeField] private float _maxstamina = 100f;
 
@@ -26,6 +29,14 @@ public class PlayerStamina : MonoBehaviour
 
     public event Action<float, float> OnStaminaChanged;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -35,11 +46,22 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleStamina();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes stamina for this component.
+    /// </summary>
     private void HandleStamina()
     {
         if (_input == null)
@@ -60,6 +82,9 @@ public class PlayerStamina : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Consumes stamina for this component.
+    /// </summary>
     public void DrainStamina(float amount)
     {
         if (amount <= 0f)
@@ -73,6 +98,9 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Regenerates stamina for this component.
+    /// </summary>
     public void RegenerateStamina(float amount)
     {
         if (amount <= 0f || Mathf.Approximately(_currentStamina, _maxstamina))
@@ -92,8 +120,13 @@ public class PlayerStamina : MonoBehaviour
         NotifyStaminaChanged();
     }
 
+    /// <summary>
+    /// Notifies subscribers about stamina changed for this component.
+    /// </summary>
     private void NotifyStaminaChanged()
     {
         OnStaminaChanged?.Invoke(_currentStamina, _maxstamina);
     }
+
+    #endregion
 }

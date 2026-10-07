@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 /// </summary>
 public class PlayerInputHandler : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     private InputSystem_Actions _playerInputActions;
 
     public Vector2 MoveInput { get; private set; }
@@ -36,27 +39,52 @@ public class PlayerInputHandler : MonoBehaviour
     public bool LockSlotPressed { get; private set; }
     public bool UnlockSlotPressed { get; private set; }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _playerInputActions = new InputSystem_Actions();
         RegisterInputCallbacks();
     }
 
+    /// <summary>
+    /// Enables runtime subscriptions or input required while this component is active.
+    /// </summary>
     private void OnEnable()
     {
         _playerInputActions.Player.Enable();
     }
 
+    /// <summary>
+    /// Disables runtime subscriptions or input when this component becomes inactive.
+    /// </summary>
     private void OnDisable()
     {
         _playerInputActions.Player.Disable();
     }
 
+    /// <summary>
+    /// Releases owned resources and event subscriptions before this component is destroyed.
+    /// </summary>
     private void OnDestroy()
     {
         _playerInputActions?.Dispose();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Registers input callbacks for this component.
+    /// </summary>
     private void RegisterInputCallbacks()
     {
         var playerActions = _playerInputActions.Player;
@@ -94,11 +122,27 @@ public class PlayerInputHandler : MonoBehaviour
         playerActions.UnlockSlot.performed += _ => UnlockSlotPressed = true;
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Applies frame-dependent presentation updates after regular Update callbacks complete.
+    /// </summary>
     private void LateUpdate()
     {
         ResetFrameInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Resets frame input for this component.
+    /// </summary>
     private void ResetFrameInput()
     {
         // Reset commands after every Update consumer has had a chance to read them.
@@ -129,6 +173,9 @@ public class PlayerInputHandler : MonoBehaviour
         UnlockSlotPressed = false;
     }
 
+    /// <summary>
+    /// Executes the consume toggle menu operation for this component.
+    /// </summary>
     public bool ConsumeToggleMenu()
     {
         if (!ToggleMenuPressed)
@@ -137,4 +184,6 @@ public class PlayerInputHandler : MonoBehaviour
         ToggleMenuPressed = false;
         return true;
     }
+
+    #endregion
 }

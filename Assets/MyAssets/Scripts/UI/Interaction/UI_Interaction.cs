@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class UI_Interaction : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static UI_Interaction Instance { get; private set; }
 
     [Header("References")]
@@ -18,6 +21,14 @@ public class UI_Interaction : MonoBehaviour
 
     private Coroutine _currentRoutine;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,6 +42,14 @@ public class UI_Interaction : MonoBehaviour
         HideImmediate();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Displays text for this component.
+    /// </summary>
     public void ShowText(string message)
     {
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsPlaying())
@@ -44,6 +63,9 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(FadeCanvas(1f));
     }
 
+    /// <summary>
+    /// Displays text timed for this component.
+    /// </summary>
     public void ShowTextTimed(string message, float duration)
     {
         if (_currentRoutine != null)
@@ -52,6 +74,9 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(ShowRoutine(message, duration));
     }
 
+    /// <summary>
+    /// Displays routine for this component.
+    /// </summary>
     private IEnumerator ShowRoutine(string message, float duration)
     {
         _text.text = message;
@@ -63,6 +88,9 @@ public class UI_Interaction : MonoBehaviour
         yield return FadeCanvas(0f);
     }
 
+    /// <summary>
+    /// Executes the fade canvas operation for this component.
+    /// </summary>
     private IEnumerator FadeCanvas(float targetAlpha)
     {
         if (_fadeDuration <= 0f)
@@ -91,6 +119,9 @@ public class UI_Interaction : MonoBehaviour
         _canvasGroup.alpha = targetAlpha;
     }
 
+    /// <summary>
+    /// Hides  for this component.
+    /// </summary>
     public void Hide()
     {
         if (_currentRoutine != null)
@@ -99,9 +130,14 @@ public class UI_Interaction : MonoBehaviour
         _currentRoutine = StartCoroutine(FadeCanvas(0f));
     }
 
+    /// <summary>
+    /// Hides immediate for this component.
+    /// </summary>
     private void HideImmediate()
     {
         _canvasGroup.alpha = 0f;
         _currentRoutine = null;
     }
+
+    #endregion
 }

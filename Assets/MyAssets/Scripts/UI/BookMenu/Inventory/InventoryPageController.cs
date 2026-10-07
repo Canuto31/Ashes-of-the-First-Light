@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class InventoryPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Categories")] 
     [SerializeField] private Transform _categoryContainer;
     [SerializeField] private GameObject _categoryOptionPrefab;
@@ -23,16 +26,35 @@ public class InventoryPageController : MonoBehaviour
 
     private int _currentCategoryIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         RefreshInventory();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds inventory for this component.
+    /// </summary>
     public void RefreshInventory()
     {
         CreateCategories();
     }
 
+    /// <summary>
+    /// Creates categories for this component.
+    /// </summary>
     private void CreateCategories()
     {
         if (_categoryContainer == null || _categoryOptionPrefab == null)
@@ -43,6 +65,9 @@ public class InventoryPageController : MonoBehaviour
         SelectCategory(0);
     }
 
+    /// <summary>
+    /// Clears category options for this component.
+    /// </summary>
     private void ClearCategoryOptions()
     {
         foreach (Transform child in _categoryContainer)
@@ -51,6 +76,9 @@ public class InventoryPageController : MonoBehaviour
         _categoryOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate category options operation for this component.
+    /// </summary>
     private void PopulateCategoryOptions()
     {
         foreach (InventoryCategory category in _categories)
@@ -68,6 +96,9 @@ public class InventoryPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Selects category for this component.
+    /// </summary>
     private void SelectCategory(int index)
     {
         _currentCategoryIndex = index;
@@ -75,6 +106,9 @@ public class InventoryPageController : MonoBehaviour
         UpdateCategoryVisuals();
     }
 
+    /// <summary>
+    /// Refreshes category visuals for this component.
+    /// </summary>
     private void UpdateCategoryVisuals()
     {
         for (int i = 0; i < _categoryOptions.Count; i++)
@@ -85,6 +119,9 @@ public class InventoryPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current category name for this component.
+    /// </summary>
     private static string GetCategoryName(InventoryCategory category)
     {
         return category switch
@@ -97,4 +134,6 @@ public class InventoryPageController : MonoBehaviour
             _ => string.Empty
         };
     }
+
+    #endregion
 }

@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class SettingsPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Options")]
     [SerializeField] private UISelectableOption[] _options;
 
@@ -12,6 +15,14 @@ public class SettingsPageController : MonoBehaviour
 
     private int _currentOption;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -19,6 +30,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -28,12 +42,23 @@ public class SettingsPageController : MonoBehaviour
         HandleSettingsInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes settings input for this component.
+    /// </summary>
     private void HandleSettingsInput()
     {
         HandleNavigation();
         HandleConfirm();
     }
 
+    /// <summary>
+    /// Processes navigation for this component.
+    /// </summary>
     private void HandleNavigation()
     {
         if (_input.NavigateUpPressed)
@@ -42,6 +67,9 @@ public class SettingsPageController : MonoBehaviour
             NavigateDown();
     }
 
+    /// <summary>
+    /// Executes the navigate up operation for this component.
+    /// </summary>
     private void NavigateUp()
     {
         if (_options.Length == 0)
@@ -52,6 +80,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Executes the navigate down operation for this component.
+    /// </summary>
     private void NavigateDown()
     {
         if (_options.Length == 0)
@@ -62,6 +93,9 @@ public class SettingsPageController : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _options.Length; i++)
@@ -72,6 +106,9 @@ public class SettingsPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes confirm for this component.
+    /// </summary>
     private void HandleConfirm()
     {
         if (!_input.ConfirmPressed)
@@ -91,11 +128,17 @@ public class SettingsPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the resume game operation for this component.
+    /// </summary>
     private void ResumeGame()
     {
         BookMenuManager.Instance?.CloseBook();
     }
 
+    /// <summary>
+    /// Returns to checkpoint for this component.
+    /// </summary>
     private void ReturnToCheckpoint()
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -104,8 +147,13 @@ public class SettingsPageController : MonoBehaviour
         BookMenuManager.Instance?.CloseBook();
     }
 
+    /// <summary>
+    /// Executes the exit game operation for this component.
+    /// </summary>
     private void ExitGame()
     {
         Debug.Log("Exit Game");
     }
+
+    #endregion
 }

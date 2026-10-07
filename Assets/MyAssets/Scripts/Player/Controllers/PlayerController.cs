@@ -89,6 +89,9 @@ public class PlayerController : MonoBehaviour
 
     #region Unity Lifecycle
 
+    /// <summary>
+    /// Caches the Rigidbody, input adapter, state machine, and stamina dependency required by the controller.
+    /// </summary>
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -97,6 +100,9 @@ public class PlayerController : MonoBehaviour
         _playerStamina = GetComponent<PlayerStamina>();
     }
 
+    /// <summary>
+    /// Coordinates frame-based gameplay logic while the global game state allows player control.
+    /// </summary>
     private void Update()
     {
         if (!IsGameplayActive())
@@ -105,6 +111,9 @@ public class PlayerController : MonoBehaviour
         ProcessGameplayFrame();
     }
 
+    /// <summary>
+    /// Coordinates Rigidbody movement and traversal physics on Unity's fixed timestep.
+    /// </summary>
     private void FixedUpdate()
     {
         if (!IsGameplayActive())
@@ -141,6 +150,9 @@ public class PlayerController : MonoBehaviour
         HandleWallSlide();
     }
 
+    /// <summary>
+    /// Refreshes ground and wall contacts before deriving the current player state.
+    /// </summary>
     private void RefreshEnvironmentState()
     {
         // State selection depends on the latest ground and wall observations.
@@ -149,6 +161,9 @@ public class PlayerController : MonoBehaviour
         UpdateState();
     }
 
+    /// <summary>
+    /// Advances buffered input and active traversal ability timers.
+    /// </summary>
     private void UpdateAbilityTimers()
     {
         UpdateJumpBuffer();
@@ -156,6 +171,9 @@ public class PlayerController : MonoBehaviour
         HandleDash();
     }
 
+    /// <summary>
+    /// Processes jump, dash, and attack requests in their intentional priority order.
+    /// </summary>
     private void ProcessActionInput()
     {
         // Preserve the original action order because abilities share velocity and state.
@@ -164,6 +182,9 @@ public class PlayerController : MonoBehaviour
         HandleAttack();
     }
 
+    /// <summary>
+    /// Clears residual Rigidbody velocity while gameplay is suspended.
+    /// </summary>
     private void StopPhysicsMovement()
     {
         _rb.linearVelocity = Vector2.zero;
@@ -173,11 +194,17 @@ public class PlayerController : MonoBehaviour
 
     #region Game State
 
+    /// <summary>
+    /// Returns whether the global game state currently permits player gameplay.
+    /// </summary>
     private static bool IsGameplayActive()
     {
         return GameStateManager.Instance != null && GameStateManager.Instance.IsPlaying();
     }
 
+    /// <summary>
+    /// Selects the highest-priority locomotion state from the current runtime flags.
+    /// </summary>
     private void UpdateState()
     {
         // Transient abilities have priority over general locomotion states.
@@ -197,6 +224,9 @@ public class PlayerController : MonoBehaviour
 
     #region Movement
 
+    /// <summary>
+    /// Calculates accelerated horizontal velocity and refreshes movement presentation.
+    /// </summary>
     private void HandleMovement()
     {
         // Dash and wall-jump impulses temporarily own horizontal velocity.
@@ -226,6 +256,9 @@ public class PlayerController : MonoBehaviour
         UpdateMovementVisuals();
     }
 
+    /// <summary>
+    /// Updates locomotion animation and facing direction from horizontal input.
+    /// </summary>
     private void UpdateMovementVisuals()
     {
         if (_input.MoveInput.x != 0)
@@ -239,6 +272,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rotates the character to face the current horizontal movement direction.
+    /// </summary>
     private void FaceMovementDirection()
     {
         if (_input.MoveInput.x < 0)
@@ -251,6 +287,9 @@ public class PlayerController : MonoBehaviour
 
     #region Environment Detection
 
+    /// <summary>
+    /// Detects ground contact and manages landing, coyote time, and grounded animation state.
+    /// </summary>
     private void CheckGround()
     {
         bool groundedNow = Physics2D.OverlapCircle(
@@ -284,6 +323,9 @@ public class PlayerController : MonoBehaviour
         _wasGrounded = _isGrounded;
     }
 
+    /// <summary>
+    /// Detects adjacent walls and refreshes wall direction and aerial jump resources.
+    /// </summary>
     private void CheckWall()
     {
         bool hitRight = Physics2D.Raycast(
@@ -321,6 +363,9 @@ public class PlayerController : MonoBehaviour
 
     #region Jump
 
+    /// <summary>
+    /// Maintains the short input window used to accept an early jump request.
+    /// </summary>
     private void UpdateJumpBuffer()
     {
         // Buffering accepts a jump pressed shortly before a valid jump opportunity.
@@ -330,6 +375,9 @@ public class PlayerController : MonoBehaviour
             _jumpBufferCounter -= Time.deltaTime;
     }
 
+    /// <summary>
+    /// Coordinates wall jump, standard jump, and variable jump-height behavior.
+    /// </summary>
     private void HandleJump()
     {
         if (_stateMachine.CurrentState == PlayerState.Dashing)
@@ -342,6 +390,9 @@ public class PlayerController : MonoBehaviour
         ApplyVariableJumpHeight();
     }
 
+    /// <summary>
+    /// Attempts a wall jump and locks regular movement while its impulse is active.
+    /// </summary>
     private bool TryWallJump()
     {
         if (_jumpBufferCounter <= 0f || !_isWallSliding)
@@ -358,6 +409,9 @@ public class PlayerController : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Attempts a coyote-time jump or consumes an available extra jump.
+    /// </summary>
     private void TryStandardJump()
     {
         // Coyote time allows the base jump shortly after leaving a platform.
@@ -374,6 +428,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Shortens upward velocity when the jump input is released early.
+    /// </summary>
     private void ApplyVariableJumpHeight()
     {
         // Releasing jump during ascent produces a shorter, more responsive jump.
@@ -388,6 +445,9 @@ public class PlayerController : MonoBehaviour
         animator.SetFloat(AirSpeedYHash, -1f);
     }
 
+    /// <summary>
+    /// Applies the configured vertical jump impulse and animation trigger.
+    /// </summary>
     private void Jump()
     {
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, jumpForce);
@@ -395,6 +455,9 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(JumpHash);
     }
 
+    /// <summary>
+    /// Applies additional gravity while falling to sharpen the descent.
+    /// </summary>
     private void ApplyBetterGravity()
     {
         // Additional downward gravity sharpens the fall without changing the ascent.
@@ -409,6 +472,9 @@ public class PlayerController : MonoBehaviour
 
     #region Wall Movement
 
+    /// <summary>
+    /// Limits downward velocity while the player pushes toward a contacted wall.
+    /// </summary>
     private void HandleWallSlide()
     {
         float inputDir = _input.MoveInput.x;
@@ -430,6 +496,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Releases the temporary movement lock after a wall jump.
+    /// </summary>
     private void HandleWallJumpLock()
     {
         if (!_isWallJumping)
@@ -446,6 +515,9 @@ public class PlayerController : MonoBehaviour
 
     #region Dash
 
+    /// <summary>
+    /// Starts a dash when input and stamina requirements are satisfied.
+    /// </summary>
     private void TryDash()
     {
         if (!_input.DashPressed || !CanDash())
@@ -454,12 +526,18 @@ public class PlayerController : MonoBehaviour
         StartDash();
     }
 
+    /// <summary>
+    /// Returns whether the player has enough stamina to start a dash.
+    /// </summary>
     private bool CanDash()
     {
         return _playerStamina != null &&
                _playerStamina.CurrentStamina >= dashStaminaCost;
     }
 
+    /// <summary>
+    /// Consumes stamina and applies the configured dash impulse and animation.
+    /// </summary>
     private void StartDash()
     {
         _isDashing = true;
@@ -475,6 +553,9 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger(RollHash);
     }
 
+    /// <summary>
+    /// Advances the active dash timer and ends the dash when its duration expires.
+    /// </summary>
     private void HandleDash()
     {
         if (!_isDashing)
@@ -490,6 +571,9 @@ public class PlayerController : MonoBehaviour
 
     #region Combat
 
+    /// <summary>
+    /// Starts an attack when input is received and no attack is already active.
+    /// </summary>
     private void HandleAttack()
     {
         if (!_input.AttackPressed || _isAttacking)

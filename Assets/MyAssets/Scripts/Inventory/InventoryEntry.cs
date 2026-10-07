@@ -6,14 +6,27 @@ using System;
 /// </summary>
 public class InventoryEntry
 {
+
+    #region Fields and Configuration
+
     public InventoryItem Item;
     public int Quantity;
     public bool Identified;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the inventory entry operation for this component.
+    /// </summary>
     public InventoryEntry(InventoryItem item, int quantity = 1, bool identified = false)
     {
         Item = item;
         Quantity = quantity;
         Identified = identified;
     }
+
+    #endregion
 }

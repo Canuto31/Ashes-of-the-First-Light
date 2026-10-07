@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class InventoryItem : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     public string itemId;
     public string itemName;
     public Sprite icon;
@@ -15,4 +18,6 @@ public class InventoryItem : ScriptableObject
 
     [TextArea] 
     public string description;
+
+    #endregion
 }

@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialData : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     public string tutorialId;
 
     [Header("Book")] 
@@ -19,4 +22,6 @@ public class TutorialData : ScriptableObject
     public string popupMessage;
 
     public Sprite icon;
+
+    #endregion
 }

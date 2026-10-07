@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class BookMenuManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private GameObject _bookRoot;
     [SerializeField] private GameObject[] _pages;
@@ -32,6 +35,14 @@ public class BookMenuManager : MonoBehaviour
         Settings
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -43,6 +54,9 @@ public class BookMenuManager : MonoBehaviour
         Instance = this;
     }
 
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -55,6 +69,9 @@ public class BookMenuManager : MonoBehaviour
             _bookRoot.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null)
@@ -63,6 +80,14 @@ public class BookMenuManager : MonoBehaviour
         ProcessBookInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the process book input operation for this component.
+    /// </summary>
     private void ProcessBookInput()
     {
         UpdateContextPageTimer();
@@ -75,6 +100,9 @@ public class BookMenuManager : MonoBehaviour
         HandlePageNavigation();
     }
 
+    /// <summary>
+    /// Processes book toggle for this component.
+    /// </summary>
     private void HandleBookToggle()
     {
         if (!_input.ConsumeToggleMenu())
@@ -90,6 +118,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes context page open for this component.
+    /// </summary>
     private void HandleContextPageOpen()
     {
         if (!_input.OpenItemPressed)
@@ -105,6 +136,9 @@ public class BookMenuManager : MonoBehaviour
         _hasPendingContextPage = false;
     }
 
+    /// <summary>
+    /// Refreshes context page timer for this component.
+    /// </summary>
     private void UpdateContextPageTimer()
     {
         if (!_hasPendingContextPage)
@@ -118,6 +152,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes page navigation for this component.
+    /// </summary>
     private void HandlePageNavigation()
     {
         if (_justOpenedBook)
@@ -136,6 +173,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens book for this component.
+    /// </summary>
     private void OpenBook()
     {
         if (_bookRoot == null || GameStateManager.Instance == null)
@@ -155,6 +195,9 @@ public class BookMenuManager : MonoBehaviour
         InteractionUIManager.Instance?.HideVisual();
     }
 
+    /// <summary>
+    /// Closes book for this component.
+    /// </summary>
     public void CloseBook()
     {
         GameStateManager.Instance?.SetState(GameStateManager.GameState.Playing);
@@ -163,6 +206,9 @@ public class BookMenuManager : MonoBehaviour
             _bookRoot.SetActive(false);
     }
 
+    /// <summary>
+    /// Executes the next page operation for this component.
+    /// </summary>
     private void NextPage()
     {
         if (_pages.Length == 0)
@@ -173,6 +219,9 @@ public class BookMenuManager : MonoBehaviour
         ShowPage(_currentPage);
     }
 
+    /// <summary>
+    /// Executes the previous page operation for this component.
+    /// </summary>
     private void PreviousPage()
     {
         if (_pages.Length == 0)
@@ -183,6 +232,9 @@ public class BookMenuManager : MonoBehaviour
         ShowPage(_currentPage);
     }
 
+    /// <summary>
+    /// Displays page for this component.
+    /// </summary>
     private void ShowPage(int index)
     {
         if (index < 0 || index >= _pages.Length)
@@ -210,6 +262,9 @@ public class BookMenuManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens book at page for this component.
+    /// </summary>
     public void OpenBookAtPage(BookPage page)
     {
         _currentPage = GetPageIndex(page);
@@ -217,8 +272,14 @@ public class BookMenuManager : MonoBehaviour
         OpenBook();
     }
 
+    /// <summary>
+    /// Returns the current page index for this component.
+    /// </summary>
     private int GetPageIndex(BookPage page) => (int)page;
 
+    /// <summary>
+    /// Queues context page for this component.
+    /// </summary>
     public void QueueContextPage(BookPage page)
     {
         _hasPendingContextPage = true;
@@ -227,4 +288,6 @@ public class BookMenuManager : MonoBehaviour
 
         _contextPageTimer = 2f;
     }
+
+    #endregion
 }

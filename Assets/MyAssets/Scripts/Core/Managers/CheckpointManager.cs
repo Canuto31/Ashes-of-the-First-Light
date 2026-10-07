@@ -5,10 +5,21 @@ using UnityEngine;
 /// </summary>
 public class CheckpointManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static CheckpointManager Instance { get; private set; }
 
     private Vector3 _lastCheckpointPosition;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -20,6 +31,14 @@ public class CheckpointManager : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates checkpoint for this component.
+    /// </summary>
     public void SetCheckpoint(Vector3 position)
     {
         _lastCheckpointPosition = position;
@@ -27,6 +46,9 @@ public class CheckpointManager : MonoBehaviour
         Debug.Log("Checkpoint saved at: " + position);
     }
 
+    /// <summary>
+    /// Returns to checkpoint for this component.
+    /// </summary>
     public void ReturnToCheckpoint(GameObject player)
     {
         if (player == null)
@@ -40,4 +62,6 @@ public class CheckpointManager : MonoBehaviour
 
         Debug.Log("Returned to checkpoint");
     }
+
+    #endregion
 }

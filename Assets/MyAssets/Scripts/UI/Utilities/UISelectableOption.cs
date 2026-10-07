@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class UISelectableOption : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private TextMeshProUGUI _optionText;
 
@@ -16,6 +19,14 @@ public class UISelectableOption : MonoBehaviour
     [SerializeField] private float _normalSize = 28f;
     [SerializeField] private float _selectedSize = 34f;
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Updates selected for this component.
+    /// </summary>
     public void SetSelected(bool selected)
     {
         if (_optionText == null)
@@ -24,4 +35,6 @@ public class UISelectableOption : MonoBehaviour
         _optionText.color = selected ? _selectedColor : _normalColor;
         _optionText.fontSize = selected ? _selectedSize : _normalSize;
     }
+
+    #endregion
 }

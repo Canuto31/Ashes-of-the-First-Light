@@ -3,9 +3,14 @@
 /// </summary>
 public enum InventoryCategory
 {
+
+    #region Values
+
     All,
     Consumable,
     Equipment,
     KeyItem,
     Material
+
+    #endregion
 }

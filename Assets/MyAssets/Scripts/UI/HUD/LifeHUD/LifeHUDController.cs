@@ -6,6 +6,9 @@ using UnityEngine.UI;
 /// </summary>
 public class LifeHUDController : BaseHUDModule
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private Image _lifeBarFill;
     [SerializeField] private Image _damageFlash;
@@ -22,6 +25,14 @@ public class LifeHUDController : BaseHUDModule
     
     private bool _isFlashing;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     protected override void Awake()
     {
         base.Awake();
@@ -29,6 +40,9 @@ public class LifeHUDController : BaseHUDModule
         _playerHealth = FindFirstObjectByType<PlayerHealth>();
     }
     
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         if (_damageFlash != null)
@@ -47,17 +61,31 @@ public class LifeHUDController : BaseHUDModule
         }
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         UpdateHudVisuals();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes hud visuals for this component.
+    /// </summary>
     private void UpdateHudVisuals()
     {
         HandleDamageFlashFade();
         UpdateLifeBar();
     }
 
+    /// <summary>
+    /// Refreshes life bar for this component.
+    /// </summary>
     private void UpdateLifeBar()
     {
         if (_lifeBarFill == null)
@@ -70,6 +98,14 @@ public class LifeHUDController : BaseHUDModule
         );
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Releases owned resources and event subscriptions before this component is destroyed.
+    /// </summary>
     private void OnDestroy()
     {
         if (_playerHealth != null)
@@ -79,11 +115,22 @@ public class LifeHUDController : BaseHUDModule
         }
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Refreshes life for this component.
+    /// </summary>
     public void UpdateLife(float currentLife, float maxLife)
     {
         _targetFill = maxLife > 0f ? Mathf.Clamp01(currentLife / maxLife) : 0f;
     }
 
+    /// <summary>
+    /// Displays damage flash for this component.
+    /// </summary>
     private void ShowDamageFlash()
     {
         if (_damageFlash == null)
@@ -97,6 +144,9 @@ public class LifeHUDController : BaseHUDModule
         _isFlashing = true;
     }
 
+    /// <summary>
+    /// Processes damage flash fade for this component.
+    /// </summary>
     private void HandleDamageFlashFade()
     {
         if (!_isFlashing || _damageFlash == null)
@@ -116,4 +166,6 @@ public class LifeHUDController : BaseHUDModule
             _isFlashing = false;
         }
     }
+
+    #endregion
 }

@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class NotesUIManager : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static NotesUIManager Instance { get; private set; }
     
     [SerializeField] private PlayerInputHandler _input;
@@ -21,6 +24,14 @@ public class NotesUIManager : MonoBehaviour
 
     private bool _ignoreInputThisFrame;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,6 +44,9 @@ public class NotesUIManager : MonoBehaviour
         _panel.SetActive(false);
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (GameStateManager.Instance == null ||
@@ -48,6 +62,14 @@ public class NotesUIManager : MonoBehaviour
         HandleInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes input for this component.
+    /// </summary>
     private void HandleInput()
     {
         if (_input == null)
@@ -63,6 +85,9 @@ public class NotesUIManager : MonoBehaviour
             CloseNote();
     }
 
+    /// <summary>
+    /// Opens note for this component.
+    /// </summary>
     public void OpenNote(NoteData note)
     {
         if (note == null || note.pages == null || note.pages.Length == 0)
@@ -83,6 +108,9 @@ public class NotesUIManager : MonoBehaviour
         InteractionUIManager.Instance?.HideVisual();
     }
 
+    /// <summary>
+    /// Closes note for this component.
+    /// </summary>
     private void CloseNote()
     {
         _panel.SetActive(false);
@@ -90,6 +118,9 @@ public class NotesUIManager : MonoBehaviour
         GameStateManager.Instance.SetState(GameStateManager.GameState.Playing);
     }
 
+    /// <summary>
+    /// Executes the next page operation for this component.
+    /// </summary>
     private void NextPage()
     {
         if (_currentNote == null || _currentNote.pages == null)
@@ -102,6 +133,9 @@ public class NotesUIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Executes the previous page operation for this component.
+    /// </summary>
     private void PreviousPage()
     {
         if (_currentNote == null)
@@ -114,6 +148,9 @@ public class NotesUIManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes ui for this component.
+    /// </summary>
     private void UpdateUI()
     {
         if (_currentNote == null || _currentNote.pages == null || _currentNote.pages.Length == 0)
@@ -123,4 +160,6 @@ public class NotesUIManager : MonoBehaviour
         _contentText.text = _currentNote.pages[_currentPage];
         _pageIndicator.text = (_currentPage + 1) + "/" + _currentNote.pages.Length;
     }
+
+    #endregion
 }

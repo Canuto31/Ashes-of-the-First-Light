@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class CameraDirector : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public static CameraDirector Instance { get; private set; }
 
     [Header("Main Player Camera")]
@@ -20,6 +23,14 @@ public class CameraDirector : MonoBehaviour
     private Coroutine _currentRoutine;
     private CinemachineVirtualCamera _currentTargetCamera;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -31,6 +42,14 @@ public class CameraDirector : MonoBehaviour
         Instance = this;
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Focuses on for this component.
+    /// </summary>
     public void FocusOn(CinemachineVirtualCamera targetCamera, float duration)
     {
         if (targetCamera == null || _playerCamera == null)
@@ -46,6 +65,9 @@ public class CameraDirector : MonoBehaviour
         _currentRoutine = StartCoroutine(FocusRoutine(targetCamera, duration));
     }
 
+    /// <summary>
+    /// Focuses routine for this component.
+    /// </summary>
     private IEnumerator FocusRoutine(CinemachineVirtualCamera targetCamera, float duration)
     {
         _isPlayingCinematic = true;
@@ -58,6 +80,9 @@ public class CameraDirector : MonoBehaviour
         RestorePlayerCamera();
     }
 
+    /// <summary>
+    /// Updates camera for this component.
+    /// </summary>
     public void SetCamera(CinemachineVirtualCamera targetCamera)
     {
         if (_isPlayingCinematic || targetCamera == null || _playerCamera == null)
@@ -67,11 +92,17 @@ public class CameraDirector : MonoBehaviour
         _playerCamera.Priority = _defaultPriority;
     }
 
+    /// <summary>
+    /// Returns whether playing cinematic is currently true.
+    /// </summary>
     public bool IsPlayingCinematic()
     {
         return _isPlayingCinematic;
     }
 
+    /// <summary>
+    /// Executes the restore player camera operation for this component.
+    /// </summary>
     private void RestorePlayerCamera()
     {
         if (_currentTargetCamera != null)
@@ -84,4 +115,6 @@ public class CameraDirector : MonoBehaviour
         _isPlayingCinematic = false;
         _currentRoutine = null;
     }
+
+    #endregion
 }

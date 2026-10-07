@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class NotesPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("List")] 
     [SerializeField] private Transform _notesContainer;
     [SerializeField] private GameObject _notesOptionPrefab;
@@ -25,6 +28,14 @@ public class NotesPageController : MonoBehaviour
     private int _currentNoteIndex;
     private int _currentPageIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -32,6 +43,9 @@ public class NotesPageController : MonoBehaviour
         RefreshNotes();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -41,12 +55,23 @@ public class NotesPageController : MonoBehaviour
         HandleNavigationInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes navigation input for this component.
+    /// </summary>
     private void HandleNavigationInput()
     {
         HandleNoteNavigation();
         HandlePageNavigation();
     }
 
+    /// <summary>
+    /// Rebuilds notes for this component.
+    /// </summary>
     public void RefreshNotes()
     {
         if (_notesContainer == null || _notesOptionPrefab == null || NotesManager.Instance == null)
@@ -57,6 +82,9 @@ public class NotesPageController : MonoBehaviour
         SelectInitialNote();
     }
 
+    /// <summary>
+    /// Clears spawned options for this component.
+    /// </summary>
     private void ClearSpawnedOptions()
     {
         foreach (Transform child in _notesContainer)
@@ -65,6 +93,9 @@ public class NotesPageController : MonoBehaviour
         _spawnOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate notes operation for this component.
+    /// </summary>
     private void PopulateNotes()
     {
         _notes = NotesManager.Instance.GetNotes();
@@ -84,6 +115,9 @@ public class NotesPageController : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Selects initial note for this component.
+    /// </summary>
     private void SelectInitialNote()
     {
         if (_notes.Count > 0)
@@ -92,6 +126,9 @@ public class NotesPageController : MonoBehaviour
             ClearContent();
     }
 
+    /// <summary>
+    /// Clears content for this component.
+    /// </summary>
     private void ClearContent()
     {
         _titleText.text = "";
@@ -99,6 +136,9 @@ public class NotesPageController : MonoBehaviour
         _pageIndicatorText.text = "";
     }
 
+    /// <summary>
+    /// Selects note for this component.
+    /// </summary>
     private void SelectNote(int index)
     {
         if (_notes == null || index < 0 || index >= _notes.Count)
@@ -113,6 +153,9 @@ public class NotesPageController : MonoBehaviour
         UpdateContent();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _spawnOptions.Count; i++)
@@ -123,6 +166,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes content for this component.
+    /// </summary>
     private void UpdateContent()
     {
         if (_notes == null || _notes.Count == 0)
@@ -143,6 +189,9 @@ public class NotesPageController : MonoBehaviour
         _pageIndicatorText.text = (_currentPageIndex + 1) + " / " + note.pages.Length;
     }
 
+    /// <summary>
+    /// Processes note navigation for this component.
+    /// </summary>
     private void HandleNoteNavigation()
     {
         if (_notes == null || _notes.Count == 0)
@@ -158,6 +207,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Processes page navigation for this component.
+    /// </summary>
     private void HandlePageNavigation()
     {
         if (_notes == null || _notes.Count == 0)
@@ -188,6 +240,9 @@ public class NotesPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Focuses last collected note for this component.
+    /// </summary>
     public void FocusLastCollectedNote()
     {
         NoteData lastNote = NotesManager.Instance?.GetLastCollectedNote();
@@ -202,4 +257,6 @@ public class NotesPageController : MonoBehaviour
             SelectNote(index);
         }
     }
+
+    #endregion
 }

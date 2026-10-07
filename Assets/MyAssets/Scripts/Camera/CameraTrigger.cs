@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class CameraTrigger : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("Camera")]
     [SerializeField] private CinemachineVirtualCamera _cameraTarget;
     
@@ -22,11 +25,22 @@ public class CameraTrigger : MonoBehaviour
 
     private PlayerInputHandler _playerInput;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Caches required dependencies and initializes this component before other Unity callbacks run.
+    /// </summary>
     private void Awake()
     {
         _interactable = GetComponentInParent<IInteractable>();
     }
 
+    /// <summary>
+    /// Registers an eligible collider when it enters this component's trigger.
+    /// </summary>
     private void OnTriggerEnter2D(Collider2D other) 
     {
         if (!other.CompareTag("Player"))
@@ -45,6 +59,9 @@ public class CameraTrigger : MonoBehaviour
         }*/
     }
 
+    /// <summary>
+    /// Clears the registered collider when it leaves this component's trigger.
+    /// </summary>
     private void OnTriggerExit2D(Collider2D other) 
     {
         if (!other.CompareTag("Player"))
@@ -56,11 +73,22 @@ public class CameraTrigger : MonoBehaviour
         UI_Interaction.Instance?.Hide();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         HandleInteractionInput();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Processes interaction input for this component.
+    /// </summary>
     private void HandleInteractionInput()
     {
         if (!_requireInput || !_playerInside)
@@ -73,6 +101,9 @@ public class CameraTrigger : MonoBehaviour
             _interactable.Interact();
     }
 
+    /// <summary>
+    /// Attempts to activate for this component.
+    /// </summary>
     private void TryActivate()
     {
         if (_hasTriggered && _triggerOnce)
@@ -88,4 +119,6 @@ public class CameraTrigger : MonoBehaviour
 
         _hasTriggered = true;
     }
+
+    #endregion
 }

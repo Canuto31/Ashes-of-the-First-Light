@@ -6,9 +6,14 @@ using UnityEngine;
 /// </summary>
 public class NoteData : ScriptableObject
 {
+
+    #region Fields and Configuration
+
     [Header("Note Info")]
     public string noteTitle;
 
     [TextArea(5, 10)]
     public string[] pages;
+
+    #endregion
 }

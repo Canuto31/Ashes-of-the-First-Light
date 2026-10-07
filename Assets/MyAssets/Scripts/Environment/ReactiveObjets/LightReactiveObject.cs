@@ -5,6 +5,9 @@ using UnityEngine;
 /// </summary>
 public class LightReactiveObject : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("References")]
     [SerializeField] private PlayerLamp _playerLamp;
 
@@ -14,11 +17,27 @@ public class LightReactiveObject : MonoBehaviour
     [Header("Behavior")]
     [SerializeField] private bool _activeInLight = true;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         RefreshTargetStates();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds target states for this component.
+    /// </summary>
     private void RefreshTargetStates()
     {
         if (!HasValidConfiguration())
@@ -27,11 +46,17 @@ public class LightReactiveObject : MonoBehaviour
         SetTargetsActive(ShouldTargetsBeActive());
     }
 
+    /// <summary>
+    /// Returns whether valid configuration is currently true.
+    /// </summary>
     private bool HasValidConfiguration()
     {
         return _playerLamp != null && _targets != null && _targets.Length > 0;
     }
 
+    /// <summary>
+    /// Executes the should targets be active operation for this component.
+    /// </summary>
     private bool ShouldTargetsBeActive()
     {
         if (!_playerLamp.IsLightOn())
@@ -41,6 +66,9 @@ public class LightReactiveObject : MonoBehaviour
         return _activeInLight ? anyTargetInLight : !anyTargetInLight;
     }
 
+    /// <summary>
+    /// Returns whether any target in light is currently true.
+    /// </summary>
     private bool IsAnyTargetInLight()
     {
         Vector3 lightPosition = _playerLamp.GetLightPosition();
@@ -59,6 +87,9 @@ public class LightReactiveObject : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Updates targets active for this component.
+    /// </summary>
     private void SetTargetsActive(bool state)
     {
         foreach (GameObject target in _targets)
@@ -68,6 +99,14 @@ public class LightReactiveObject : MonoBehaviour
         }
     }
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Draws editor-only gizmos that visualize this component's configured range.
+    /// </summary>
     private void OnDrawGizmos()
     {
         if (_targets == null)
@@ -81,4 +120,6 @@ public class LightReactiveObject : MonoBehaviour
                 Gizmos.DrawWireSphere(target.transform.position, 0.3f);
         }
     }
+
+    #endregion
 }

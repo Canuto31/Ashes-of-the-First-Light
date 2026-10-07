@@ -6,6 +6,9 @@ using UnityEngine;
 /// </summary>
 public class DoorController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     public enum DoorType
     {
         Sliding,
@@ -35,11 +38,27 @@ public class DoorController : MonoBehaviour
     private Quaternion _closedRotation;
     private Quaternion _openRotation;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         CacheDoorTransforms();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Executes the cache door transforms operation for this component.
+    /// </summary>
     private void CacheDoorTransforms()
     {
         _closedPosition = transform.position;
@@ -56,6 +75,9 @@ public class DoorController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens  for this component.
+    /// </summary>
     public void Open()
     {
         if (_isOpen)
@@ -65,6 +87,9 @@ public class DoorController : MonoBehaviour
         StartCoroutine(OpenWithDelay());
     }
 
+    /// <summary>
+    /// Opens with delay for this component.
+    /// </summary>
     private IEnumerator OpenWithDelay()
     {
         yield return new WaitForSeconds(_openDelay);
@@ -80,6 +105,9 @@ public class DoorController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Opens sliding for this component.
+    /// </summary>
     private IEnumerator OpenSliding()
     {
         float time = 0f;
@@ -96,6 +124,9 @@ public class DoorController : MonoBehaviour
         transform.position = _openPosition;
     }
 
+    /// <summary>
+    /// Opens hinged for this component.
+    /// </summary>
     private IEnumerator OpenHinged()
     {
         float time = 0f;
@@ -111,4 +142,6 @@ public class DoorController : MonoBehaviour
 
         transform.rotation = _openRotation;
     }
+
+    #endregion
 }

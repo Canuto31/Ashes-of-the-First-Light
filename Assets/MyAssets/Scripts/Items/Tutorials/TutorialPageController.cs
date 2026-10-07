@@ -7,6 +7,9 @@ using UnityEngine;
 /// </summary>
 public class TutorialPageController : MonoBehaviour
 {
+
+    #region Fields and Configuration
+
     [Header("List")]
     [SerializeField] private Transform _tutorialsContainer;
     [SerializeField] private GameObject _tutorialOptionPrefab;
@@ -23,6 +26,14 @@ public class TutorialPageController : MonoBehaviour
 
     private int _currentTutorialIndex;
 
+
+    #endregion
+
+    #region Unity Lifecycle
+
+    /// <summary>
+    /// Initializes runtime state after all scene objects have completed their Awake phase.
+    /// </summary>
     private void Start()
     {
         _input = FindFirstObjectByType<PlayerInputHandler>();
@@ -30,6 +41,9 @@ public class TutorialPageController : MonoBehaviour
         RefreshTutorials();
     }
 
+    /// <summary>
+    /// Coordinates frame-based input and state updates for this component.
+    /// </summary>
     private void Update()
     {
         if (_input == null || GameStateManager.Instance == null ||
@@ -39,6 +53,14 @@ public class TutorialPageController : MonoBehaviour
         HandleTutorialNavigation();
     }
 
+
+    #endregion
+
+    #region Runtime Behavior
+
+    /// <summary>
+    /// Rebuilds tutorials for this component.
+    /// </summary>
     public void RefreshTutorials()
     {
         if (_tutorialsContainer == null || _tutorialOptionPrefab == null || TutorialManager.Instance == null)
@@ -49,6 +71,9 @@ public class TutorialPageController : MonoBehaviour
         SelectInitialTutorial();
     }
 
+    /// <summary>
+    /// Clears spawned options for this component.
+    /// </summary>
     private void ClearSpawnedOptions()
     {
         foreach (Transform child in _tutorialsContainer)
@@ -57,6 +82,9 @@ public class TutorialPageController : MonoBehaviour
         _spawnedOptions.Clear();
     }
 
+    /// <summary>
+    /// Executes the populate tutorials operation for this component.
+    /// </summary>
     private void PopulateTutorials()
     {
         _tutorials = TutorialManager.Instance.GetUnlockedTutorials();
@@ -80,6 +108,9 @@ public class TutorialPageController : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Selects initial tutorial for this component.
+    /// </summary>
     private void SelectInitialTutorial()
     {
         if (_tutorials.Count > 0)
@@ -88,12 +119,18 @@ public class TutorialPageController : MonoBehaviour
             ClearContent();
     }
 
+    /// <summary>
+    /// Clears content for this component.
+    /// </summary>
     private void ClearContent()
     {
         _titleText.text = "";
         _contentText.text = "";
     }
 
+    /// <summary>
+    /// Selects tutorial for this component.
+    /// </summary>
     private void SelectTutorial(int index)
     {
         if (_tutorials == null || index < 0 || index >= _tutorials.Count)
@@ -106,6 +143,9 @@ public class TutorialPageController : MonoBehaviour
         UpdateContent();
     }
 
+    /// <summary>
+    /// Refreshes visuals for this component.
+    /// </summary>
     private void UpdateVisuals()
     {
         for (int i = 0; i < _spawnedOptions.Count; i++)
@@ -116,6 +156,9 @@ public class TutorialPageController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Refreshes content for this component.
+    /// </summary>
     private void UpdateContent()
     {
         if (_tutorials.Count == 0)
@@ -129,6 +172,9 @@ public class TutorialPageController : MonoBehaviour
         _contentText.text = tutorial.description;
     }
 
+    /// <summary>
+    /// Processes tutorial navigation for this component.
+    /// </summary>
     private void HandleTutorialNavigation()
     {
         if (_tutorials == null || _tutorials.Count == 0)
@@ -143,4 +189,6 @@ public class TutorialPageController : MonoBehaviour
             SelectTutorial((_currentTutorialIndex + 1) % _tutorials.Count);
         }
     }
+
+    #endregion
 }
