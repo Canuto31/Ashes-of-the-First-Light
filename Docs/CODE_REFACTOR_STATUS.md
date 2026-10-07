@@ -1,6 +1,9 @@
 # Estado del refactor de código
 
-Fecha: 2026-10-02
+Fecha de última validación: 2026-10-06
+
+La evaluación técnica y la hoja de ruta actualizadas se encuentran en
+[`MEJORAS_PROFESIONALES_SCRIPTS.md`](MEJORAS_PROFESIONALES_SCRIPTS.md).
 
 ## Alcance y reglas aplicadas
 
